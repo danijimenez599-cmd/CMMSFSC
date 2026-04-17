@@ -1,3 +1,8 @@
+// ================================================================
+// APEX CMMS — Zustand Store v2.3 con Supabase integrado
+// Patrón: optimistic update (UI rápida) + sync en Supabase
+// ================================================================
+
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type {
@@ -5,343 +10,486 @@ import type {
   PmTask, AssetPlan, InventoryItem, WoComment, PartUsage
 } from '@/types'
 import { DB_DEFAULTS } from '@/data/defaults'
+import { api } from '@/lib/api'
 
-// ── helpers ──────────────────────────────────────────────────────
 let _seq = 0
 export const uid = (prefix = 'cx') =>
   `${prefix}-${Date.now().toString(36)}-${(++_seq).toString(36)}`
 
-// ── tipos del store ───────────────────────────────────────────────
+// ── Tipos ─────────────────────────────────────────────────────────
 interface AppState {
-  // datos
-  db: AppDB
-  // navegación
-  view: AppView
-  // auth
-  currentUser: User | null
-  // selección activa
+  db:              AppDB
+  view:            AppView
+  currentUser:     User | null
   selectedAssetId: string | null
-  selectedWOId: string | null
-  editingWOId: string | null | false
+  selectedWOId:    string | null
+  editingWOId:     string | null | false
   woEditorInitial: Partial<WorkOrder> | null
-  expandedAssets: string[]
-  // filtros OT
-  woFilter: { status: string; type: string; priority: string }
+  expandedAssets:  string[]
+  woFilter:        { status: string; type: string; priority: string }
 
-  // acciones — navegación
-  navigate: (view: AppView) => void
-  setSelectedAsset: (id: string | null) => void
-  setSelectedWO: (id: string | null) => void
-  openWOEditor: (id: string | null, initialData?: Partial<WorkOrder>) => void
-  closeWOEditor: () => void
+  navigate:        (view: AppView) => void
+  setSelectedAsset:(id: string | null) => void
+  setSelectedWO:   (id: string | null) => void
+  openWOEditor:    (id: string | null, initialData?: Partial<WorkOrder>) => void
+  closeWOEditor:   () => void
   toggleAssetNode: (id: string) => void
+  setCurrentUser:  (user: User | null) => void
+  setWOFilter:     (f: Partial<AppState['woFilter']>) => void
 
-  // acciones — auth
-  setCurrentUser: (user: User | null) => void
+  // Carga inicial desde Supabase
+  loadFromSupabase: () => Promise<void>
 
-  // acciones — WO filter
-  setWOFilter: (f: Partial<AppState['woFilter']>) => void
+  // Assets
+  saveAsset:   (data: Partial<Asset> & { id?: string }) => Promise<void>
+  deleteAsset: (id: string) => Promise<void>
 
-  // acciones — assets
-  saveAsset: (data: Partial<Asset> & { id?: string }) => void
-  deleteAsset: (id: string) => void
+  // Work Orders
+  saveWO:          (data: Partial<WorkOrder> & { id?: string }) => Promise<void>
+  deleteWO:        (id: string) => Promise<void>
+  updateWOStatus:  (id: string, status: WorkOrder['status'], extra?: Partial<WorkOrder>) => Promise<void>
+  toggleWoTask:    (taskId: string) => Promise<void>
+  addComment:      (woId: string, text: string) => Promise<void>
+  addPartUsage:    (woId: string, itemId: string, qty: number) => Promise<void>
+  removePartUsage: (id: string) => Promise<void>
 
-  // acciones — work orders
-  saveWO: (data: Partial<WorkOrder> & { id?: string }) => void
-  deleteWO: (id: string) => void
-  updateWOStatus: (id: string, status: WorkOrder['status'], extra?: Partial<WorkOrder>) => void
-  toggleWoTask: (taskId: string) => void
-  addComment: (woId: string, text: string) => void
-  addPartUsage: (woId: string, itemId: string, qty: number) => void
-  removePartUsage: (id: string) => void
+  // PM Plans
+  savePlan:   (data: Partial<PmPlan> & { id?: string }, tasks: string[]) => Promise<void>
+  deletePlan: (id: string) => Promise<void>
 
-  // acciones — PM plans
-  savePlan: (data: Partial<PmPlan> & { id?: string }, tasks: string[]) => void
-  deletePlan: (id: string) => void
+  // Asset Plans
+  assignPlan:      (assetId: string, pmPlanId: string) => Promise<void>
+  unassignPlan:    (assetId: string, pmPlanId: string) => Promise<void>
+  toggleAssetPlan: (apId: string) => Promise<void>
+  removeAssetPlan: (apId: string) => Promise<void>
+  generateWO:      (apId: string) => Promise<WorkOrder | null>
 
-  // acciones — asset plans (asignación equipo↔plan)
-  assignPlan: (assetId: string, pmPlanId: string) => void
-  unassignPlan: (assetId: string, pmPlanId: string) => void
-  toggleAssetPlan: (apId: string) => void
-  removeAssetPlan: (apId: string) => void
-  generateWO: (apId: string) => WorkOrder | null
+  // Inventory
+  saveInventoryItem:   (data: Partial<InventoryItem> & { id?: string }) => Promise<void>
+  deleteInventoryItem: (id: string) => Promise<void>
+  adjustStock:         (id: string, newStock: number) => Promise<void>
 
-  // acciones — inventory
-  saveInventoryItem: (data: Partial<InventoryItem> & { id?: string }) => void
-  deleteInventoryItem: (id: string) => void
-  adjustStock: (id: string, newStock: number) => void
-
-  // reset demo
   resetDemo: () => void
 }
 
+// ── Store ─────────────────────────────────────────────────────────
 export const useStore = create<AppState>()(
   persist(
     (set, get) => ({
-      db: JSON.parse(JSON.stringify(DB_DEFAULTS)),
-      view: 'dashboard',
-      currentUser: DB_DEFAULTS.users[0] ?? null,
+      db:              JSON.parse(JSON.stringify(DB_DEFAULTS)),
+      view:            'dashboard',
+      currentUser:     DB_DEFAULTS.users[0] ?? null,
       selectedAssetId: null,
-      selectedWOId: null,
-      editingWOId: false,
+      selectedWOId:    null,
+      editingWOId:     false,
       woEditorInitial: null,
-      expandedAssets: ['asset-1', 'asset-2', 'asset-11', 'asset-16'],
-      woFilter: { status: 'all', type: 'all', priority: 'all' },
+      expandedAssets:  ['asset-1', 'asset-2', 'asset-11', 'asset-16'],
+      woFilter:        { status: 'all', type: 'all', priority: 'all' },
 
-      navigate: (view) => set({ view }),
-      setSelectedAsset: (id) => set({ selectedAssetId: id }),
-      setSelectedWO: (id) => set({ selectedWOId: id }),
-      openWOEditor: (id, initialData) => set({ editingWOId: id, woEditorInitial: initialData || null }),
-      closeWOEditor: () => set({ editingWOId: false, woEditorInitial: null }),
-      toggleAssetNode: (id) =>
-        set((s) => ({
-          expandedAssets: s.expandedAssets.includes(id)
-            ? s.expandedAssets.filter((x) => x !== id)
-            : [...s.expandedAssets, id],
-        })),
-
+      navigate:        (view) => set({ view }),
+      setSelectedAsset:(id)   => set({ selectedAssetId: id }),
+      setSelectedWO:   (id)   => set({ selectedWOId: id }),
+      openWOEditor:    (id, d)=> set({ editingWOId: id, woEditorInitial: d ?? null }),
+      closeWOEditor:   ()     => set({ editingWOId: false, woEditorInitial: null }),
+      toggleAssetNode: (id)   => set((s) => ({
+        expandedAssets: s.expandedAssets.includes(id)
+          ? s.expandedAssets.filter((x) => x !== id)
+          : [...s.expandedAssets, id],
+      })),
       setCurrentUser: (user) => set({ currentUser: user }),
+      setWOFilter:    (f)    => set((s) => ({ woFilter: { ...s.woFilter, ...f } })),
 
-      setWOFilter: (f) =>
-        set((s) => ({ woFilter: { ...s.woFilter, ...f } })),
-
-      // ── Assets ──────────────────────────────────────────────────
-      saveAsset: (data) =>
-        set((s) => {
-          const now = new Date().toISOString()
-          const db = { ...s.db }
-          if (data.id) {
-            db.assets = db.assets.map((a) =>
-              a.id === data.id ? { ...a, ...data, updatedAt: now } : a
-            )
-          } else {
-            const newAsset: Asset = {
-              id: uid('ast'), parentId: null, name: '', category: 'equip',
-              locationId: null, brand: '', model: '', serialNumber: '',
-              criticality: 'MEDIUM', status: 'OPERATIONAL', installDate: null,
-              photoUrl: null, notes: '', qrCode: null,
-              createdAt: now, updatedAt: now, ...data,
-            }
-            db.assets = [...db.assets, newAsset]
-          }
-          return { db }
-        }),
-
-      deleteAsset: (id) =>
-        set((s) => {
-          const toDelete = new Set<string>()
-          const collect = (aid: string) => {
-            toDelete.add(aid)
-            s.db.assets.filter((a) => a.parentId === aid).forEach((c) => collect(c.id))
-          }
-          collect(id)
-          return {
+      // ── Carga inicial desde Supabase ─────────────────────────────
+      loadFromSupabase: async () => {
+        try {
+          const data = await api.loadAll()
+          set((s) => ({
             db: {
               ...s.db,
-              assets: s.db.assets.filter((a) => !toDelete.has(a.id)),
-              assetPlans: s.db.assetPlans.filter((ap) => !toDelete.has(ap.assetId)),
-              workOrders: s.db.workOrders.filter((wo) => !toDelete.has(wo.assetId ?? '')),
+              assets:         data.assets.length         > 0 ? data.assets         : s.db.assets,
+              workOrders:     data.workOrders.length     > 0 ? data.workOrders     : s.db.workOrders,
+              pmPlans:        data.pmPlans.length        > 0 ? data.pmPlans        : s.db.pmPlans,
+              assetPlans:     data.assetPlans.length     > 0 ? data.assetPlans     : s.db.assetPlans,
+              inventoryItems: data.inventoryItems.length > 0 ? data.inventoryItems : s.db.inventoryItems,
+              users:          data.users.length          > 0 ? data.users          : s.db.users,
             },
-            selectedAssetId: null,
-          }
-        }),
+          }))
+        } catch (e) {
+          console.warn('Supabase no disponible, usando datos locales:', e)
+        }
+      },
 
-      // ── Work Orders ──────────────────────────────────────────────
-      saveWO: (data) =>
-        set((s) => {
-          const now = new Date().toISOString()
-          const db = { ...s.db }
-          if (data.id) {
-            db.workOrders = db.workOrders.map((w) =>
-              w.id === data.id ? { ...w, ...data, updatedAt: now } : w
-            )
-            // Mejora C: Two-Way Sync al Reprogramar
-            // Si la OT es preventiva y se cambió su dueDate
-            const updatedWO = db.workOrders.find(w => w.id === data.id)
-            if (updatedWO && updatedWO.pmPlanId && data.dueDate !== undefined) {
-              db.assetPlans = db.assetPlans.map(ap => 
-                ap.id === updatedWO.pmPlanId ? { ...ap, nextDueDate: data.dueDate! } : ap
-              )
-            }
-          } else {
-            const newWO: WorkOrder = {
-              id: uid('wo'), title: '', description: '', assetId: null,
-              reportedById: get().currentUser?.id ?? null, assignedToId: null,
-              priority: 'NORMAL', status: 'OPEN', type: 'CORRECTIVE',
-              dueDate: null, startedAt: null, completedAt: null,
-              timeSpentMin: null, resolutionNotes: null, pmPlanId: null,
-              createdAt: now, updatedAt: now, ...data,
-            }
-            db.workOrders = [...db.workOrders, newWO]
-          }
-          return { db }
-        }),
+      // ── ASSETS ──────────────────────────────────────────────────
+      saveAsset: async (data) => {
+        const now = new Date().toISOString()
+        const snapshot = get().db
 
-      deleteWO: (id) =>
+        // 1. Optimistic update
+        if (data.id) {
+          set((s) => ({
+            db: {
+              ...s.db,
+              assets: s.db.assets.map((a) =>
+                a.id === data.id ? { ...a, ...data, updatedAt: now } : a
+              ),
+            },
+          }))
+        } else {
+          const tmp: Asset = {
+            id: uid('ast'), parentId: null, name: '', category: 'equip',
+            locationId: null, brand: '', model: '', serialNumber: '',
+            criticality: 'MEDIUM', status: 'OPERATIONAL', installDate: null,
+            photoUrl: null, notes: '', qrCode: null,
+            createdAt: now, updatedAt: now, ...data,
+          }
+          set((s) => ({ db: { ...s.db, assets: [...s.db.assets, tmp] } }))
+          data = { ...data, id: tmp.id }
+        }
+
+        // 2. Persistir en Supabase
+        try {
+          const saved = await api.assets.upsert(data)
+          set((s) => ({
+            db: {
+              ...s.db,
+              assets: s.db.assets.map((a) =>
+                a.id === data.id || a.id === saved.id ? saved : a
+              ),
+            },
+          }))
+        } catch (e) {
+          console.error('Error guardando activo:', e)
+          set({ db: snapshot })
+        }
+      },
+
+      deleteAsset: async (id) => {
+        const snapshot = get().db
+        const toDelete = new Set<string>()
+        const collect  = (aid: string) => {
+          toDelete.add(aid)
+          get().db.assets.filter((a) => a.parentId === aid).forEach((c) => collect(c.id))
+        }
+        collect(id)
+
+        set((s) => ({
+          db: {
+            ...s.db,
+            assets:     s.db.assets.filter((a)  => !toDelete.has(a.id)),
+            assetPlans: s.db.assetPlans.filter((ap) => !toDelete.has(ap.assetId)),
+            workOrders: s.db.workOrders.filter((wo) => !toDelete.has(wo.assetId ?? '')),
+          },
+          selectedAssetId: null,
+        }))
+
+        try {
+          for (const aid of toDelete) await api.assets.delete(aid)
+        } catch (e) {
+          console.error('Error eliminando activo:', e)
+          set({ db: snapshot })
+        }
+      },
+
+      // ── WORK ORDERS ─────────────────────────────────────────────
+      saveWO: async (data) => {
+        const now      = new Date().toISOString()
+        const snapshot = get().db
+
+        if (data.id) {
+          set((s) => ({
+            db: {
+              ...s.db,
+              workOrders: s.db.workOrders.map((w) =>
+                w.id === data.id ? { ...w, ...data, updatedAt: now } : w
+              ),
+            },
+          }))
+          // Two-way sync: si cambia dueDate de una OT preventiva
+          const wo = get().db.workOrders.find((w) => w.id === data.id)
+          if (wo?.pmPlanId && data.dueDate !== undefined) {
+            set((s) => ({
+              db: {
+                ...s.db,
+                assetPlans: s.db.assetPlans.map((ap) =>
+                  ap.id === wo.pmPlanId ? { ...ap, nextDueDate: data.dueDate! } : ap
+                ),
+              },
+            }))
+            try { await api.assetPlans.updateDueDate(wo.pmPlanId, data.dueDate!) }
+            catch (e) { console.error('Error sync dueDate:', e) }
+          }
+        } else {
+          const newWO: WorkOrder = {
+            id: uid('wo'), title: '', description: '', assetId: null,
+            reportedById: get().currentUser?.id ?? null, assignedToId: null,
+            priority: 'NORMAL', status: 'OPEN', type: 'CORRECTIVE',
+            dueDate: null, startedAt: null, completedAt: null,
+            timeSpentMin: null, resolutionNotes: null, pmPlanId: null,
+            createdAt: now, updatedAt: now, ...data,
+          }
+          set((s) => ({ db: { ...s.db, workOrders: [...s.db.workOrders, newWO] } }))
+          data = { ...data, id: newWO.id }
+        }
+
+        try {
+          const saved = await api.workOrders.upsert(data)
+          set((s) => ({
+            db: {
+              ...s.db,
+              workOrders: s.db.workOrders.map((w) =>
+                w.id === data.id || w.id === saved.id ? saved : w
+              ),
+            },
+          }))
+        } catch (e) {
+          console.error('Error guardando OT:', e)
+          set({ db: snapshot })
+        }
+      },
+
+      deleteWO: async (id) => {
+        const snapshot = get().db
         set((s) => ({
           db: { ...s.db, workOrders: s.db.workOrders.filter((w) => w.id !== id) },
           selectedWOId: s.selectedWOId === id ? null : s.selectedWOId,
-        })),
+        }))
+        try { await api.workOrders.delete(id) }
+        catch (e) { console.error('Error eliminando OT:', e); set({ db: snapshot }) }
+      },
 
-      updateWOStatus: (id, status, extra = {}) =>
+      updateWOStatus: async (id, status, extra = {}) => {
+        const now      = new Date().toISOString()
+        const snapshot = get().db
+        let nextDueDateUpdate: { apId: string; date: string } | null = null
+
         set((s) => {
-          const now = new Date().toISOString()
           let dbOut = { ...s.db }
-          
           dbOut.workOrders = dbOut.workOrders.map((w) => {
             if (w.id !== id) return w
-            
             const updates: Partial<WorkOrder> = { status, updatedAt: now, ...extra }
-            
-            if (status === 'IN_PROGRESS' && !w.startedAt) {
-              updates.startedAt = now
-            }
+            if (status === 'IN_PROGRESS' && !w.startedAt) updates.startedAt = now
             if (status === 'COMPLETED' && !w.completedAt) {
               updates.completedAt = now
               if (w.startedAt && !updates.timeSpentMin && !w.timeSpentMin) {
-                updates.timeSpentMin = Math.round((new Date(now).getTime() - new Date(w.startedAt).getTime()) / 60000)
+                updates.timeSpentMin = Math.round(
+                  (new Date(now).getTime() - new Date(w.startedAt).getTime()) / 60000
+                )
               }
-
-              // MEJORA D: RECALCULAR nextDueDate AQUI PARA OTs PREVENTIVAS CERRADAS CON BASELINE
+              // Recalcular nextDueDate al completar OT preventiva
               if (w.pmPlanId) {
-                const ap = dbOut.assetPlans.find(a => a.id === w.pmPlanId)
-                if (ap) {
-                  const plan = dbOut.pmPlans.find(p => p.id === ap.pmPlanId)
-                  if (plan) {
-                    // Usar dueDate de la OT como baseline, sino fallback a now
-                    const baseDate = w.dueDate ? new Date(w.dueDate) : new Date(now)
-                    const next = new Date(baseDate)
-                    next.setDate(next.getDate() + plan.frequencyDays)
-                    dbOut.assetPlans = dbOut.assetPlans.map(a => 
-                      a.id === ap.id ? { ...a, nextDueDate: next.toISOString() } : a
-                    )
-                  }
+                const ap   = dbOut.assetPlans.find((a) => a.id === w.pmPlanId)
+                const plan = ap ? dbOut.pmPlans.find((p) => p.id === ap.pmPlanId) : null
+                if (ap && plan) {
+                  const base = w.dueDate ? new Date(w.dueDate) : new Date(now)
+                  const next = new Date(base)
+                  next.setDate(next.getDate() + plan.frequencyDays)
+                  const nextStr = next.toISOString()
+                  dbOut.assetPlans = dbOut.assetPlans.map((a) =>
+                    a.id === ap.id ? { ...a, nextDueDate: nextStr } : a
+                  )
+                  nextDueDateUpdate = { apId: ap.id, date: nextStr }
                 }
               }
             }
-            
             return { ...w, ...updates }
           })
-
           return { db: dbOut }
-        }),
+        })
 
-      toggleWoTask: (taskId) =>
+        try {
+          await api.workOrders.updateStatus(id, status, extra)
+          if (nextDueDateUpdate) {
+            await api.assetPlans.updateDueDate(nextDueDateUpdate.apId, nextDueDateUpdate.date)
+          }
+        } catch (e) {
+          console.error('Error actualizando estado OT:', e)
+          set({ db: snapshot })
+        }
+      },
+
+      toggleWoTask: async (taskId) => {
+        const task = get().db.woTasks.find((t) => t.id === taskId)
+        if (!task) return
+        const newVal = !task.completed
         set((s) => ({
           db: {
             ...s.db,
-            woTasks: s.db.woTasks.map(t => t.id === taskId ? { ...t, completed: !t.completed } : t)
-          }
-        })),
+            woTasks: s.db.woTasks.map((t) =>
+              t.id === taskId ? { ...t, completed: newVal } : t
+            ),
+          },
+        }))
+        try { await api.woTasks.toggle(taskId, newVal) }
+        catch (e) { console.error('Error toggling tarea:', e) }
+      },
 
-      addComment: (woId, text) =>
-        set((s) => {
-          const comment: WoComment = {
-            id: uid('cmt'), workOrderId: woId,
-            userId: s.currentUser?.id ?? '',
-            text, createdAt: new Date().toISOString(),
-          }
-          return { db: { ...s.db, woComments: [...s.db.woComments, comment] } }
-        }),
+      addComment: async (woId, text) => {
+        const userId  = get().currentUser?.id ?? ''
+        const comment: WoComment = {
+          id: uid('cmt'), workOrderId: woId,
+          userId, text, createdAt: new Date().toISOString(),
+        }
+        set((s) => ({ db: { ...s.db, woComments: [...s.db.woComments, comment] } }))
+        try { await api.woComments.insert(woId, userId, text) }
+        catch (e) { console.error('Error guardando comentario:', e) }
+      },
 
-      addPartUsage: (woId, itemId, qty) =>
-        set((s) => {
-          const item = s.db.inventoryItems.find((i) => i.id === itemId)
-          if (!item || item.currentStock < qty) return s
-          const usage: PartUsage = {
-            id: uid('pu'), workOrderId: woId, inventoryItemId: itemId,
-            quantity: qty, usedAt: new Date().toISOString(),
+      addPartUsage: async (woId, itemId, qty) => {
+        const snapshot = get().db
+        const item = get().db.inventoryItems.find((i) => i.id === itemId)
+        if (!item || item.currentStock < qty) return
+        const usage: PartUsage = {
+          id: uid('pu'), workOrderId: woId, inventoryItemId: itemId,
+          quantity: qty, usedAt: new Date().toISOString(),
+        }
+        set((s) => ({
+          db: {
+            ...s.db,
+            partUsages: [...s.db.partUsages, usage],
+            inventoryItems: s.db.inventoryItems.map((i) =>
+              i.id === itemId
+                ? { ...i, currentStock: i.currentStock - qty, updatedAt: new Date().toISOString() }
+                : i
+            ),
+          },
+        }))
+        try {
+          await api.partUsages.insert(woId, itemId, qty)
+          await api.inventory.adjustStock(itemId, item.currentStock - qty)
+        } catch (e) {
+          console.error('Error registrando parte:', e)
+          set({ db: snapshot })
+        }
+      },
+
+      removePartUsage: async (id) => {
+        const snapshot = get().db
+        const pu = get().db.partUsages.find((p) => p.id === id)
+        set((s) => ({
+          db: {
+            ...s.db,
+            partUsages: s.db.partUsages.filter((p) => p.id !== id),
+            inventoryItems: pu
+              ? s.db.inventoryItems.map((i) =>
+                  i.id === pu.inventoryItemId
+                    ? { ...i, currentStock: i.currentStock + pu.quantity }
+                    : i
+                )
+              : s.db.inventoryItems,
+          },
+        }))
+        try {
+          await api.partUsages.delete(id)
+          if (pu) {
+            const item = get().db.inventoryItems.find((i) => i.id === pu.inventoryItemId)
+            if (item) await api.inventory.adjustStock(item.id, item.currentStock)
           }
-          return {
+        } catch (e) {
+          console.error('Error eliminando parte:', e)
+          set({ db: snapshot })
+        }
+      },
+
+      // ── PM PLANS ────────────────────────────────────────────────
+      savePlan: async (data, taskDescriptions) => {
+        const now      = new Date().toISOString()
+        const snapshot = get().db
+        let planId     = data.id ?? uid('pm')
+
+        if (data.id) {
+          set((s) => ({
             db: {
               ...s.db,
-              partUsages: [...s.db.partUsages, usage],
-              inventoryItems: s.db.inventoryItems.map((i) =>
-                i.id === itemId
-                  ? { ...i, currentStock: i.currentStock - qty, updatedAt: new Date().toISOString() }
-                  : i
+              pmPlans: s.db.pmPlans.map((p) =>
+                p.id === data.id ? { ...p, ...data, updatedAt: now } : p
               ),
             },
+          }))
+        } else {
+          const newPlan: PmPlan = {
+            id: planId, name: '', triggerType: 'TIME_BASED', frequencyDays: 30,
+            meterUnit: null, meterInterval: null, defaultAssignId: null,
+            active: true, notes: '', createdAt: now, updatedAt: now, ...data,
           }
-        }),
+          set((s) => ({ db: { ...s.db, pmPlans: [...s.db.pmPlans, newPlan] } }))
+        }
 
-      removePartUsage: (id) =>
-        set((s) => {
-          const pu = s.db.partUsages.find((p) => p.id === id)
-          return {
-            db: {
-              ...s.db,
-              partUsages: s.db.partUsages.filter((p) => p.id !== id),
-              inventoryItems: pu
-                ? s.db.inventoryItems.map((i) =>
-                    i.id === pu.inventoryItemId
-                      ? { ...i, currentStock: i.currentStock + pu.quantity }
-                      : i
-                  )
-                : s.db.inventoryItems,
-            },
-          }
-        }),
-
-      // ── PM Plans ─────────────────────────────────────────────────
-      savePlan: (data, taskDescriptions) =>
-        set((s) => {
-          const now = new Date().toISOString()
-          const db = { ...s.db }
-          let planId = data.id ?? uid('pm')
-
-          if (data.id) {
-            db.pmPlans = db.pmPlans.map((p) =>
-              p.id === data.id ? { ...p, ...data, updatedAt: now } : p
-            )
-          } else {
-            const newPlan: PmPlan = {
-              id: planId, name: '', triggerType: 'TIME_BASED', frequencyDays: 30,
-              meterUnit: null, meterInterval: null, defaultAssignId: null,
-              active: true, notes: '', createdAt: now, updatedAt: now, ...data,
-            }
-            db.pmPlans = [...db.pmPlans, newPlan]
-          }
-
-          // reemplazar tareas del plan
-          const newTasks: PmTask[] = taskDescriptions
-            .filter((d) => d.trim())
-            .map((desc, i) => ({
-              id: uid('tsk'), pmPlanId: planId, description: desc.trim(), order: i + 1,
-            }))
-          db.pmTasks = [...db.pmTasks.filter((t) => t.pmPlanId !== planId), ...newTasks]
-          return { db }
-        }),
-
-      deletePlan: (id) =>
+        // Tareas locales
+        const newTasks: PmTask[] = taskDescriptions
+          .filter((d) => d.trim())
+          .map((desc, i) => ({ id: uid('tsk'), pmPlanId: planId, description: desc.trim(), order: i + 1 }))
         set((s) => ({
           db: {
             ...s.db,
-            pmPlans: s.db.pmPlans.filter((p) => p.id !== id),
-            pmTasks: s.db.pmTasks.filter((t) => t.pmPlanId !== id),
+            pmTasks: [...s.db.pmTasks.filter((t) => t.pmPlanId !== planId), ...newTasks],
+          },
+        }))
+
+        try {
+          const saved = await api.pmPlans.upsert({ ...data, id: planId })
+          await api.pmTasks.replaceForPlan(saved.id, taskDescriptions)
+          set((s) => ({
+            db: {
+              ...s.db,
+              pmPlans: s.db.pmPlans.map((p) => p.id === planId ? saved : p),
+            },
+          }))
+        } catch (e) {
+          console.error('Error guardando plan:', e)
+          set({ db: snapshot })
+        }
+      },
+
+      deletePlan: async (id) => {
+        const snapshot = get().db
+        set((s) => ({
+          db: {
+            ...s.db,
+            pmPlans:    s.db.pmPlans.filter((p)  => p.id !== id),
+            pmTasks:    s.db.pmTasks.filter((t)  => t.pmPlanId !== id),
             assetPlans: s.db.assetPlans.filter((ap) => ap.pmPlanId !== id),
           },
-        })),
+        }))
+        try { await api.pmPlans.delete(id) }
+        catch (e) { console.error('Error eliminando plan:', e); set({ db: snapshot }) }
+      },
 
-      // ── Asset Plans ──────────────────────────────────────────────
-      assignPlan: (assetId, pmPlanId) =>
-        set((s) => {
-          const already = s.db.assetPlans.some(
-            (ap) => ap.assetId === assetId && ap.pmPlanId === pmPlanId
-          )
-          if (already) return s
-          const plan = s.db.pmPlans.find((p) => p.id === pmPlanId)
-          const next = new Date()
-          next.setDate(next.getDate() + (plan?.frequencyDays ?? 30))
-          const ap: AssetPlan = {
-            id: uid('ap'), assetId, pmPlanId,
-            nextDueDate: next.toISOString(), active: true,
-            createdAt: new Date().toISOString(),
-          }
-          return { db: { ...s.db, assetPlans: [...s.db.assetPlans, ap] } }
-        }),
+      // ── ASSET PLANS ─────────────────────────────────────────────
+      assignPlan: async (assetId, pmPlanId) => {
+        const already = get().db.assetPlans.some(
+          (ap) => ap.assetId === assetId && ap.pmPlanId === pmPlanId
+        )
+        if (already) return
+        const plan = get().db.pmPlans.find((p) => p.id === pmPlanId)
+        const next = new Date()
+        next.setDate(next.getDate() + (plan?.frequencyDays ?? 30))
+        const nextStr = next.toISOString()
+        const tmpAp: AssetPlan = {
+          id: uid('ap'), assetId, pmPlanId,
+          nextDueDate: nextStr, active: true,
+          createdAt: new Date().toISOString(),
+        }
+        set((s) => ({ db: { ...s.db, assetPlans: [...s.db.assetPlans, tmpAp] } }))
+        try {
+          const saved = await api.assetPlans.insert(assetId, pmPlanId, nextStr)
+          set((s) => ({
+            db: {
+              ...s.db,
+              assetPlans: s.db.assetPlans.map((ap) => ap.id === tmpAp.id ? saved : ap),
+            },
+          }))
+        } catch (e) {
+          console.error('Error asignando plan:', e)
+          set((s) => ({
+            db: {
+              ...s.db,
+              assetPlans: s.db.assetPlans.filter((ap) => ap.id !== tmpAp.id),
+            },
+          }))
+        }
+      },
 
-      unassignPlan: (assetId, pmPlanId) =>
+      unassignPlan: async (assetId, pmPlanId) => {
         set((s) => ({
           db: {
             ...s.db,
@@ -349,131 +497,170 @@ export const useStore = create<AppState>()(
               (ap) => !(ap.assetId === assetId && ap.pmPlanId === pmPlanId)
             ),
           },
-        })),
+        }))
+        try { await api.assetPlans.deleteByAssetAndPlan(assetId, pmPlanId) }
+        catch (e) { console.error('Error desasignando plan:', e) }
+      },
 
-      toggleAssetPlan: (apId) =>
+      toggleAssetPlan: async (apId) => {
+        const ap = get().db.assetPlans.find((a) => a.id === apId)
+        if (!ap) return
+        const newVal = !ap.active
         set((s) => ({
           db: {
             ...s.db,
-            assetPlans: s.db.assetPlans.map((ap) =>
-              ap.id === apId ? { ...ap, active: !ap.active } : ap
+            assetPlans: s.db.assetPlans.map((a) =>
+              a.id === apId ? { ...a, active: newVal } : a
             ),
           },
-        })),
-
-      removeAssetPlan: (apId) =>
-        set((s) => ({
-          db: { ...s.db, assetPlans: s.db.assetPlans.filter((ap) => ap.id !== apId) },
-        })),
-
-      generateWO: (apId) => {
-        let createdWO: WorkOrder | null = null
-        set((s) => {
-          // Bloqueo Antibugging: Comprobar si ya existe una OT activa para este apId
-          const existingActive = s.db.workOrders.find(w => 
-            w.pmPlanId === apId && 
-            ['OPEN', 'ASSIGNED', 'IN_PROGRESS'].includes(w.status)
-          )
-          
-          if (existingActive) {
-            ;(window as any)._toast?.('Bloqueado', `Ya existe una OT preventiva en curso (#${existingActive.id.slice(0,6)})`, 'err')
-            return s
-          }
-
-          const ap    = s.db.assetPlans.find((a) => a.id === apId)
-          const plan  = ap ? s.db.pmPlans.find((p) => p.id === ap.pmPlanId) : null
-          const asset = ap ? s.db.assets.find((a) => a.id === ap.assetId)   : null
-          if (!ap || !plan || !asset) return s
-
-          const now = new Date()
-          // MEJORA A: Heredar exactamente la fecha estipulada en el plan
-          const due = ap.nextDueDate ? new Date(ap.nextDueDate) : new Date()
-
-          const wo: WorkOrder = {
-            id: uid('wo'), title: `PM: ${plan.name}`,
-            description: `Mantenimiento preventivo para ${asset.name}`,
-            assetId: asset.id, reportedById: s.currentUser?.id ?? null,
-            assignedToId: plan.defaultAssignId,
-            priority: 'NORMAL', status: 'OPEN', type: 'PREVENTIVE',
-            dueDate: due.toISOString(), startedAt: null, completedAt: null,
-            timeSpentMin: null, resolutionNotes: null, pmPlanId: apId,
-            createdAt: now.toISOString(), updatedAt: now.toISOString(),
-          }
-          createdWO = wo
-          
-          // Snapshot de tareas
-          const pmTasks = s.db.pmTasks.filter(t => t.pmPlanId === plan.id).sort((a,b) => a.order - b.order)
-          const snapshots = pmTasks.map(t => ({
-            id: uid('wot'), woId: wo.id, description: t.description, completed: false, order: t.order
-          }))
-
-          return {
-            db: {
-              ...s.db,
-              workOrders: [...s.db.workOrders, wo],
-              woTasks: [...(s.db.woTasks || []), ...snapshots],
-              // NOTA: No recalculamos nextDueDate aquí. Ocurrirá en updateWOStatus -> COMPLETED.
-            },
-          }
-        })
-        return createdWO
+        }))
+        try { await api.assetPlans.toggle(apId, newVal) }
+        catch (e) { console.error('Error toggling plan:', e) }
       },
 
-      // ── Inventory ────────────────────────────────────────────────
-      saveInventoryItem: (data) =>
-        set((s) => {
-          const now = new Date().toISOString()
-          const db = { ...s.db }
-          if (data.id) {
-            db.inventoryItems = db.inventoryItems.map((i) =>
-              i.id === data.id ? { ...i, ...data, updatedAt: now } : i
-            )
-          } else {
-            const item: InventoryItem = {
-              id: uid('inv'), name: '', sku: '', category: 'consumable',
-              currentStock: 0, minStock: 0, unit: 'pcs', unitCost: 0,
-              location: '', supplier: '', notes: '', createdAt: now, updatedAt: now, ...data,
-            }
-            db.inventoryItems = [...db.inventoryItems, item]
-          }
-          return { db }
-        }),
+      removeAssetPlan: async (apId) => {
+        set((s) => ({
+          db: { ...s.db, assetPlans: s.db.assetPlans.filter((ap) => ap.id !== apId) },
+        }))
+        try { await api.assetPlans.delete(apId) }
+        catch (e) { console.error('Error eliminando asignación:', e) }
+      },
 
-      deleteInventoryItem: (id) =>
+      generateWO: async (apId) => {
+        const s = get()
+        const existingActive = s.db.workOrders.find(
+          (w) => w.pmPlanId === apId && ['OPEN', 'ASSIGNED', 'IN_PROGRESS'].includes(w.status)
+        )
+        if (existingActive) {
+          ;(window as any)._toast?.(`Ya existe una OT activa para este plan`, 'warn')
+          return null
+        }
+
+        const ap    = s.db.assetPlans.find((a) => a.id === apId)
+        const plan  = ap ? s.db.pmPlans.find((p) => p.id === ap.pmPlanId) : null
+        const asset = ap ? s.db.assets.find((a) => a.id === ap.assetId)   : null
+        if (!ap || !plan || !asset) return null
+
+        const now = new Date()
+        const due = ap.nextDueDate ? new Date(ap.nextDueDate) : now
+
+        const wo: WorkOrder = {
+          id: uid('wo'), title: `PM: ${plan.name}`,
+          description: `Mantenimiento preventivo para ${asset.name}`,
+          assetId: asset.id, reportedById: s.currentUser?.id ?? null,
+          assignedToId: plan.defaultAssignId,
+          priority: 'NORMAL', status: 'OPEN', type: 'PREVENTIVE',
+          dueDate: due.toISOString(), startedAt: null, completedAt: null,
+          timeSpentMin: null, resolutionNotes: null, pmPlanId: apId,
+          createdAt: now.toISOString(), updatedAt: now.toISOString(),
+        }
+
+        // Snapshot de tareas
+        const pmTasks   = s.db.pmTasks.filter((t) => t.pmPlanId === plan.id).sort((a, b) => a.order - b.order)
+        const snapshots = pmTasks.map((t) => ({
+          id: uid('wot'), woId: wo.id, description: t.description, completed: false, order: t.order,
+        }))
+
+        set((ss) => ({
+          db: {
+            ...ss.db,
+            workOrders: [...ss.db.workOrders, wo],
+            woTasks:    [...(ss.db.woTasks || []), ...snapshots],
+          },
+        }))
+
+        try {
+          const saved = await api.workOrders.upsert(wo)
+          if (snapshots.length > 0) await api.woTasks.insertMany(snapshots)
+          set((ss) => ({
+            db: {
+              ...ss.db,
+              workOrders: ss.db.workOrders.map((w) => w.id === wo.id ? saved : w),
+            },
+          }))
+          return saved
+        } catch (e) {
+          console.error('Error generando OT:', e)
+          return wo
+        }
+      },
+
+      // ── INVENTORY ────────────────────────────────────────────────
+      saveInventoryItem: async (data) => {
+        const now      = new Date().toISOString()
+        const snapshot = get().db
+
+        if (data.id) {
+          set((s) => ({
+            db: {
+              ...s.db,
+              inventoryItems: s.db.inventoryItems.map((i) =>
+                i.id === data.id ? { ...i, ...data, updatedAt: now } : i
+              ),
+            },
+          }))
+        } else {
+          const tmp: InventoryItem = {
+            id: uid('inv'), name: '', sku: '', category: 'consumable',
+            currentStock: 0, minStock: 0, unit: 'pcs', unitCost: 0,
+            location: '', supplier: '', notes: '', createdAt: now, updatedAt: now, ...data,
+          }
+          set((s) => ({ db: { ...s.db, inventoryItems: [...s.db.inventoryItems, tmp] } }))
+          data = { ...data, id: tmp.id }
+        }
+
+        try {
+          const saved = await api.inventory.upsert(data)
+          set((s) => ({
+            db: {
+              ...s.db,
+              inventoryItems: s.db.inventoryItems.map((i) =>
+                i.id === data.id || i.id === saved.id ? saved : i
+              ),
+            },
+          }))
+        } catch (e) {
+          console.error('Error guardando ítem:', e)
+          set({ db: snapshot })
+        }
+      },
+
+      deleteInventoryItem: async (id) => {
+        const snapshot = get().db
         set((s) => ({
           db: { ...s.db, inventoryItems: s.db.inventoryItems.filter((i) => i.id !== id) },
-        })),
+        }))
+        try { await api.inventory.delete(id) }
+        catch (e) { console.error('Error eliminando ítem:', e); set({ db: snapshot }) }
+      },
 
-      adjustStock: (id, newStock) =>
+      adjustStock: async (id, newStock) => {
         set((s) => ({
           db: {
             ...s.db,
             inventoryItems: s.db.inventoryItems.map((i) =>
-              i.id === id
-                ? { ...i, currentStock: newStock, updatedAt: new Date().toISOString() }
-                : i
+              i.id === id ? { ...i, currentStock: newStock, updatedAt: new Date().toISOString() } : i
             ),
           },
-        })),
-
-      resetDemo: () => {
-        set({
-          db: JSON.parse(JSON.stringify(DB_DEFAULTS)),
-          selectedAssetId: null,
-          selectedWOId: null,
-          view: 'dashboard',
-          currentUser: DB_DEFAULTS.users[0] ?? null,
-        })
+        }))
+        try { await api.inventory.adjustStock(id, newStock) }
+        catch (e) { console.error('Error ajustando stock:', e) }
       },
+
+      // ── Reset demo ───────────────────────────────────────────────
+      resetDemo: () => set({
+        db: JSON.parse(JSON.stringify(DB_DEFAULTS)),
+        selectedAssetId: null,
+        selectedWOId:    null,
+        view:            'dashboard',
+        currentUser:     DB_DEFAULTS.users[0] ?? null,
+      }),
     }),
     {
-      name: 'apex-cmms-db',
-      version: 4,
+      name:    'apex-cmms-db',
+      version: 5,
       migrate: (persistedState: any, version: number) => {
-        if (version < 4) {
-          // Migrando a v4: Forzar nueva inyección de data limpia
-          return { ...persistedState, db: JSON.parse(JSON.stringify(DB_DEFAULTS)) } as any
-        }
+        if (version < 5) return { ...persistedState, db: JSON.parse(JSON.stringify(DB_DEFAULTS)) } as any
         return persistedState as any
       },
       partialize: (s) => ({ db: s.db, currentUser: s.currentUser }),
@@ -481,22 +668,16 @@ export const useStore = create<AppState>()(
   )
 )
 
-// ── Selectores derivados (evitan recalcular en cada render) ───────
+// ── Selectores derivados ──────────────────────────────────────────
 export const useActiveWOCount = () =>
-  useStore((s) =>
-    s.db.workOrders.filter(
-      (w) => w.status !== 'COMPLETED' && w.status !== 'CANCELLED'
-    ).length
-  )
+  useStore((s) => s.db.workOrders.filter((w) => w.status !== 'COMPLETED' && w.status !== 'CANCELLED').length)
 
 export const useLowStockCount = () =>
-  useStore((s) =>
-    s.db.inventoryItems.filter((i) => i.currentStock <= i.minStock).length
-  )
+  useStore((s) => s.db.inventoryItems.filter((i) => i.currentStock <= i.minStock).length)
 
 export const useStockStatus = (item: InventoryItem) => {
-  if (item.currentStock === 0) return 'er'
-  if (item.currentStock < item.minStock) return 'er'
+  if (item.currentStock === 0)             return 'er'
+  if (item.currentStock < item.minStock)   return 'er'
   if (item.currentStock === item.minStock) return 'wn'
   return 'ok'
 }
