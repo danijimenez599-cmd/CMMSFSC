@@ -201,7 +201,7 @@ export function Indicators() {
   })
 
   const pmTotal      = pmWOsEvaluable.length + pmMissed
-  const pmCompliance = pmTotal > 0 ? Math.round((pmCompliantCount / pmTotal) * 100) : null
+  const pmCompliance = pmTotal > 0 ? Math.round((pmCompliantCount / pmTotal) * 100) : 100
 
   // ── OTs vencidas ───────────────────────────────────────────────
   const overdueCount = relevantWOs.filter(
@@ -323,14 +323,10 @@ export function Indicators() {
         />
         <MetricCard
           title="Cumplimiento PM"
-          value={pmCompliance !== null ? `${pmCompliance}` : 'N/A'}
-          unit={pmCompliance !== null ? '%' : undefined}
-          description={
-            pmCompliance !== null
-              ? `${pmCompliantCount} preventivos cumplidos a tiempo de ${pmTotal} esperados. OTs canceladas excluidas del denominador.${pmMissed > 0 ? ` Incluye ${pmMissed} PM(s) vencidos sin OT generada.` : ''}`
-              : 'Sin órdenes preventivas en el período seleccionado.'
-          }
-          alert={pmCompliance !== null && pmCompliance < 80}
+          value={`${pmCompliance}`}
+          unit="%"
+          description={`${pmCompliantCount} preventivos cumplidos a tiempo de ${pmTotal} esperados. OTs canceladas excluidas del denominador.${pmMissed > 0 ? ` Incluye ${pmMissed} PM(s) vencidos sin OT generada.` : ''}`}
+          alert={pmCompliance < 80}
         />
         <MetricCard
           title="OTs Vencidas"

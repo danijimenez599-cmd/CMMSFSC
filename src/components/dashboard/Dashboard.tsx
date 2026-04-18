@@ -15,10 +15,14 @@ function StatCard({ icon, value, label }: { icon: string; value: number; label: 
 export function Dashboard() {
   const db = useStore((s) => s.db)
 
-  const totalAssets  = db.assets.length
+  const totalAssets  = db.assets.filter((a) => a.category === 'equip').length
   const openWO       = db.workOrders.filter((w) => ['OPEN','ASSIGNED','IN_PROGRESS'].includes(w.status)).length
   const activePlans  = db.pmPlans.filter((p) => p.active).length
   const lowStock     = db.inventoryItems.filter((i) => i.currentStock <= i.minStock).length
+  const overdueWOs   = db.workOrders.filter((w) =>
+    !['COMPLETED','CANCELLED'].includes(w.status) && w.dueDate && new Date(w.dueDate) < new Date()
+  ).length
+  const inRepair     = db.assets.filter((a) => a.status === 'IN_REPAIR').length
 
   const statusCounts = {
     OPEN:        db.workOrders.filter((o) => o.status === 'OPEN').length,
@@ -53,11 +57,13 @@ export function Dashboard() {
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard icon="🏭" value={totalAssets}  label="Activos" />
-        <StatCard icon="🔧" value={openWO}       label="Órdenes Abiertas" />
-        <StatCard icon="🛡️" value={activePlans}  label="Planes Activos" />
+      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+        <StatCard icon="⚙️" value={totalAssets}  label="Equipos" />
+        <StatCard icon="🔧" value={openWO}       label="OTs Activas" />
+        <StatCard icon="🛡️" value={activePlans}  label="Planes PM" />
         <StatCard icon="⚠️" value={lowStock}     label="Stock Bajo" />
+        <StatCard icon="🔴" value={overdueWOs}   label="OTs Vencidas" />
+        <StatCard icon="🔩" value={inRepair}     label="En Reparación" />
       </div>
 
       {/* Status bars */}

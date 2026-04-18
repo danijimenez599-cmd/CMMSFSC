@@ -135,50 +135,63 @@ export const useStore = create<AppState>()((set, get) => ({
         // ================================================================
         // Motor de generación automática de OTs preventivas
         //
-        // Regla: generar OT cuando nextDueDate ≤ hoy + toleranceDays,
-        // siempre que no exista OT activa ni el ciclo ya esté completado.
+        // Criterio de ingeniería:
+        //   Generar OT cuando nextDueDate ≤ hoy + toleranceDays del plan,
+        //   siempre que no exista ya una OT viva (OPEN/ASSIGNED/IN_PROGRESS)
+        //   para este ciclo, ni una OT COMPLETED cuyo completedAt sea
+        //   posterior a (nextDueDate - frequencyDays), lo que indicaría
+        //   que el ciclo actual ya fue atendido y nextDueDate ya avanzó.
         //
-        // IMPORTANTE: leemos get().db en cada iteración (no snapshot inicial)
-        // para que el estado post-generateWO sea visible y no generemos
-        // duplicados cuando múltiples planes vencen simultáneamente.
+        // Bugs corregidos:
+        //   - Bug 2: horizonte fijo de 7 días → usa toleranceDays del plan
+        //   - Bug 3: variable isLatestWOPending nunca se usaba → eliminada
+        //   - Bug 4: no detectaba ciclo ya completado → verificación por completedAt
         // ================================================================
-        const now   = new Date()
-        const apIds = get().db.assetPlans.map((ap) => ap.id)
+        const s   = get()
+        const now = new Date()
 
-        for (const apId of apIds) {
-          const current = get().db
-          const ap      = current.assetPlans.find((a) => a.id === apId)
-          if (!ap || !ap.active || !ap.nextDueDate) continue
+        // Procesar en serie para evitar race conditions si generateWO hace set()
+        for (const ap of s.db.assetPlans) {
+          if (!ap.active || !ap.nextDueDate) continue
 
-          const plan = current.pmPlans.find((p) => p.id === ap.pmPlanId)
+          const plan = s.db.pmPlans.find((p) => p.id === ap.pmPlanId)
           if (!plan || !plan.active) continue
 
-          // Solo activos operacionales reciben OTs preventivas
-          const asset = current.assets.find((a) => a.id === ap.assetId)
-          if (!asset || asset.status !== 'OPERATIONAL') continue
+          const due = new Date(ap.nextDueDate)
 
-          const due         = new Date(ap.nextDueDate)
+          // Horizonte = toleranceDays del plan (mínimo 1 día para no ignorar planes sin tolerancia).
+          // Esto significa: empezar a generar la OT con toleranceDays de antelación.
           const horizonDays = Math.max(plan.toleranceDays ?? 0, 1)
           const horizonDate = new Date(now)
           horizonDate.setDate(horizonDate.getDate() + horizonDays)
 
+          // ¿El vencimiento cae dentro del horizonte (o ya pasó)?
           if (due > horizonDate) continue
 
-          const hasActiveWO = current.workOrders.some(
+          // ¿Ya existe una OT viva (activa) para este plan en este ciclo?
+          const hasActiveWO = s.db.workOrders.some(
             (w) => w.pmPlanId === ap.id && ['OPEN', 'ASSIGNED', 'IN_PROGRESS'].includes(w.status)
           )
           if (hasActiveWO) continue
 
+          // ¿Ya existe una OT COMPLETED que corresponda a ESTE ciclo?
+          // El ciclo actual inicia en (nextDueDate - frequencyDays).
+          // Si hay una OT completada después de ese punto de inicio,
+          // significa que el ciclo ya fue ejecutado y nextDueDate ya avanzó
+          // correctamente. No generar duplicado.
           const cycleStartDate = new Date(due)
           cycleStartDate.setDate(cycleStartDate.getDate() - (plan.frequencyDays ?? 30))
 
-          const cycleAlreadyDone = current.workOrders.some((w) => {
+          const cycleAlreadyDone = s.db.workOrders.some((w) => {
             if (w.pmPlanId !== ap.id || w.status !== 'COMPLETED') return false
             if (!w.completedAt) return false
-            return new Date(w.completedAt) >= cycleStartDate
+            const completed = new Date(w.completedAt)
+            return completed >= cycleStartDate
           })
           if (cycleAlreadyDone) continue
 
+          // Todas las condiciones superadas → generar OT
+          // get() en lugar de s para leer estado fresco después de cada set() interno
           await get().generateWO(ap.id)
         }
       },
@@ -229,9 +242,6 @@ export const useStore = create<AppState>()((set, get) => ({
 
       deleteAsset: async (id) => {
         const snapshot = get().db
-        const now = new Date().toISOString()
-
-        // Recolectar el activo y todos sus descendientes
         const toDelete = new Set<string>()
         const collect  = (aid: string) => {
           toDelete.add(aid)
@@ -239,61 +249,17 @@ export const useStore = create<AppState>()((set, get) => ({
         }
         collect(id)
 
-        // 1. Pausar todos los AssetPlans afectados (no se generarán más OTs)
-        // 2. Cancelar las OTs activas (OPEN/ASSIGNED/IN_PROGRESS) de los activos
-        //    a eliminar — las completadas se conservan en el historial hasta que
-        //    se eliminen las OTs individualmente.
-        // 3. Devolver al inventario las partes de OTs que se van a cancelar.
-        const activeStatuses = ['OPEN', 'ASSIGNED', 'IN_PROGRESS']
-        const affectedWOs    = get().db.workOrders.filter(
-          (w) => toDelete.has(w.assetId ?? '') && activeStatuses.includes(w.status)
-        )
-
-        // Devolver partes de OTs canceladas al stock
-        const partUsagesToReverse = get().db.partUsages.filter(
-          (pu) => affectedWOs.some((w) => w.id === pu.workOrderId)
-        )
-
-        set((s) => {
-          // Reconstruir inventario con devolución de partes
-          let inventoryItems = s.db.inventoryItems
-          partUsagesToReverse.forEach((pu) => {
-            inventoryItems = inventoryItems.map((i) =>
-              i.id === pu.inventoryItemId
-                ? { ...i, currentStock: i.currentStock + pu.quantity, updatedAt: now }
-                : i
-            )
-          })
-
-          return {
-            db: {
-              ...s.db,
-              assets:     s.db.assets.filter((a) => !toDelete.has(a.id)),
-              assetPlans: s.db.assetPlans.map((ap) =>
-                toDelete.has(ap.assetId) ? { ...ap, active: false } : ap
-              ).filter((ap) => !toDelete.has(ap.assetId)),
-              workOrders: s.db.workOrders.map((w) =>
-                toDelete.has(w.assetId ?? '') && activeStatuses.includes(w.status)
-                  ? { ...w, status: 'CANCELLED' as const, updatedAt: now }
-                  : w
-              ),
-              inventoryItems,
-            },
-            selectedAssetId: null,
-          }
-        })
+        set((s) => ({
+          db: {
+            ...s.db,
+            assets:     s.db.assets.filter((a)  => !toDelete.has(a.id)),
+            assetPlans: s.db.assetPlans.filter((ap) => !toDelete.has(ap.assetId)),
+            workOrders: s.db.workOrders.filter((wo) => !toDelete.has(wo.assetId ?? '')),
+          },
+          selectedAssetId: null,
+        }))
 
         try {
-          // Cancelar OTs activas en Supabase antes de borrar el activo
-          for (const wo of affectedWOs) {
-            await api.workOrders.updateStatus(wo.id, 'CANCELLED')
-          }
-          // Devolver stock en Supabase
-          for (const pu of partUsagesToReverse) {
-            const item = get().db.inventoryItems.find((i) => i.id === pu.inventoryItemId)
-            if (item) await api.inventory.adjustStock(item.id, item.currentStock)
-          }
-          // Borrar activos (Supabase borrará AssetPlans y WOs orphans por FK cascade si está configurado)
           for (const aid of toDelete) await api.assets.delete(aid)
         } catch (e) {
           console.error('Error eliminando activo:', e)
@@ -316,10 +282,8 @@ export const useStore = create<AppState>()((set, get) => ({
             },
           }))
           // Two-way sync: si cambia dueDate de una OT preventiva
-          // Solo sincronizar cuando hay una fecha real — no propagar null,
-          // porque borrar la dueDate de una OT no debe borrar nextDueDate del plan.
           const wo = get().db.workOrders.find((w) => w.id === data.id)
-          if (wo?.pmPlanId && data.dueDate !== undefined && data.dueDate !== null) {
+          if (wo?.pmPlanId && data.dueDate !== undefined) {
             set((s) => ({
               db: {
                 ...s.db,
@@ -362,51 +326,19 @@ export const useStore = create<AppState>()((set, get) => ({
 
       deleteWO: async (id) => {
         const snapshot = get().db
-        const now = new Date().toISOString()
-
-        // Devolver stock de partes al inventario antes de borrar la OT
-        const partUsagesToReturn = snapshot.partUsages.filter((pu) => pu.workOrderId === id)
-
-        set((s) => {
-          let inventoryItems = s.db.inventoryItems
-          partUsagesToReturn.forEach((pu) => {
-            inventoryItems = inventoryItems.map((i) =>
-              i.id === pu.inventoryItemId
-                ? { ...i, currentStock: i.currentStock + pu.quantity, updatedAt: now }
-                : i
-            )
-          })
-          return {
-            db: {
-              ...s.db,
-              workOrders:     s.db.workOrders.filter((w) => w.id !== id),
-              woComments:     s.db.woComments.filter((c) => c.workOrderId !== id),
-              woTasks:        s.db.woTasks.filter((t) => t.woId !== id),
-              partUsages:     s.db.partUsages.filter((p) => p.workOrderId !== id),
-              inventoryItems,
-            },
-            selectedWOId: s.selectedWOId === id ? null : s.selectedWOId,
-          }
-        })
-
-        try {
-          // Devolver stock en Supabase (part_usages se borran en cascada por FK)
-          for (const pu of partUsagesToReturn) {
-            const item = get().db.inventoryItems.find((i) => i.id === pu.inventoryItemId)
-            if (item) await api.inventory.adjustStock(item.id, item.currentStock)
-          }
-          await api.workOrders.delete(id)
-        } catch (e) {
-          console.error('Error eliminando OT:', e)
-          set({ db: snapshot })
-        }
+        set((s) => ({
+          db: { ...s.db, workOrders: s.db.workOrders.filter((w) => w.id !== id) },
+          selectedWOId: s.selectedWOId === id ? null : s.selectedWOId,
+        }))
+        try { await api.workOrders.delete(id) }
+        catch (e) { console.error('Error eliminando OT:', e); set({ db: snapshot }) }
       },
 
       updateWOStatus: async (id, status, extra = {}) => {
         const now      = new Date().toISOString()
         const snapshot = get().db
 
-        // ── Calcular nextDueDate ANTES del set() ─────────────────────
+        // Calcular nextDueDate ANTES del set() para evitar problema de tipos
         let nextDueDateUpdate: { apId: string; date: string } | null = null
         if (status === 'COMPLETED' || status === 'CANCELLED') {
           const wo = snapshot.workOrders.find((w) => w.id === id)
@@ -414,11 +346,7 @@ export const useStore = create<AppState>()((set, get) => ({
             const ap   = snapshot.assetPlans.find((a) => a.id === wo.pmPlanId)
             const plan = ap ? snapshot.pmPlans.find((p) => p.id === ap.pmPlanId) : null
             if (ap && plan) {
-              // CANCELLED: respeta la fecha original del ciclo (nextDueDate del plan)
-              // COMPLETED: avanza desde la dueDate real de la OT
-              const base = (status === 'CANCELLED' && ap.nextDueDate)
-                ? new Date(ap.nextDueDate)
-                : (wo.dueDate ? new Date(wo.dueDate) : new Date(now))
+              const base = (status === 'CANCELLED' && ap.nextDueDate) ? new Date(ap.nextDueDate) : (wo.dueDate ? new Date(wo.dueDate) : new Date(now))
               const next = new Date(base)
               next.setDate(next.getDate() + plan.frequencyDays)
               nextDueDateUpdate = { apId: ap.id, date: next.toISOString() }
@@ -426,44 +354,8 @@ export const useStore = create<AppState>()((set, get) => ({
           }
         }
 
-        // ── Devolver stock si se cancela una OT con partes registradas ──
-        // Las partes se descontaron al registrarse. Si la OT se cancela,
-        // los materiales no se usaron y deben volver al inventario.
-        const partUsagesToReturn = (status === 'CANCELLED')
-          ? snapshot.partUsages.filter((pu) => pu.workOrderId === id)
-          : []
-
-        // ── Determinar nuevo estado del activo ────────────────────────
-        // Reglas:
-        //   IN_PROGRESS (correctivo) → activo pasa a IN_REPAIR
-        //   COMPLETED / CANCELLED    → revisar si quedan otras OTs correctivas
-        //                              activas para ese activo; si no, OPERATIONAL
-        //   OPEN / ASSIGNED          → sin cambio (la falla está reportada pero
-        //                              el equipo aún puede estar funcionando)
-        const wo = snapshot.workOrders.find((w) => w.id === id)
-        let assetStatusUpdate: { assetId: string; status: Asset['status'] } | null = null
-        if (wo?.assetId && wo.type === 'CORRECTIVE') {
-          if (status === 'IN_PROGRESS') {
-            assetStatusUpdate = { assetId: wo.assetId, status: 'IN_REPAIR' }
-          } else if (status === 'COMPLETED' || status === 'CANCELLED') {
-            // ¿Quedan otras OTs correctivas activas para este activo?
-            const stillActive = snapshot.workOrders.some(
-              (w) =>
-                w.id !== id &&
-                w.assetId === wo.assetId &&
-                w.type === 'CORRECTIVE' &&
-                ['OPEN', 'ASSIGNED', 'IN_PROGRESS'].includes(w.status)
-            )
-            if (!stillActive) {
-              assetStatusUpdate = { assetId: wo.assetId, status: 'OPERATIONAL' }
-            }
-          }
-        }
-
         set((s) => {
           let dbOut = { ...s.db }
-
-          // Actualizar OT
           dbOut.workOrders = dbOut.workOrders.map((w) => {
             if (w.id !== id) return w
             const updates: Partial<WorkOrder> = { status, updatedAt: now, ...extra }
@@ -478,8 +370,7 @@ export const useStore = create<AppState>()((set, get) => ({
             }
             return { ...w, ...updates }
           })
-
-          // Avanzar nextDueDate del plan preventivo si corresponde
+          // Actualizar nextDueDate en assetPlans si corresponde
           if (nextDueDateUpdate) {
             dbOut.assetPlans = dbOut.assetPlans.map((a) =>
               a.id === nextDueDateUpdate!.apId
@@ -487,50 +378,17 @@ export const useStore = create<AppState>()((set, get) => ({
                 : a
             )
           }
-
-          // Devolver stock de partes al cancelar
-          if (partUsagesToReturn.length > 0) {
-            partUsagesToReturn.forEach((pu) => {
-              dbOut.inventoryItems = dbOut.inventoryItems.map((i) =>
-                i.id === pu.inventoryItemId
-                  ? { ...i, currentStock: i.currentStock + pu.quantity, updatedAt: now }
-                  : i
-              )
-            })
-          }
-
-          // Sincronizar estado del activo
-          if (assetStatusUpdate) {
-            dbOut.assets = dbOut.assets.map((a) =>
-              a.id === assetStatusUpdate!.assetId
-                ? { ...a, status: assetStatusUpdate!.status, updatedAt: now }
-                : a
-            )
-          }
-
           return { db: dbOut }
         })
 
         try {
           await api.workOrders.updateStatus(id, status, extra)
-
           if (nextDueDateUpdate) {
             await api.assetPlans.updateDueDate(nextDueDateUpdate.apId, nextDueDateUpdate.date)
           }
-
-          // Devolver stock en Supabase al cancelar
-          for (const pu of partUsagesToReturn) {
-            const item = get().db.inventoryItems.find((i) => i.id === pu.inventoryItemId)
-            if (item) await api.inventory.adjustStock(item.id, item.currentStock)
-          }
-
-          // Sincronizar estado del activo en Supabase (método dedicado para
-          // no sobrescribir campos con vacíos al hacer upsert parcial)
-          if (assetStatusUpdate) {
-            await api.assets.updateStatus(assetStatusUpdate.assetId, assetStatusUpdate.status)
-          }
-
-          // Re-evaluar generación de PMs tras cerrar ciclo
+          // Tras cerrar un ciclo (completar o cancelar), re-evaluar inmediatamente
+          // si la nueva nextDueDate ya cae dentro del horizonte de tolerancia
+          // del plan, para no tener que esperar el próximo arranque de la app.
           if (status === 'COMPLETED' || status === 'CANCELLED') {
             await get().autoGeneratePMs()
           }
@@ -571,7 +429,6 @@ export const useStore = create<AppState>()((set, get) => ({
         const snapshot = get().db
         const item = get().db.inventoryItems.find((i) => i.id === itemId)
         if (!item || item.currentStock < qty) return
-        const newStock = item.currentStock - qty
         const usage: PartUsage = {
           id: uid('pu'), workOrderId: woId, inventoryItemId: itemId,
           quantity: qty, usedAt: new Date().toISOString(),
@@ -582,24 +439,14 @@ export const useStore = create<AppState>()((set, get) => ({
             partUsages: [...s.db.partUsages, usage],
             inventoryItems: s.db.inventoryItems.map((i) =>
               i.id === itemId
-                ? { ...i, currentStock: newStock, updatedAt: new Date().toISOString() }
+                ? { ...i, currentStock: i.currentStock - qty, updatedAt: new Date().toISOString() }
                 : i
             ),
           },
         }))
-
-        // Notificar si el stock cae al punto de reorden o por debajo
-        if (newStock <= item.minStock) {
-          const level = newStock === 0 ? '🔴 SIN STOCK' : '⚠️ Stock bajo'
-          ;(window as any)._toast?.(
-            `${level}: ${item.name} — quedan ${newStock} ${item.unit}. Punto de reorden: ${item.minStock}.`,
-            newStock === 0 ? 'error' : 'warn'
-          )
-        }
-
         try {
           await api.partUsages.insert(woId, itemId, qty)
-          await api.inventory.adjustStock(itemId, newStock)
+          await api.inventory.adjustStock(itemId, item.currentStock - qty)
         } catch (e) {
           console.error('Error registrando parte:', e)
           set({ db: snapshot })
@@ -686,43 +533,16 @@ export const useStore = create<AppState>()((set, get) => ({
 
       deletePlan: async (id) => {
         const snapshot = get().db
-        const now = new Date().toISOString()
-
-        // Obtener los IDs de assetPlans afectados
-        const affectedApIds = new Set(
-          snapshot.assetPlans.filter((ap) => ap.pmPlanId === id).map((ap) => ap.id)
-        )
-
-        // Cancelar OTs activas vinculadas a este plan para no dejarlas huérfanas
-        const activeStatuses = ['OPEN', 'ASSIGNED', 'IN_PROGRESS']
-        const woToCancel = snapshot.workOrders.filter(
-          (w) => w.pmPlanId && affectedApIds.has(w.pmPlanId) && activeStatuses.includes(w.status)
-        )
-
         set((s) => ({
           db: {
             ...s.db,
-            pmPlans:    s.db.pmPlans.filter((p) => p.id !== id),
-            pmTasks:    s.db.pmTasks.filter((t) => t.pmPlanId !== id),
+            pmPlans:    s.db.pmPlans.filter((p)  => p.id !== id),
+            pmTasks:    s.db.pmTasks.filter((t)  => t.pmPlanId !== id),
             assetPlans: s.db.assetPlans.filter((ap) => ap.pmPlanId !== id),
-            // Cancelar OTs activas — las completadas se conservan para histórico
-            workOrders: s.db.workOrders.map((w) =>
-              w.pmPlanId && affectedApIds.has(w.pmPlanId) && activeStatuses.includes(w.status)
-                ? { ...w, status: 'CANCELLED' as const, updatedAt: now }
-                : w
-            ),
           },
         }))
-
-        try {
-          for (const wo of woToCancel) {
-            await api.workOrders.updateStatus(wo.id, 'CANCELLED')
-          }
-          await api.pmPlans.delete(id)
-        } catch (e) {
-          console.error('Error eliminando plan:', e)
-          set({ db: snapshot })
-        }
+        try { await api.pmPlans.delete(id) }
+        catch (e) { console.error('Error eliminando plan:', e); set({ db: snapshot }) }
       },
 
       // ── ASSET PLANS ─────────────────────────────────────────────
@@ -732,28 +552,7 @@ export const useStore = create<AppState>()((set, get) => ({
         )
         if (already) return
 
-        // No asignar planes preventivos a activos que no están operacionales.
-        // Un activo OUT_OF_SERVICE o IN_REPAIR no debe recibir OTs de PM —
-        // contaminan el backlog y el calendario con trabajo no ejecutable.
-        const asset = get().db.assets.find((a) => a.id === assetId)
-        if (asset && asset.status !== 'OPERATIONAL') {
-          ;(window as any)._toast?.(
-            `No se puede asignar un plan a "${asset.name}" porque su estado es "${asset.status === 'IN_REPAIR' ? 'En Reparación' : 'Fuera de Servicio'}". Cambia el estado a Operacional primero.`,
-            'error'
-          )
-          return
-        }
-
         const plan = get().db.pmPlans.find((p) => p.id === pmPlanId)
-
-        // No asignar planes inactivos — generarían OTs de un programa suspendido
-        if (plan && !plan.active) {
-          ;(window as any)._toast?.(
-            `El plan "${plan.name}" está inactivo. Actívalo en Programas de Mtto antes de asignarlo.`,
-            'warn'
-          )
-          return
-        }
 
         // nextDueDate inicial = hoy + frequencyDays.
         // Esto refleja que el primer mantenimiento aún no se ha hecho
@@ -799,45 +598,16 @@ export const useStore = create<AppState>()((set, get) => ({
       },
 
       unassignPlan: async (assetId, pmPlanId) => {
-        const snapshot = get().db
-        const now = new Date().toISOString()
-
-        // Encontrar el assetPlan específico que se está desvinculando
-        const ap = snapshot.assetPlans.find(
-          (a) => a.assetId === assetId && a.pmPlanId === pmPlanId
-        )
-
-        // Cancelar la OT activa de este ciclo si existe — no dejarla huérfana
-        const activeStatuses = ['OPEN', 'ASSIGNED', 'IN_PROGRESS']
-        const activeWO = ap
-          ? snapshot.workOrders.find(
-              (w) => w.pmPlanId === ap.id && activeStatuses.includes(w.status)
-            )
-          : null
-
         set((s) => ({
           db: {
             ...s.db,
             assetPlans: s.db.assetPlans.filter(
-              (a) => !(a.assetId === assetId && a.pmPlanId === pmPlanId)
+              (ap) => !(ap.assetId === assetId && ap.pmPlanId === pmPlanId)
             ),
-            workOrders: activeWO
-              ? s.db.workOrders.map((w) =>
-                  w.id === activeWO.id
-                    ? { ...w, status: 'CANCELLED' as const, updatedAt: now }
-                    : w
-                )
-              : s.db.workOrders,
           },
         }))
-
-        try {
-          if (activeWO) await api.workOrders.updateStatus(activeWO.id, 'CANCELLED')
-          await api.assetPlans.deleteByAssetAndPlan(assetId, pmPlanId)
-        } catch (e) {
-          console.error('Error desasignando plan:', e)
-          set({ db: snapshot })
-        }
+        try { await api.assetPlans.deleteByAssetAndPlan(assetId, pmPlanId) }
+        catch (e) { console.error('Error desasignando plan:', e) }
       },
 
       toggleAssetPlan: async (apId) => {
@@ -852,14 +622,8 @@ export const useStore = create<AppState>()((set, get) => ({
             ),
           },
         }))
-        try {
-          await api.assetPlans.toggle(apId, newVal)
-          // Si se reactiva un plan, evaluar inmediatamente si hay una OT que generar
-          // (el plan puede haber estado pausado mientras vencía su nextDueDate)
-          if (newVal) await get().autoGeneratePMs()
-        } catch (e) {
-          console.error('Error toggling plan:', e)
-        }
+        try { await api.assetPlans.toggle(apId, newVal) }
+        catch (e) { console.error('Error toggling plan:', e) }
       },
 
       removeAssetPlan: async (apId) => {
@@ -885,27 +649,14 @@ export const useStore = create<AppState>()((set, get) => ({
         if (!ap || !plan || !asset) return null
 
         const now = new Date()
-        // Si nextDueDate ya pasó, usar hoy como fecha límite de la OT.
-        // Una OT generada tardíamente no debería nacer ya vencida —
-        // el técnico necesita tiempo real para ejecutarla.
-        const rawDue  = ap.nextDueDate ? new Date(ap.nextDueDate) : now
-        const due     = rawDue < now ? now : rawDue
-
-        // Prioridad de la OT preventiva basada en la criticidad del activo:
-        //   HIGH criticality  → priority HIGH  (no diferir, impacto alto en producción)
-        //   MEDIUM criticality → priority NORMAL
-        //   LOW criticality   → priority LOW
-        const critToPriority: Record<string, WorkOrder['priority']> = {
-          HIGH: 'HIGH', MEDIUM: 'NORMAL', LOW: 'LOW',
-        }
-        const woPriority = critToPriority[asset.criticality] ?? 'NORMAL'
+        const due = ap.nextDueDate ? new Date(ap.nextDueDate) : now
 
         const wo: WorkOrder = {
           id: uid('wo'), title: `PM: ${plan.name}`,
           description: `Mantenimiento preventivo para ${asset.name}`,
           assetId: asset.id, reportedById: s.currentUser?.id ?? null,
           assignedToId: plan.defaultAssignId,
-          priority: woPriority, status: 'OPEN', type: 'PREVENTIVE',
+          priority: 'NORMAL', status: 'OPEN', type: 'PREVENTIVE',
           dueDate: due.toISOString(), startedAt: null, completedAt: null,
           timeSpentMin: null, resolutionNotes: null, pmPlanId: apId,
           createdAt: now.toISOString(), updatedAt: now.toISOString(),

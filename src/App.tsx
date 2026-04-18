@@ -12,7 +12,6 @@ import { Schedule }  from '@/components/schedule/Schedule'
 import { WorkOrders, WOForm } from '@/components/workorders/WorkOrders'
 import { Inventory } from '@/components/inventory/Inventory'
 
-// Componente placeholder para vistas no implementadas
 function ComingSoon({ title }: { title: string }) {
   return (
     <div className="flex items-center justify-center h-64 text-tx-3">
@@ -27,7 +26,6 @@ function ComingSoon({ title }: { title: string }) {
 
 function ViewRouter() {
   const view = useStore((s) => s.view)
-
   switch (view) {
     case 'dashboard':  return <Dashboard />
     case 'indicators': return <Indicators />
@@ -40,41 +38,38 @@ function ViewRouter() {
   }
 }
 
-
 export default function App() {
   const { toasts, toast, dismiss } = useToast()
-  const editingWOId = useStore((s) => s.editingWOId)
-  const closeWOEditor = useStore((s) => s.closeWOEditor)
-  const autoGeneratePMs = useStore((s) => s.autoGeneratePMs)
+  const editingWOId     = useStore((s) => s.editingWOId)
+  const closeWOEditor   = useStore((s) => s.closeWOEditor)
+  const loadFromSupabase = useStore((s) => s.loadFromSupabase)
+  const autoGeneratePMs  = useStore((s) => s.autoGeneratePMs)
 
-  // Ejecutado en el arranque para auto-generar
+  // FIX Bug 1: autoGeneratePMs debe correr DESPUÉS de que los datos carguen.
+  // Se encadena la carga con la generación en lugar de correr en paralelo.
   useEffect(() => {
-    autoGeneratePMs()
+    const init = async () => {
+      await loadFromSupabase()
+      await autoGeneratePMs()
+    }
+    init()
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Exponer toast globalmente para módulos que lo necesiten
-  // (forma simple sin context, ya que el store maneja la lógica)
   ;(window as unknown as Record<string, unknown>)._toast = toast
 
   return (
     <div className="flex min-h-screen bg-bg font-sans">
-      {/* Sidebar fijo */}
       <Sidebar />
-
-      {/* Área principal */}
       <div className="lg:ml-56 flex-1 flex flex-col min-h-screen">
         <Topbar />
         <main className="flex-1 px-4 lg:px-6 py-5 overflow-y-auto">
           <ViewRouter />
         </main>
       </div>
-
       {editingWOId !== false && (
         <WOForm woId={editingWOId as string | null} onClose={closeWOEditor} />
       )}
-
-      {/* Toasts */}
       <ToastRack toasts={toasts} dismiss={dismiss} />
     </div>
   )

@@ -82,9 +82,6 @@ export const api = {
     async delete(id: string): Promise<void> {
       await run(db.from('assets').delete().eq('id', id))
     },
-    async updateStatus(id: string, status: string): Promise<void> {
-      await run(db.from('assets').update({ status, updated_at: new Date().toISOString() }).eq('id', id))
-    },
   },
 
   // ── WORK ORDERS ─────────────────────────────────────────────────
@@ -340,7 +337,7 @@ export const api = {
     await insert('assets', children1.map(mapAssetToDb));
     await insert('assets', children2.map(mapAssetToDb));
     
-    await insert('pm_plans', data.pmPlans.map((p: any) => ({ id: p.id, name: p.name, trigger_type: p.triggerType, frequency_days: p.frequencyDays, tolerance_days: p.toleranceDays ?? 3, meter_unit: p.meterUnit, meter_interval: p.meterInterval, default_assign_id: p.defaultAssignId, active: p.active, notes: p.notes })));
+    await insert('pm_plans', data.pmPlans.map((p: any) => ({ id: p.id, name: p.name, trigger_type: p.triggerType, frequency_days: p.frequencyDays, meter_unit: p.meterUnit, meter_interval: p.meterInterval, default_assign_id: p.defaultAssignId, active: p.active, notes: p.notes })));
     await insert('pm_tasks', data.pmTasks.map((t: any) => ({ id: t.id, pm_plan_id: t.pmPlanId, description: t.description, "order": t.order })));
     await insert('asset_plans', data.assetPlans.map((ap: any) => ({ id: ap.id, asset_id: ap.assetId, pm_plan_id: ap.pmPlanId, next_due_date: ap.nextDueDate, active: ap.active })));
     

@@ -82,7 +82,7 @@ function ItemForm({ itemId, onClose }: { itemId: string | null; onClose: () => v
           <Input type="number" min="0"
             value={form.currentStock} onChange={(e) => set('currentStock', parseFloat(e.target.value) || 0)} />
         </FormField>
-        <FormField label="Stock mínimo">
+        <FormField label="Punto de reorden" hint="Alerta cuando el stock llega a este nivel. Debe quedar stock suficiente para operar mientras llega el pedido.">
           <Input type="number" min="0"
             value={form.minStock} onChange={(e) => set('minStock', parseFloat(e.target.value) || 0)} />
         </FormField>
@@ -246,7 +246,7 @@ export function Inventory() {
           <table className="w-full border-collapse text-sm">
             <thead>
               <tr className="border-b border-gray-100 bg-bg">
-                {['SKU','Nombre','Categoría','Stock','Mín.','Estado','Ubicación','Costo Unit.',''].map((h) => (
+                {['SKU','Nombre','Categoría','Stock','Reorden','Estado','Ubicación','Costo Unit.',''].map((h) => (
                   <th key={h} className="text-left py-2.5 px-3 text-[11px] font-bold text-tx-3 uppercase tracking-wide whitespace-nowrap">
                     {h}
                   </th>

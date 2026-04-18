@@ -94,18 +94,10 @@ export function WOForm({ woId, onClose }: { woId: string | null; onClose: () => 
           </FormField>
         </div>
         <FormField label="Tipo">
-          {form.pmPlanId ? (
-            // OT vinculada a un plan preventivo — tipo bloqueado para no romper la cadena PM
-            <div className="flex items-center gap-2 px-3 py-2 bg-bg border border-gray-200 rounded-lg text-sm text-tx-2">
-              <span>🛡️ Preventivo</span>
-              <span className="text-[10px] text-tx-3 ml-auto">Vinculado a plan PM</span>
-            </div>
-          ) : (
-            <Select value={form.type} onChange={(e) => set('type', e.target.value)}>
-              <option value="CORRECTIVE">🔧 Correctivo</option>
-              <option value="PREVENTIVE">🛡️ Preventivo</option>
-            </Select>
-          )}
+          <Select value={form.type} onChange={(e) => set('type', e.target.value)}>
+            <option value="CORRECTIVE">🔧 Correctivo</option>
+            <option value="PREVENTIVE">🛡️ Preventivo</option>
+          </Select>
         </FormField>
         <FormField label="Prioridad">
           <Select value={form.priority} onChange={(e) => set('priority', e.target.value)}>
@@ -177,27 +169,15 @@ function AssignModal({ woId, onClose }: { woId: string; onClose: () => void }) {
 
 // ── CompleteModal — optimizado para móvil ─────────────────────────
 function CompleteModal({ woId, onClose }: { woId: string; onClose: () => void }) {
-  const { db, updateWOStatus } = useStore()
+  const { updateWOStatus } = useStore()
   const [notes, setNotes]  = useState('')
   const [time,  setTime]   = useState('0')
 
-  const wo         = db.workOrders.find((w) => w.id === woId)
-  const isPM       = wo?.type === 'PREVENTIVE'
-  const timeVal    = parseInt(time) || 0
-  const timeInvalid = timeVal < 1  // al menos 1 minuto — 0 contamina el MTTR
-
   const handleComplete = () => {
-    if (timeInvalid) {
-      ;(window as any)._toast?.('Ingresa el tiempo real invertido (mínimo 1 minuto) para un MTTR preciso.', 'warn')
-      return
-    }
-    if (isPM && !notes.trim()) {
-      if (!confirm('No escribiste notas de resolución. En un preventivo es recomendable documentar qué se hizo. ¿Continuar de todas formas?')) return
-    }
     updateWOStatus(woId, 'COMPLETED', {
       completedAt:     new Date().toISOString(),
       resolutionNotes: notes.trim() || null,
-      timeSpentMin:    timeVal,
+      timeSpentMin:    parseInt(time) || 0,
     })
     onClose()
   }
@@ -207,28 +187,24 @@ function CompleteModal({ woId, onClose }: { woId: string; onClose: () => void })
       footer={
         <>
           <Button variant="secondary" onClick={onClose}>Cancelar</Button>
-          <Button onClick={handleComplete} className="bg-green-600 hover:bg-green-700" disabled={timeInvalid}>
-            Marcar Completada
-          </Button>
+          <Button onClick={handleComplete} className="bg-green-600 hover:bg-green-700">Marcar Completada</Button>
         </>
       }>
       {/* Campos grandes y táctiles */}
       <div className="flex flex-col gap-4">
-        {isPM && (
-          <div className="bg-green-50 border border-green-200 rounded-xl px-4 py-3 text-sm text-green-800 font-medium">
-            Al completar, se generará la próxima fecha de mantenimiento automáticamente.
-          </div>
-        )}
+        <div className="bg-green-50 border border-green-200 rounded-xl px-4 py-3 text-sm text-green-800 font-medium">
+          Al completar, se generará la próxima fecha de mantenimiento automáticamente.
+        </div>
         <FormField label="Notas de resolución (qué se hizo)">
           <Textarea rows={5} value={notes} onChange={(e) => setNotes(e.target.value)}
-            placeholder="Describe el trabajo realizado, materiales usados, observaciones..."
+            placeholder="Describe el trabajo realizado, materiales usados, observaciones..." 
             className="text-base"
           />
         </FormField>
-        <FormField label="Tiempo invertido (minutos) *">
+        <FormField label="Tiempo invertido (minutos)">
           <div className="flex items-center gap-3">
-            <Input type="number" min="1" value={time} onChange={(e) => setTime(e.target.value)}
-              className={clsx('text-base text-center font-bold w-28', timeInvalid && 'border-red-300 bg-red-50')} />
+            <Input type="number" min="0" value={time} onChange={(e) => setTime(e.target.value)}
+              className="text-base text-center font-bold w-28" />
             <div className="flex gap-2">
               {[30, 60, 90, 120].map((t) => (
                 <button key={t} onClick={() => setTime(String(t))}
@@ -239,7 +215,6 @@ function CompleteModal({ woId, onClose }: { woId: string; onClose: () => void })
               ))}
             </div>
           </div>
-          {timeInvalid && <p className="text-xs text-red-600 mt-1">Requerido para un MTTR preciso.</p>}
         </FormField>
       </div>
     </Modal>
@@ -757,17 +732,7 @@ function WODetail({ woId, onEdit }: { woId: string; onEdit: () => void }) {
               {actions.includes('iniciar')                           && <Button size="sm" onClick={() => updateWOStatus(woId, 'IN_PROGRESS', { startedAt: new Date().toISOString() })}>Iniciar</Button>}
               {actions.includes('completar')                         && <Button size="sm" onClick={handleCompleteClicked}>Completar</Button>}
               {actions.includes('cancelar')                          && <Button size="sm" variant="danger" onClick={() => { if (confirm('¿Cancelar esta orden?')) updateWOStatus(woId, 'CANCELLED') }}>Cancelar</Button>}
-              {actions.includes('reabrir')   && perms.canReopenWO   && (
-                <Button size="sm" variant="secondary" onClick={() => {
-                  if (wo.type === 'PREVENTIVE' && wo.status === 'COMPLETED' && wo.pmPlanId) {
-                    if (!confirm(
-                      'Esta es una OT preventiva completada. Al reabrirla, el ciclo del plan ya avanzó — ' +
-                      'la fecha de próximo mantenimiento NO se revertirá. ¿Continuar de todas formas?'
-                    )) return
-                  }
-                  updateWOStatus(woId, 'OPEN')
-                }}>Reabrir</Button>
-              )}
+              {actions.includes('reabrir')   && perms.canReopenWO   && <Button size="sm" variant="secondary" onClick={() => updateWOStatus(woId, 'OPEN')}>Reabrir</Button>}
             </div>
           </section>
         )}

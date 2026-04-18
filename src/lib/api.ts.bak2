@@ -82,9 +82,6 @@ export const api = {
     async delete(id: string): Promise<void> {
       await run(db.from('assets').delete().eq('id', id))
     },
-    async updateStatus(id: string, status: string): Promise<void> {
-      await run(db.from('assets').update({ status, updated_at: new Date().toISOString() }).eq('id', id))
-    },
   },
 
   // ── WORK ORDERS ─────────────────────────────────────────────────

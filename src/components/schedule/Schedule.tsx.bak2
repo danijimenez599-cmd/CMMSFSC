@@ -138,10 +138,7 @@ export function Schedule() {
     if (row.ap) {
       // OTs asociadas a este plan que vencen EN ESTE DÍA exacto
       const wosForDay = db.workOrders.filter(
-        (wo) => wo.pmPlanId === row.ap!.id &&
-                wo.dueDate &&
-                isoDate(new Date(wo.dueDate)) === ds &&
-                wo.status !== 'CANCELLED'   // canceladas: no tienen lugar en el calendario
+        (wo) => wo.pmPlanId === row.ap!.id && wo.dueDate && isoDate(new Date(wo.dueDate)) === ds
       )
       
       const tolerance = row.plan?.toleranceDays ?? 3
@@ -170,7 +167,7 @@ export function Schedule() {
     
     // Si la fila es de OTs huerfanas (standalone)
     if (row.standaloneWOs) {
-      const wos = row.standaloneWOs.filter((wo) => wo.dueDate && isoDate(new Date(wo.dueDate)) === ds && wo.status !== 'CANCELLED')
+      const wos = row.standaloneWOs.filter((wo) => wo.dueDate && isoDate(new Date(wo.dueDate)) === ds)
       return wos.map((wo) => {
          let sts = wo.status
          let cls = getEventClass(wo.dueDate!, wo.status)

@@ -89,6 +89,11 @@ function AssetDetail({ assetId, onEdit, onAssignPlans }: {
   const workOrders = db.workOrders.filter((wo) => wo.assetId === assetId)
   const assetPlans = db.assetPlans.filter((ap) => ap.assetId === assetId)
 
+  // OTs correctivas activas que justifican el estado IN_REPAIR
+  const activeCorrectiveWOs = workOrders.filter(
+    (wo) => wo.type === 'CORRECTIVE' && ['OPEN', 'ASSIGNED', 'IN_PROGRESS'].includes(wo.status)
+  )
+
   const handleGenerateWO = async (apId: string) => {
     const wo = await generateWO(apId)
     if (wo) {
@@ -133,6 +138,23 @@ function AssetDetail({ assetId, onEdit, onAssignPlans }: {
       </div>
 
       <div className="px-6 py-5 flex flex-col gap-5">
+        {/* Banner de activo en reparación */}
+        {asset.status === 'IN_REPAIR' && activeCorrectiveWOs.length > 0 && (
+          <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 text-sm text-amber-800">
+            <div className="font-semibold mb-1">⚠️ Equipo en reparación — planes PM pausados automáticamente</div>
+            <div className="text-xs text-amber-700">
+              {activeCorrectiveWOs.length} OT{activeCorrectiveWOs.length !== 1 ? 's' : ''} correctiva{activeCorrectiveWOs.length !== 1 ? 's' : ''} activa{activeCorrectiveWOs.length !== 1 ? 's' : ''}:{' '}
+              {activeCorrectiveWOs.map((wo) => wo.title).join(' · ')}
+            </div>
+          </div>
+        )}
+        {asset.status === 'OUT_OF_SERVICE' && (
+          <div className="bg-gray-100 border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-700">
+            <div className="font-semibold">🚫 Equipo fuera de servicio</div>
+            <div className="text-xs text-gray-500 mt-0.5">No se generarán OTs preventivas para este activo.</div>
+          </div>
+        )}
+
         {asset.notes && (
           <p className="text-sm text-tx-2 leading-relaxed">{asset.notes}</p>
         )}
@@ -254,32 +276,58 @@ function AssignPlansModal({ assetId, onClose }: { assetId: string; onClose: () =
   const asset      = db.assets.find((a) => a.id === assetId)
   const assigned   = new Set(db.assetPlans.filter((ap) => ap.assetId === assetId).map((ap) => ap.pmPlanId))
 
+  const isBlocked = asset && asset.status !== 'OPERATIONAL'
+  const statusMsg: Record<string, string> = {
+    IN_REPAIR:       'En Reparación',
+    OUT_OF_SERVICE:  'Fuera de Servicio',
+  }
+
   return (
     <Modal open title={`Planes — ${asset?.name ?? ''}`} onClose={onClose}
       footer={<Button onClick={onClose}>Listo</Button>} large>
+
+      {/* Advertencia si el activo no está operacional */}
+      {isBlocked && (
+        <div className="mb-4 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 text-sm text-amber-800 flex items-start gap-2">
+          <span className="text-base flex-shrink-0">⚠️</span>
+          <div>
+            <strong>Este equipo está {statusMsg[asset.status] ?? asset.status}.</strong>
+            {' '}No se pueden asignar planes preventivos a equipos fuera de servicio o en reparación.
+            Cambia el estado del activo a <em>Operacional</em> primero para habilitar esta función.
+          </div>
+        </div>
+      )}
+
       <p className="text-sm text-tx-2 mb-4">
         Marca los planes que aplican a este equipo. El mismo plan puede asignarse a múltiples equipos con fechas independientes.
       </p>
+
       {db.pmPlans.length === 0 ? (
         <p className="text-sm text-tx-3">No hay planes creados. Ve a <em>Programas de Mtto</em> para crear uno.</p>
       ) : (
         <div className="flex flex-col gap-2">
           {db.pmPlans.map((plan) => {
             const isChecked = assigned.has(plan.id)
-            const tasks = db.pmTasks.filter((t) => t.pmPlanId === plan.id)
+            const tasks     = db.pmTasks.filter((t) => t.pmPlanId === plan.id)
             return (
               <label
                 key={plan.id}
                 className={clsx(
-                  'flex items-center gap-3 px-3 py-2.5 border rounded-lg cursor-pointer transition-colors',
-                  isChecked ? 'border-brand bg-brand-pale' : 'border-gray-200 hover:bg-bg'
+                  'flex items-center gap-3 px-3 py-2.5 border rounded-lg transition-colors',
+                  isBlocked
+                    ? 'border-gray-100 bg-gray-50 opacity-50 cursor-not-allowed'
+                    : isChecked
+                      ? 'border-brand bg-brand-pale cursor-pointer'
+                      : 'border-gray-200 hover:bg-bg cursor-pointer'
                 )}
               >
                 <input
                   type="checkbox"
                   checked={isChecked}
+                  disabled={!!isBlocked}
                   className="accent-brand w-4 h-4 flex-shrink-0"
                   onChange={(e) => {
+                    if (isBlocked) return
                     if (e.target.checked) assignPlan(assetId, plan.id)
                     else unassignPlan(assetId, plan.id)
                   }}
@@ -287,7 +335,7 @@ function AssignPlansModal({ assetId, onClose }: { assetId: string; onClose: () =
                 <div className="flex-1 min-w-0">
                   <div className="text-sm font-semibold text-tx">{plan.name}</div>
                   <div className="text-[11px] text-tx-3 mt-0.5">
-                    Cada {plan.frequencyDays} días · {tasks.length} tarea{tasks.length !== 1 ? 's' : ''}
+                    Cada {plan.frequencyDays} días · ±{plan.toleranceDays} días tolerancia · {tasks.length} tarea{tasks.length !== 1 ? 's' : ''}
                   </div>
                 </div>
                 <Badge variant={plan.active ? 'ok' : 'neutral'}>{plan.active ? 'Activo' : 'Inactivo'}</Badge>
