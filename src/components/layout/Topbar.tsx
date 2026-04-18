@@ -16,7 +16,7 @@ const ROLE_LABEL: Record<Role, string> = {
 }
 const ROLE_COLOR: Record<Role, string> = {
   ADMIN:      'bg-purple-100 text-purple-700',
-  SUPERVISOR: 'bg-blue-100   text-blue-700',
+  SUPERVISOR: 'bg-red-100    text-red-700',
   TECHNICIAN: 'bg-green-100  text-green-700',
 }
 
@@ -29,11 +29,11 @@ export function Topbar() {
   const activeUsers = db.users.filter((u) => u.active)
 
   return (
-    <header className="h-[58px] bg-white border-b border-gray-100 flex items-center justify-between px-4 lg:px-6 sticky top-0 z-10 shadow-[0_1px_0_rgba(0,0,0,0.06)]">
+    <header className="h-[64px] bg-surface/70 backdrop-blur-xl border-b border-gray-200/50 dark:border-white/10 flex items-center justify-between px-4 lg:px-6 sticky top-0 z-10">
       <div className="flex items-center gap-3">
         <button
           onClick={() => setMobileMenuOpen(true)}
-          className="lg:hidden p-1.5 -ml-1.5 text-tx-2 hover:bg-gray-100 rounded-md transition-colors"
+          className="lg:hidden p-1.5 -ml-1.5 text-tx-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-md transition-colors"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
             <line x1="3" y1="12" x2="21" y2="12" />

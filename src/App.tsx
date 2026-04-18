@@ -61,9 +61,9 @@ export default function App() {
   return (
     <div className="flex min-h-screen bg-bg font-sans">
       <Sidebar />
-      <div className="lg:ml-56 flex-1 flex flex-col min-h-screen">
+      <div className="lg:ml-[72px] xl:ml-56 flex-1 flex flex-col min-h-screen min-w-0">
         <Topbar />
-        <main className="flex-1 px-4 lg:px-6 py-5 overflow-y-auto">
+        <main className="flex-1 px-4 lg:px-6 py-5 overflow-auto pb-6 flex flex-col max-w-full">
           <ViewRouter />
         </main>
       </div>

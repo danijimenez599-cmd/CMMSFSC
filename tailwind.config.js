@@ -1,28 +1,28 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class',
   content: ['./index.html', './src/**/*.{ts,tsx}'],
   theme: {
     extend: {
       colors: {
-        // Paleta APEX CMMS
         brand: {
-          DEFAULT: '#8b1a00',
-          hover:   '#a82000',
-          light:   '#b52400',
-          pale:    'rgba(139,26,0,0.07)',
-          pale2:   'rgba(139,26,0,0.13)',
+          DEFAULT: '#6366f1', // Indigo 500
+          hover:   '#4f46e5', // Indigo 600
+          light:   '#818cf8', // Indigo 400
+          pale:    'rgba(99, 102, 241, 0.1)',
+          pale2:   'rgba(99, 102, 241, 0.2)',
         },
-        ocre: '#c8693a',
-        surface: '#ffffff',
+        ocre: '#f59e0b',
+        surface: 'var(--surface)',
         bg: {
-          DEFAULT: '#f7f3f0',
-          2: '#f0e9e2',
-          3: '#e6ddd5',
+          DEFAULT: 'var(--bg-default)',
+          2: 'var(--bg-2)',
+          3: 'var(--bg-3)',
         },
         tx: {
-          DEFAULT: '#1a0f0a',
-          2: '#4a2e24',
-          3: '#8a6456',
+          DEFAULT: 'var(--tx-default)',
+          2: 'var(--tx-2)',
+          3: 'var(--tx-3)',
         },
       },
       fontFamily: {
@@ -32,9 +32,11 @@ export default {
       borderRadius: { cmms: '14px' },
       boxShadow: {
         card:  '0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05)',
+        cardHov: '0 10px 40px rgba(0,0,0,0.1)',
         card2: '0 4px 24px rgba(0,0,0,0.11)',
       },
     },
   },
   plugins: [],
 }
+

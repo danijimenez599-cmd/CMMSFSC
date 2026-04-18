@@ -40,7 +40,7 @@ const evClasses: Record<string, string> = {
 }
 
 const WO_STATUS_CLS: Record<string, string> = {
-  OPEN:'bg-amber-100 text-amber-700', ASSIGNED:'bg-blue-100 text-blue-700',
+  OPEN:'bg-amber-100 text-amber-700', ASSIGNED:'bg-red-100 text-red-700',
   IN_PROGRESS:'bg-amber-100 text-amber-700', COMPLETED:'bg-green-100 text-green-700',
   CANCELLED:'bg-gray-100 text-gray-500',
 }
@@ -54,7 +54,54 @@ export function Schedule() {
   const { db, navigate, openWOEditor } = useStore()
   const [mode,   setMode]   = useState<Mode>('week')
   const [offset, setOffset] = useState(0)
-  const [locationFilter, setLocationFilter] = useState<string>('all')
+  
+  // Nuevos filtros
+  const [plantFilter, setPlantFilter] = useState<string>('all')
+  const [areaFilter,  setAreaFilter]  = useState<string>('all')
+
+  const plants = db.assets.filter((a) => a.category === 'plant')
+  // Mostrar áreas que pertenecen a la planta seleccionada (o todas si no hay filtro de planta)
+  const areas = db.assets.filter((a) => 
+    a.category === 'area' && (plantFilter === 'all' || a.parentId === plantFilter)
+  )
+
+  // Al cambiar planta, resetear área si no pertenece a la nueva planta
+  const handlePlantChange = (newPlant: string) => {
+    setPlantFilter(newPlant)
+    const areaExistsInPlant = db.assets.some(a => a.category === 'area' && a.parentId === newPlant && a.id === areaFilter)
+    if (newPlant !== 'all' && !areaExistsInPlant && areaFilter !== 'all') {
+      setAreaFilter('all')
+    }
+  }
+
+  // Función para evaluar si un equipo cumple el filtro de planta y área
+  const assetMatchesFilters = (assetId: string) => {
+    if (plantFilter === 'all' && areaFilter === 'all') return true
+    
+    let currentAsset = db.assets.find(a => a.id === assetId)
+    if (!currentAsset) return false
+
+    // Checks directos
+    if (areaFilter !== 'all') {
+      if (currentAsset.category === 'area' && currentAsset.id !== areaFilter) return false
+      if (currentAsset.parentId !== areaFilter && currentAsset.id !== areaFilter) {
+         // Verificar sub-nivel si aplica
+         const parent = db.assets.find(a => a.id === currentAsset?.parentId)
+         if (!parent || (parent.id !== areaFilter && parent.parentId !== areaFilter)) return false
+      }
+    }
+
+    if (plantFilter !== 'all') {
+      if (currentAsset.category === 'plant' && currentAsset.id !== plantFilter) return false
+      // Subir en el árbol para ver si la raíz es la planta
+      while (currentAsset && currentAsset.category !== 'plant' && currentAsset.parentId) {
+        currentAsset = db.assets.find(a => a.id === currentAsset!.parentId)
+      }
+      if (!currentAsset || currentAsset.id !== plantFilter) return false
+    }
+
+    return true
+  }
 
   // Calcular días del período
   const today = new Date(); today.setHours(0, 0, 0, 0)
@@ -85,19 +132,16 @@ export function Schedule() {
     if (!ap.active) return false
     const asset = db.assets.find((a) => a.id === ap.assetId)
     if (!asset || asset.status !== 'OPERATIONAL') return false
-    if (locationFilter === 'all') return true
-    return asset.locationId === locationFilter
+    return assetMatchesFilters(asset.id)
   })
 
-  // 2. OTs en el período general filtradas por ubicación
+  // 2. OTs en el período general filtradas por planta/área
   const periodWOs = db.workOrders
     .filter((wo) => {
       const isPeriod = wo.dueDate && isoDate(new Date(wo.dueDate)) >= startStr && isoDate(new Date(wo.dueDate)) <= endStr
       if (!isPeriod) return false
-      
-      if (locationFilter === 'all') return true
-      const asset = db.assets.find(a => a.id === wo.assetId)
-      return asset?.locationId === locationFilter
+      if (!wo.assetId) return (plantFilter === 'all' && areaFilter === 'all')
+      return assetMatchesFilters(wo.assetId)
     })
     .sort((a, b) => isoDate(new Date(a.dueDate!)).localeCompare(isoDate(new Date(b.dueDate!))))
 
@@ -151,7 +195,7 @@ export function Schedule() {
         return wosForDay.map((wo) => {
            let sts = wo.status
            let cls = getEventClass(wo.dueDate!, wo.status, tolerance)
-           if (cls === 'ev-plan' && sts !== 'COMPLETED') cls = 'bg-blue-100 text-blue-800 border-blue-300 border font-semibold' 
+           if (cls === 'ev-plan' && sts !== 'COMPLETED') cls = 'bg-red-100 text-red-800 border-red-300 border font-semibold' 
            return { cls, label: sts === 'COMPLETED' ? 'Hecho' : 'OT', woId: wo.id }
         })
       }
@@ -174,7 +218,7 @@ export function Schedule() {
       return wos.map((wo) => {
          let sts = wo.status
          let cls = getEventClass(wo.dueDate!, wo.status)
-         if (cls === 'ev-plan' && sts !== 'COMPLETED') cls = 'bg-blue-100 text-blue-800 border-blue-300 border font-semibold' 
+         if (cls === 'ev-plan' && sts !== 'COMPLETED') cls = 'bg-red-100 text-red-800 border-red-300 border font-semibold' 
          return { cls, label: sts === 'COMPLETED' ? 'Hecho' : 'OT', woId: wo.id }
       })
     }
@@ -212,15 +256,24 @@ export function Schedule() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <h1 className="font-display font-bold text-xl text-tx">Programación de Mantenimiento</h1>
         <div className="flex items-center gap-2 flex-wrap">
-          {/* Filtro de ubicación */}
           <select 
-            value={locationFilter} 
-            onChange={(e) => setLocationFilter(e.target.value)}
+            value={plantFilter} 
+            onChange={(e) => handlePlantChange(e.target.value)}
             className="border border-gray-300 rounded-lg px-3 py-1.5 text-xs font-semibold text-tx-2 bg-white"
           >
-            <option value="all">Todas las ubicaciones</option>
-            {db.locations.map(l => (
-              <option key={l.id} value={l.id}>{l.name}</option>
+            <option value="all">Todas las Plantas</option>
+            {plants.map(p => (
+              <option key={p.id} value={p.id}>{p.name}</option>
+            ))}
+          </select>
+          <select 
+            value={areaFilter} 
+            onChange={(e) => setAreaFilter(e.target.value)}
+            className="border border-gray-300 rounded-lg px-3 py-1.5 text-xs font-semibold text-tx-2 bg-white"
+          >
+            <option value="all">Todas las Áreas</option>
+            {areas.map(a => (
+              <option key={a.id} value={a.id}>{a.name}</option>
             ))}
           </select>
           {/* Toggle semana/mes */}

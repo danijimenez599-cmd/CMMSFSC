@@ -25,7 +25,7 @@ interface AppState {
   editingWOId:     string | null | false
   woEditorInitial: Partial<WorkOrder> | null
   expandedAssets:  string[]
-  woFilter:        { status: string; type: string; priority: string }
+  woFilter:        { status: string; type: string; priority: string; plantId: string; areaId: string }
   isMobileMenuOpen: boolean
 
   navigate:        (view: AppView) => void
@@ -88,7 +88,7 @@ export const useStore = create<AppState>()((set, get) => ({
       editingWOId:     false,
       woEditorInitial: null,
       expandedAssets:  ['asset-1', 'asset-2', 'asset-11', 'asset-16'],
-      woFilter:        { status: 'all', type: 'all', priority: 'all' },
+      woFilter:        { status: 'all', type: 'all', priority: 'all', plantId: 'all', areaId: 'all' },
       isMobileMenuOpen: false,
 
       navigate:        (view) => set({ view, isMobileMenuOpen: false }),

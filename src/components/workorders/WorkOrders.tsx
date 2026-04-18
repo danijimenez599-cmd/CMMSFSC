@@ -8,31 +8,8 @@ import {
   Textarea, NoSelection, EmptyState,
 } from '@/components/ui'
 import { format, isPast } from 'date-fns'
-
-// ── helpers ───────────────────────────────────────────────────────
-const STATUS_LABEL: Record<string, string> = {
-  OPEN:'Abierta', ASSIGNED:'Asignada', IN_PROGRESS:'En Progreso',
-  COMPLETED:'Completada', CANCELLED:'Cancelada',
-}
-const STATUS_BADGE: Record<string, 'open'|'scheduled'|'ok'|'paused'> = {
-  OPEN:'open', ASSIGNED:'scheduled', IN_PROGRESS:'open',
-  COMPLETED:'ok', CANCELLED:'paused',
-}
-const PRIORITY_LABEL: Record<string, string> = {
-  URGENT:'Urgente', HIGH:'Alta', NORMAL:'Normal', LOW:'Baja',
-}
-const PRIORITY_BADGE: Record<string, 'err'|'warn'|'ok'|'neutral'> = {
-  URGENT:'err', HIGH:'err', NORMAL:'warn', LOW:'ok',
-}
-const TYPE_ICON: Record<string, string> = { PREVENTIVE:'🛡️', CORRECTIVE:'🔧' }
-
-const ACTIONS: Record<string, string[]> = {
-  OPEN:        ['asignar','cancelar'],
-  ASSIGNED:    ['iniciar','reasignar','cancelar'],
-  IN_PROGRESS: ['completar','cancelar'],
-  COMPLETED:   ['reabrir'],
-  CANCELLED:   ['reabrir'],
-}
+import { KanbanBoard } from './KanbanBoard'
+import { STATUS_LABEL, STATUS_BADGE, PRIORITY_LABEL, PRIORITY_BADGE, TYPE_ICON, ACTIONS } from './constants'
 
 // ── WOForm ────────────────────────────────────────────────────────
 export function WOForm({ woId, onClose }: { woId: string | null; onClose: () => void }) {
@@ -140,7 +117,7 @@ export function WOForm({ woId, onClose }: { woId: string | null; onClose: () => 
         <FormField label="Fecha límite">
           <Input type="date" value={form.dueDate} onChange={(e) => set('dueDate', e.target.value)} />
         </FormField>
-        <div className="col-span-2">
+        <div className="sm:col-span-2">
           <FormField label="Descripción">
             <Textarea rows={3} value={form.description} onChange={(e) => set('description', e.target.value)}
               placeholder="Detalle de la orden..." />
@@ -304,32 +281,34 @@ function WOCard({ wo, isSelected, onClick }: {
     <div
       onClick={onClick}
       className={clsx(
-        'px-3.5 py-3 border-b border-gray-100 cursor-pointer transition-colors border-l-[3px]',
+        'px-3.5 py-3 border-b border-gray-100 cursor-pointer transition-colors border-l-[3px] min-w-0 flex flex-col',
         isSelected
           ? 'bg-brand-pale border-l-brand'
           : 'border-l-transparent hover:bg-bg'
       )}
     >
-      <div className="flex items-start justify-between gap-2 mb-1.5">
+      <div className="flex flex-col gap-1.5 mb-2 w-full min-w-0">
         <div className="flex items-center gap-1.5 flex-wrap">
           <span className="text-xs">{TYPE_ICON[wo.type]}</span>
           <Badge variant={STATUS_BADGE[wo.status] ?? 'neutral'}>{STATUS_LABEL[wo.status]}</Badge>
           <Badge variant={PRIORITY_BADGE[wo.priority] ?? 'neutral'}>{PRIORITY_LABEL[wo.priority]}</Badge>
           {overdue && <Badge variant="err">Vencida</Badge>}
         </div>
-        <span className="text-[11px] text-tx-3 flex-shrink-0">
-          {format(new Date(wo.createdAt), 'd MMM')}
-        </span>
+        <div className="flex flex-col w-full min-w-0 mt-0.5">
+          <span className="text-sm font-semibold text-tx leading-snug break-words whitespace-normal text-wrap" style={{wordBreak: 'break-word'}} title={wo.title}>{wo.title}</span>
+        </div>
       </div>
-      <div className="text-sm font-semibold text-tx leading-snug mb-1">{wo.title}</div>
-      <div className="text-[11px] text-tx-3 mb-2">{asset?.name ?? 'Sin activo'}</div>
-      <div className="flex items-center justify-between text-[11px] text-tx-3 border-t border-gray-100 pt-1.5">
+      <div className="text-[11px] text-tx-3 mb-2 font-medium">{asset?.name ?? 'Sin activo'}</div>
+      <div className="flex items-center justify-between text-[11px] text-tx-3 border-t border-gray-100 pt-2">
         <span>{assignee ? `👤 ${assignee.name}` : 'Sin asignar'}</span>
-        {wo.dueDate && (
-          <span className={overdue ? 'text-red-600 font-semibold' : ''}>
-            📅 {format(new Date(wo.dueDate), 'd MMM yyyy')}
-          </span>
-        )}
+        <div className="flex gap-2">
+          <span className="flex-shrink-0">{format(new Date(wo.createdAt), 'd MMM')}</span>
+          {wo.dueDate && (
+            <span className={clsx(overdue ? 'text-red-600 font-semibold' : '', "border-l border-gray-200 pl-2")}>
+              📅 {format(new Date(wo.dueDate), 'd MMM yyyy')}
+            </span>
+          )}
+        </div>
       </div>
     </div>
   )
@@ -866,6 +845,7 @@ export function WorkOrders() {
   const perms = usePermissions()
   const role  = useRole()
   const [displayCount, setDisplayCount] = useState(15)
+  const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list') // default lists but they can switch
 
   // Técnicos en móvil → vista especial
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024
@@ -875,6 +855,21 @@ export function WorkOrders() {
   }
 
   const currentUser = useStore((s) => s.currentUser)
+  const plants = db.assets.filter(a => a.category === 'plant')
+  const areas = db.assets.filter(a => a.category === 'area' && (woFilter.plantId === 'all' ? true : a.parentId === woFilter.plantId))
+
+  // Función recursiva para obtener root (planta) y padre (área)
+  const getAssetHierarchy = (assetId: string | null) => {
+    let curr = assetId ? db.assets.find(a => a.id === assetId) : null
+    let plantId = 'all'
+    let areaId = 'all'
+    while (curr) {
+      if (curr.category === 'plant') plantId = curr.id
+      if (curr.category === 'area') areaId = curr.id
+      curr = db.assets.find(a => a.id === curr?.parentId)
+    }
+    return { plantId, areaId }
+  }
 
   // Filtrar: técnicos solo ven sus OTs (en desktop también)
   const baseWOs = role === 'TECHNICIAN'
@@ -886,6 +881,11 @@ export function WorkOrders() {
       if (woFilter.status   !== 'all' && wo.status   !== woFilter.status)   return false
       if (woFilter.type     !== 'all' && wo.type     !== woFilter.type)     return false
       if (woFilter.priority !== 'all' && wo.priority !== woFilter.priority) return false
+      
+      const { plantId, areaId } = getAssetHierarchy(wo.assetId)
+      if (woFilter.plantId !== 'all' && plantId !== woFilter.plantId) return false
+      if (woFilter.areaId !== 'all' && areaId !== woFilter.areaId) return false
+      
       return true
     })
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
@@ -901,10 +901,7 @@ export function WorkOrders() {
   }
 
   return (
-    <div
-      className="flex flex-col border border-gray-100 rounded-cmms overflow-hidden shadow-card bg-white"
-      style={{ height: 'calc(100vh - 58px - 44px)' }}
-    >
+    <div className="flex flex-col flex-1 border border-gray-100 rounded-cmms overflow-hidden shadow-card bg-white min-h-[500px]">
       {/* Filter Bar */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-bg flex-shrink-0 hide-scrollbar overflow-x-auto">
         <div className="flex items-center gap-3">
@@ -917,18 +914,46 @@ export function WorkOrders() {
             ].map(({ key, opts }) => (
               <Select
                 key={key}
-                className="text-xs py-1.5 w-auto pr-8"
+                className="text-xs py-1.5 w-auto pr-8 bg-white border-gray-200"
                 value={(woFilter as Record<string, string>)[key]}
                 onChange={(e) => setWOFilter({ [key]: e.target.value })}
               >
                 {opts.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
               </Select>
             ))}
+            
+            <Select
+              className="text-xs py-1.5 w-auto pr-8 bg-white border-gray-200"
+              value={woFilter.plantId || 'all'}
+              onChange={(e) => setWOFilter({ plantId: e.target.value, areaId: 'all' })}
+            >
+              <option value="all">Toda Planta</option>
+              {plants.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+            </Select>
+
+            <Select
+              className="text-xs py-1.5 w-auto pr-8 bg-white border-gray-200"
+              value={woFilter.areaId || 'all'}
+              onChange={(e) => setWOFilter({ areaId: e.target.value })}
+            >
+              <option value="all">Toda Área</option>
+              {areas.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+            </Select>
           </div>
         </div>
 
         <div className="flex items-center gap-4 pl-4 shrink-0">
-          <div className="hidden lg:flex items-center gap-4 text-xs font-medium text-tx-3 border-r border-gray-200 pr-4">
+          <div className="hidden lg:flex items-center border border-gray-200 bg-white rounded-lg overflow-hidden">
+            <button 
+              onClick={() => setViewMode('list')} 
+              className={clsx("px-3 py-1.5 text-xs font-bold transition-colors", viewMode === 'list' ? 'bg-brand text-white' : 'text-tx-2 hover:bg-gray-50')}
+            >📋 Lista</button>
+            <button 
+              onClick={() => setViewMode('kanban')} 
+              className={clsx("px-3 py-1.5 text-xs font-bold transition-colors", viewMode === 'kanban' ? 'bg-brand text-white' : 'text-tx-2 hover:bg-gray-50')}
+            >🗂️ Kanban</button>
+          </div>
+          <div className="hidden xl:flex items-center gap-4 text-xs font-medium text-tx-3 border-r border-gray-200 pr-4">
             <span>Tot: <strong className="text-tx">{stats.total}</strong></span>
             <span>Ab: <strong className="text-green-600">{stats.open}</strong></span>
             <span>Prog: <strong className="text-amber-600">{stats.inProgress}</strong></span>
@@ -941,58 +966,74 @@ export function WorkOrders() {
       </div>
 
       <div className="flex flex-1 overflow-hidden">
-        {/* Lista */}
-        <div className={clsx(
-          'flex-shrink-0 border-r border-gray-100 overflow-y-auto flex-col pb-4 bg-gray-50/50 transition-all duration-300',
-          selectedWOId ? 'hidden lg:flex w-80' : 'flex flex-1 lg:flex-none lg:w-80'
-        )}>
-          {filtered.length === 0 ? (
-            <EmptyState
-              title="Sin órdenes"
-              description="No hay órdenes que coincidan con los filtros."
-              action={perms.canCreateWO ? <Button size="sm" onClick={() => openWOEditor(null)}>+ Crear OT</Button> : undefined}
-            />
-          ) : (
-            <>
-              {filtered.slice(0, displayCount).map((wo) => (
-                <WOCard
-                  key={wo.id}
-                  wo={wo}
-                  isSelected={selectedWOId === wo.id}
-                  onClick={() => setSelectedWO(wo.id)}
-                />
-              ))}
-              {displayCount < filtered.length && (
-                <div className="p-3">
-                  <Button
-                    variant="secondary"
-                    className="w-full text-xs"
-                    onClick={() => setDisplayCount((c) => c + 15)}
-                  >
-                    Cargar más... ({filtered.length - displayCount} restantes)
-                  </Button>
-                </div>
-              )}
-            </>
-          )}
-        </div>
+        {viewMode === 'kanban' ? (
+           <div className="flex-1 w-full bg-gray-50/50">
+             <KanbanBoard workOrders={filtered} onSelect={setSelectedWO} />
+           </div>
+        ) : (
+          <div className={clsx(
+            'flex-shrink-0 border-r border-gray-100 overflow-y-auto flex-col pb-4 bg-gray-50/50 transition-all duration-300',
+            selectedWOId ? 'hidden lg:flex w-80' : 'flex flex-1 lg:flex-none lg:w-80'
+          )}>
+            {filtered.length === 0 ? (
+              <EmptyState
+                title="Sin órdenes"
+                description="No hay órdenes que coincidan con los filtros."
+                action={perms.canCreateWO ? <Button size="sm" onClick={() => openWOEditor(null)}>+ Crear OT</Button> : undefined}
+              />
+            ) : (
+              <>
+                {filtered.slice(0, displayCount).map((wo) => (
+                  <WOCard
+                    key={wo.id}
+                    wo={wo}
+                    isSelected={selectedWOId === wo.id}
+                    onClick={() => setSelectedWO(wo.id)}
+                  />
+                ))}
+                {displayCount < filtered.length && (
+                  <div className="p-3">
+                    <Button
+                      variant="secondary"
+                      className="w-full text-xs"
+                      onClick={() => setDisplayCount((c) => c + 15)}
+                    >
+                      Cargar más... ({filtered.length - displayCount} restantes)
+                    </Button>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        )}
 
         {/* Detalle */}
-        <div className={clsx(
-          'flex-1 overflow-hidden bg-white',
-          !selectedWOId ? 'hidden lg:block' : 'block w-full'
-        )}>
-          {selectedWOId ? (
-            <WODetail woId={selectedWOId} onEdit={() => openWOEditor(selectedWOId)} />
-          ) : (
-            <NoSelection
-              icon={<svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="9" y1="13" x2="15" y2="13" /><line x1="9" y1="17" x2="15" y2="17" /></svg>}
-              title="Selecciona una orden"
-              description="Haz clic en cualquier orden para ver sus detalles."
-            />
-          )}
-        </div>
+        {(selectedWOId && viewMode === 'kanban') && (
+           <div className="hidden xl:block w-[400px] border-l border-gray-200 overflow-hidden bg-white shadow-[-4px_0_15px_-3px_rgba(0,0,0,0.05)] relative z-10 transition-all">
+             <WODetail woId={selectedWOId} onEdit={() => openWOEditor(selectedWOId)} />
+           </div>
+        )}
+
+        {(!selectedWOId && viewMode === 'kanban') && null}
+
+        {viewMode === 'list' && (
+          <div className={clsx(
+            'flex-1 overflow-hidden bg-white',
+            !selectedWOId ? 'hidden lg:block' : 'block w-full'
+          )}>
+            {selectedWOId ? (
+              <WODetail woId={selectedWOId} onEdit={() => openWOEditor(selectedWOId)} />
+            ) : (
+              <NoSelection
+                icon={<svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="9" y1="13" x2="15" y2="13" /><line x1="9" y1="17" x2="15" y2="17" /></svg>}
+                title="Selecciona una orden"
+                description="Haz clic en cualquier orden para ver sus detalles."
+              />
+            )}
+          </div>
+        )}
       </div>
     </div>
   )
 }
+

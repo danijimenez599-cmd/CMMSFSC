@@ -55,7 +55,7 @@ function PlanForm({ planId, onClose }: { planId: string | null; onClose: () => v
         <Input value={form.name} onChange={(e) => set('name', e.target.value)} placeholder="Ej. Lubricación mensual compresor" />
       </FormField>
 
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <FormField label="Frecuencia (días)" hint="30 = mensual · 90 = trimestral">
           <Input type="number" min={1} value={form.frequencyDays}
             onChange={(e) => set('frequencyDays', parseInt(e.target.value) || 30)} />

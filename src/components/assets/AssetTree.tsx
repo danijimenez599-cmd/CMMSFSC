@@ -405,7 +405,7 @@ function AssetForm({ assetId, onClose }: { assetId: string | null; onClose: () =
           <Button onClick={handleSave} className="ml-auto">Guardar</Button>
         </div>
       }>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <FormField label="Nombre *"><Input value={form.name} onChange={(e) => set('name', e.target.value)} placeholder="Nombre del activo" /></FormField>
         <FormField label="Equipo Padre / Superior">
           <Select value={form.parentId} onChange={(e) => set('parentId', e.target.value)}>
@@ -453,8 +453,7 @@ export function AssetTree() {
   const roots = db.assets.filter((a) => a.parentId === null)
 
   return (
-    <div className="flex border border-gray-100 rounded-cmms overflow-hidden shadow-card bg-white"
-      style={{ height: 'calc(100vh - 58px - 44px)' }}>
+    <div className="flex flex-1 border border-gray-100 rounded-cmms overflow-hidden shadow-card bg-white min-h-[500px]">
 
       {/* Sidebar árbol */}
       <div className={clsx(

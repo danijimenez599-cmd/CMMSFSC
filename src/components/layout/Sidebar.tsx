@@ -67,48 +67,67 @@ export function Sidebar() {
         onClick={() => setMobileMenuOpen(false)}
       />
       <aside className={clsx(
-        "w-64 lg:w-56 bg-brand fixed top-0 left-0 bottom-0 z-30 flex flex-col overflow-y-auto overflow-x-hidden transition-transform duration-300 lg:translate-x-0",
-        isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+        "bg-surface dark:bg-bg-2 border-r border-gray-200/50 dark:border-white/10 fixed top-0 left-0 bottom-0 z-30 flex flex-col overflow-y-auto overflow-x-hidden transition-[width,transform] duration-300",
+        // Mobile
+        "w-64",
+        isMobileMenuOpen ? "translate-x-0" : "-translate-x-full",
+        // Desktop
+        "lg:translate-x-0 lg:w-[72px] xl:w-56 hover:lg:w-56 group"
       )}>
         {/* Brand */}
-        <div className="flex items-center justify-between px-4 py-4 border-b border-white/10 flex-shrink-0">
-          <div className="flex items-baseline gap-1">
-            <span className="font-display font-bold text-xl text-white tracking-wide">APEX</span>
-            <span className="font-display font-semibold text-[10px] text-white/65 tracking-widest">CMMS</span>
+        <div className="flex items-center justify-between px-4 py-[18px] border-b border-gray-100 dark:border-white/5 flex-shrink-0 h-[64px]">
+          <div className="flex items-baseline gap-1 overflow-hidden whitespace-nowrap">
+            <span className="font-display font-bold text-xl text-brand tracking-wide transition-all duration-300">
+               <span className="lg:hidden xl:inline group-hover:lg:inline">APEX</span>
+               <span className="hidden lg:inline xl:hidden group-hover:lg:hidden text-2xl ml-1">A</span>
+            </span>
+            <span className={clsx(
+              "font-display font-semibold text-[10px] text-tx-3 tracking-widest transition-all duration-300",
+              "lg:hidden xl:inline group-hover:lg:inline"
+            )}>CMMS</span>
           </div>
-          <span className="text-[10px] text-white/35">v2.3</span>
         </div>
 
         {/* Nav — filtrado por rol */}
-        <nav className="flex-1 px-2 py-2.5 flex flex-col gap-px">
+        <nav className="flex-1 px-3 py-4 flex flex-col gap-1.5">
           {nav.map((item) => (
             <div key={item.view}>
               {item.group && nav.find((n) => n.group === item.group)?.view === item.view && (
-                <div className="text-[9px] font-bold tracking-widest uppercase text-white/35 px-2.5 pt-3 pb-1">
+                <div className={clsx(
+                  "text-[9px] font-bold tracking-widest uppercase text-tx-3 px-2 pt-4 pb-1 transition-all duration-300 whitespace-nowrap overflow-hidden",
+                  "lg:h-0 lg:p-0 lg:opacity-0 xl:h-auto xl:pt-4 xl:pb-1 xl:opacity-100 group-hover:lg:h-auto group-hover:lg:pt-4 group-hover:lg:pb-1 group-hover:lg:opacity-100"
+                )}>
                   {item.group}
                 </div>
               )}
               <button
                 onClick={() => navTo(item.view)}
                 className={clsx(
-                  'flex items-center gap-2 px-3 py-2 rounded-lg w-full text-left text-sm font-medium transition-all relative',
+                  'flex items-center gap-3 px-2 xl:px-3 rounded-xl w-full text-left text-sm font-medium transition-all relative whitespace-nowrap overflow-hidden h-10',
                   view === item.view
-                    ? 'bg-white/16 text-white'
-                    : 'text-white hover:bg-white/10 hover:text-white'
+                    ? 'bg-brand/10 text-brand'
+                    : 'text-tx-2 hover:bg-gray-100 dark:hover:bg-white/5',
+                  "lg:justify-center xl:justify-start group-hover:lg:justify-start"
                 )}
               >
-              {view === item.view && (
-                <span className="absolute left-0 top-1.5 bottom-1.5 w-0.5 bg-white rounded-r" />
-              )}
-              {item.icon}
-              <span className="flex-1 truncate">{item.label}</span>
+              <div className="flex-shrink-0 flex items-center justify-center w-6 h-6">{item.icon}</div>
+              <span className={clsx(
+                "flex-1 transition-all duration-300",
+                "lg:hidden xl:block group-hover:lg:block"
+              )}>{item.label}</span>
               {item.view === 'workorders' && activeWOs > 0 && (
-                <span className="bg-white text-brand text-[10px] font-bold px-1.5 py-px rounded-full">
+                <span className={clsx(
+                  "bg-brand text-white text-[10px] font-bold px-1.5 py-px rounded-full flex-shrink-0",
+                  "lg:hidden xl:inline-block group-hover:lg:inline-block absolute right-2"
+                )}>
                   {activeWOs}
                 </span>
               )}
               {item.view === 'inventory' && lowStock > 0 && (
-                <span className="bg-amber-100 text-amber-700 text-[10px] font-bold px-1.5 py-px rounded-full">
+                <span className={clsx(
+                  "bg-ocre/20 text-ocre text-[10px] font-bold px-1.5 py-px rounded-full flex-shrink-0",
+                  "lg:hidden xl:inline-block group-hover:lg:inline-block absolute right-2"
+                )}>
                   {lowStock}
                 </span>
               )}
@@ -118,24 +137,33 @@ export function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="flex flex-col gap-2 px-3.5 py-3 border-t border-white/10 flex-shrink-0">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center font-bold text-sm text-white flex-shrink-0">
+      <div className="flex flex-col gap-3 px-4 py-4 border-t border-gray-100 dark:border-white/5 flex-shrink-0">
+        <div className="flex items-center gap-3 overflow-hidden">
+          <div className="w-9 h-9 rounded-full bg-brand/10 dark:bg-brand/20 flex items-center justify-center font-bold text-sm text-brand flex-shrink-0">
             {currentUser?.name.charAt(0) ?? 'A'}
           </div>
-          <div className="flex-1 min-w-0">
-            <div className="text-xs font-semibold text-white truncate">{currentUser?.name}</div>
-            <div className="text-[10px] text-white/50">APEX Consulting SV</div>
+          <div className={clsx(
+            "flex-1 min-w-0 transition-all duration-300",
+            "lg:hidden xl:block group-hover:lg:block"
+          )}>
+            <div className="text-sm font-semibold text-tx truncate leading-tight">{currentUser?.name}</div>
+            <div className="text-[11px] text-tx-3 truncate mt-0.5">APEX Consulting</div>
           </div>
         </div>
         {perms.canResetDemo && (
           <button
             onClick={() => { if (confirm('¿Estás seguro? Esto borrará TODA la base de datos actual y restaurará la información de demostración.')) seedSupabase() }}
-            className="bg-white/10 hover:bg-white/20 text-white rounded text-[10px] py-1.5 font-bold tracking-wide transition-colors uppercase w-full mt-1 flex items-center justify-center gap-1"
+            className={clsx(
+              "bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-500/10 dark:hover:bg-red-500/20 dark:text-red-400 rounded-lg text-xs py-2 font-bold tracking-wide transition-colors uppercase flex items-center justify-center gap-2 overflow-hidden",
+              "lg:w-9 lg:h-9 lg:p-0 xl:w-full xl:h-auto xl:px-3 hover:lg:w-full hover:lg:h-auto hover:lg:p-2"
+            )}
             title="Resetear base de datos y cargar demo"
           >
-            <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-            Reset Demo
+            <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+            <span className={clsx(
+              "whitespace-nowrap transition-opacity duration-300",
+              "lg:opacity-0 lg:w-0 xl:opacity-100 xl:w-auto group-hover:lg:opacity-100 group-hover:lg:w-auto"
+            )}>Reset Demo</span>
           </button>
         )}
       </div>

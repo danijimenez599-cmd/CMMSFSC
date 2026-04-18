@@ -1,61 +1,73 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Fuentes */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+@layer base {
+  :root {
+    --brand: #991b1b;
+    --brand-h: #7f1d1d;
+    --ocre: #f59e0b;
+    
+    /* Light Theme */
+    --surface: #ffffff;
+    --bg-default: #f9fafb;
+    --bg-2: #f3f4f6;
+    --bg-3: #e5e7eb;
+    --tx-default: #111827;
+    --tx-2: #374151;
+    --tx-3: #6b7280;
+  }
 
-/* Variables compatibles con clases Tailwind custom */
-:root {
-  --brand:     #8b1a00;
-  --brand-h:   #a82000;
-  --ocre:      #c8693a;
-  --bg:        #f7f3f0;
-  --bg-2:      #f0e9e2;
-  --bg-3:      #e6ddd5;
-  --tx:        #1a0f0a;
-  --tx-2:      #4a2e24;
-  --tx-3:      #8a6456;
+  .dark {
+    --brand: #ef4444;
+    --brand-h: #f87171;
+    --ocre: #fbbf24;
+    
+    /* Dark Theme */
+    --surface: #18181b; /* zinc-900 */
+    --bg-default: #09090b; /* zinc-950 */
+    --bg-2: #27272a; /* zinc-800 */
+    --bg-3: #3f3f46; /* zinc-700 */
+    --tx-default: #fafafa; /* zinc-50 */
+    --tx-2: #e4e4e7; /* zinc-200 */
+    --tx-3: #a1a1aa; /* zinc-400 */
+  }
+
+  body {
+    background-color: var(--bg-default);
+    color: var(--tx-default);
+  }
 }
 
 /* Scrollbar personalizado */
 ::-webkit-scrollbar       { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #e6ddd5; border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: #c8693a; }
+::-webkit-scrollbar-thumb { background: var(--bg-3); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--brand); }
 
-/* Animación modal */
-@keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.96) translateY(8px); }
-  to   { opacity: 1; transform: none; }
-}
-
-/* Clases custom de colores de la paleta APEX que Tailwind no puede inferir */
-.text-tx     { color: var(--tx); }
+/* Clases custom de colores de la paleta original mapeadas a Tailwind (para compatibilidad de código viejo) */
+.text-tx     { color: var(--tx-default); }
 .text-tx-2   { color: var(--tx-2); }
 .text-tx-3   { color: var(--tx-3); }
-.bg-bg       { background-color: var(--bg); }
+.bg-bg       { background-color: var(--bg-default); }
 .bg-bg-2     { background-color: var(--bg-2); }
 .bg-bg-3     { background-color: var(--bg-3); }
 .text-brand  { color: var(--brand); }
 .bg-brand    { background-color: var(--brand); }
-.bg-brand-pale { background-color: rgba(139,26,0,0.07); }
+.bg-brand-pale { background-color: rgba(99, 102, 241, 0.1); }
 .border-brand  { border-color: var(--brand); }
 .hover\:bg-brand-hover:hover { background-color: var(--brand-h); }
 .hover\:border-brand:hover   { border-color: var(--brand); }
 .hover\:text-brand:hover     { color: var(--brand); }
-.hover\:bg-brand-pale:hover  { background-color: rgba(139,26,0,0.07); }
+.hover\:bg-brand-pale:hover  { background-color: rgba(99, 102, 241, 0.1); }
 .accent-brand { accent-color: var(--brand); }
-.ring-brand\/10 { --tw-ring-color: rgba(139,26,0,0.10); }
 .focus\:border-brand:focus { border-color: var(--brand); }
-.focus\:ring-2:focus { box-shadow: 0 0 0 3px rgba(139,26,0,0.10); }
+.focus\:ring-2:focus { box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2); }
 
-/* Rounded custom */
 .rounded-cmms { border-radius: 14px; }
-
-/* Shadow custom */
 .shadow-card  { box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05); }
 .shadow-card2 { box-shadow: 0 4px 24px rgba(0,0,0,0.11); }
-
-/* Font display */
 .font-display { font-family: 'Space Grotesk', sans-serif; }
+

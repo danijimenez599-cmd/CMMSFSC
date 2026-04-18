@@ -9,11 +9,11 @@ const badgeClasses: Record<BadgeVariant, string> = {
   ok:        'bg-green-100 text-green-700',
   warn:      'bg-amber-100 text-amber-700',
   err:       'bg-red-100 text-red-700',
-  info:      'bg-blue-100 text-blue-700',
+  info:      'bg-red-100 text-red-700',
   neutral:   'bg-bg-3 text-tx-2',
   open:      'bg-amber-100 text-amber-700',
   closed:    'bg-green-100 text-green-700',
-  scheduled: 'bg-blue-100 text-blue-700',
+  scheduled: 'bg-red-100 text-red-700',
   paused:    'bg-red-100 text-red-700',
 }
 

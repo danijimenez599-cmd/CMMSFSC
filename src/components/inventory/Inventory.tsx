@@ -57,8 +57,8 @@ function ItemForm({ itemId, onClose }: { itemId: string | null; onClose: () => v
         </div>
       }
     >
-      <div className="grid grid-cols-2 gap-3">
-        <div className="col-span-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="col-span-1 md:col-span-2">
           <FormField label="Nombre *">
             <Input value={form.name} onChange={(e) => set('name', e.target.value)} placeholder="Nombre del ítem" />
           </FormField>
@@ -92,7 +92,7 @@ function ItemForm({ itemId, onClose }: { itemId: string | null; onClose: () => v
         <FormField label="Proveedor">
           <Input value={form.supplier} onChange={(e) => set('supplier', e.target.value)} placeholder="Nombre del proveedor" />
         </FormField>
-        <div className="col-span-2">
+        <div className="col-span-1 md:col-span-2">
           <FormField label="Notas">
             <Textarea rows={2} value={form.notes} onChange={(e) => set('notes', e.target.value)} />
           </FormField>
