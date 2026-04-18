@@ -53,7 +53,7 @@ export function Dashboard() {
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard icon="🏭" value={totalAssets}  label="Activos" />
         <StatCard icon="🔧" value={openWO}       label="Órdenes Abiertas" />
         <StatCard icon="🛡️" value={activePlans}  label="Planes Activos" />
@@ -85,32 +85,34 @@ export function Dashboard() {
         {recentWOs.length === 0 ? (
           <p className="text-sm text-tx-3">No hay órdenes.</p>
         ) : (
-          <table className="w-full text-sm border-collapse">
-            <thead>
-              <tr className="border-b border-gray-100">
-                {['Orden','Activo','Estado','Fecha'].map((h) => (
-                  <th key={h} className="text-left py-2 px-3 text-[11px] font-bold text-tx-3 uppercase tracking-wide bg-bg">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {recentWOs.map((wo) => {
-                const asset = db.assets.find((a) => a.id === wo.assetId)
-                return (
-                  <tr key={wo.id} className="border-b border-gray-50 hover:bg-bg transition-colors">
-                    <td className="py-2.5 px-3 font-medium text-tx">{wo.title}</td>
-                    <td className="py-2.5 px-3 text-tx-2">{asset?.name ?? '—'}</td>
-                    <td className="py-2.5 px-3">
-                      <Badge variant={woBadge[wo.status] ?? 'neutral'}>{woLabel[wo.status] ?? wo.status}</Badge>
-                    </td>
-                    <td className="py-2.5 px-3 text-tx-3 text-xs">
-                      {format(new Date(wo.createdAt), 'd MMM')}
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm border-collapse min-w-[500px]">
+              <thead>
+                <tr className="border-b border-gray-100">
+                  {['Orden','Activo','Estado','Fecha'].map((h) => (
+                    <th key={h} className="text-left py-2 px-3 text-[11px] font-bold text-tx-3 uppercase tracking-wide bg-bg">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {recentWOs.map((wo) => {
+                  const asset = db.assets.find((a) => a.id === wo.assetId)
+                  return (
+                    <tr key={wo.id} className="border-b border-gray-50 hover:bg-bg transition-colors">
+                      <td className="py-2.5 px-3 font-medium text-tx">{wo.title}</td>
+                      <td className="py-2.5 px-3 text-tx-2">{asset?.name ?? '—'}</td>
+                      <td className="py-2.5 px-3">
+                        <Badge variant={woBadge[wo.status] ?? 'neutral'}>{woLabel[wo.status] ?? wo.status}</Badge>
+                      </td>
+                      <td className="py-2.5 px-3 text-tx-3 text-xs">
+                        {format(new Date(wo.createdAt), 'd MMM')}
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>

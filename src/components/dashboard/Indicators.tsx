@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useStore } from '@/store'
-import { differenceInHours, isAfter } from 'date-fns'
+import { differenceInHours, isAfter, format } from 'date-fns'
 import { Select, Input } from '@/components/ui'
 
 function MetricCard({ title, value, unit, description }: { title: string, value: string | number, unit?: string, description?: string }) {
@@ -112,8 +112,46 @@ export function Indicators() {
 
   // 5. Cumplimiento de PM (Preventive Maintenance Compliance)
   const pmWOs = relevantWorkOrders.filter(w => w.type === 'PREVENTIVE')
-  const pmCompleted = pmWOs.filter(w => w.status === 'COMPLETED').length
-  const pmCompliance = pmWOs.length > 0 ? Math.round((pmCompleted / pmWOs.length) * 100) : 100
+  let pmCompliantCount = 0
+
+  pmWOs.forEach(wo => {
+    if (wo.status === 'COMPLETED' && wo.completedAt && wo.dueDate) {
+      let tolerance = 3; 
+      if (wo.pmPlanId) {
+        const assetPlan = db.assetPlans.find(ap => ap.id === wo.pmPlanId)
+        if (assetPlan) {
+          const plan = db.pmPlans.find(p => p.id === assetPlan.pmPlanId)
+          if (plan && plan.toleranceDays !== undefined) tolerance = plan.toleranceDays
+        } else {
+           const directPlan = db.pmPlans.find(p => p.id === wo.pmPlanId)
+           if (directPlan && directPlan.toleranceDays !== undefined) tolerance = directPlan.toleranceDays
+        }
+      }
+      const diffDays = differenceInHours(new Date(wo.completedAt), new Date(wo.dueDate)) / 24
+      if (diffDays <= tolerance) {
+        pmCompliantCount++
+      }
+    }
+  })
+
+  // Planes que debieron generarse pero no se generaron (vencidos sin OT asociada)
+  let expectedButNotGenerated = 0
+  db.assetPlans.forEach(ap => {
+     if (ap.nextDueDate && isAfter(now, new Date(ap.nextDueDate))) {
+        // Mirar si le pertenece al filtro
+        if (selectedAssetId !== 'all' && !relevantAssetIds.has(ap.assetId)) return
+        // Si hay una fecha de startDateFilter, se considera si cayó dentro
+        if (startDateFilter && isAfter(startDateFilter, new Date(ap.nextDueDate))) return
+        
+        // Comprobar si NO se generó una OT para esta ocurrencia
+        const ds = format(new Date(ap.nextDueDate), 'yyyy-MM-dd')
+        const hasWO = db.workOrders.find(wo => wo.pmPlanId === ap.id && wo.dueDate && format(new Date(wo.dueDate), 'yyyy-MM-dd') === ds)
+        if (!hasWO) expectedButNotGenerated++
+     }
+  })
+
+  const totalExpectedPMs = pmWOs.length + expectedButNotGenerated
+  const pmCompliance = totalExpectedPMs > 0 ? Math.round((pmCompliantCount / totalExpectedPMs) * 100) : 100
 
   // Formateadores
   const formatNum = (n: number) => Number.isInteger(n) ? n.toString() : n.toFixed(1)
@@ -126,9 +164,9 @@ export function Indicators() {
           <p className="text-sm text-tx-3 mt-1">Métricas clave de rendimiento de mantenimiento</p>
         </div>
         
-        <div className="flex items-end gap-3 rounded-lg bg-white p-2 border border-gray-100 shadow-sm">
+        <div className="flex flex-wrap items-end gap-3 rounded-lg bg-white p-2 border border-gray-100 shadow-sm w-full md:w-auto">
           {/* Filtro por Tiempo */}
-          <div className="w-40 flex flex-col gap-1">
+          <div className="w-[45%] md:w-40 flex flex-col gap-1 flex-1">
             <label className="text-[10px] font-bold text-tx-3 uppercase tracking-wide px-1">Calculado Desde</label>
             <Input 
               type="date" 
@@ -138,7 +176,7 @@ export function Indicators() {
           </div>
           
           {/* Filtro por Activo */}
-          <div className="w-56 flex flex-col gap-1">
+          <div className="w-[45%] md:w-56 flex flex-col gap-1 flex-1">
              <label className="text-[10px] font-bold text-tx-3 uppercase tracking-wide px-1">Filtro de Equipo</label>
             <Select 
               value={selectedAssetId} 
@@ -153,7 +191,7 @@ export function Indicators() {
 
           <button 
             onClick={() => { setStartDate(''); setSelectedAssetId('all'); }}
-            className="h-9 px-3 text-xs font-semibold text-brand bg-brand/5 hover:bg-brand/10 transition-colors rounded-md"
+            className="h-9 px-3 text-xs font-semibold text-brand bg-brand/5 hover:bg-brand/10 transition-colors rounded-md w-full md:w-auto mt-2 md:mt-0"
           >
             Limpiar
           </button>
@@ -202,14 +240,15 @@ export function Indicators() {
       {/* Breakdown per asset */}
       <div className="bg-white border border-gray-100 rounded-cmms p-5 shadow-card mt-2">
         <h3 className="font-display font-bold text-sm text-tx mb-4">Análisis de Fallos por {selectedAssetId === 'all' ? 'Activo (Top 10)' : 'Equipo o Rama'}</h3>
-        <table className="w-full text-sm border-collapse">
-          <thead>
-            <tr className="border-b border-gray-100">
-              <th className="text-left py-2 px-3 text-[11px] font-bold text-tx-3 uppercase tracking-wide bg-bg">Activo</th>
-              <th className="text-right py-2 px-3 text-[11px] font-bold text-tx-3 uppercase tracking-wide bg-bg">Fallos</th>
-              <th className="text-right py-2 px-3 text-[11px] font-bold text-tx-3 uppercase tracking-wide bg-bg">Tiempo Caídos (Hrs)</th>
-            </tr>
-          </thead>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm border-collapse min-w-[500px]">
+            <thead>
+              <tr className="border-b border-gray-100">
+                <th className="text-left py-2 px-3 text-[11px] font-bold text-tx-3 uppercase tracking-wide bg-bg">Activo</th>
+                <th className="text-right py-2 px-3 text-[11px] font-bold text-tx-3 uppercase tracking-wide bg-bg">Fallos</th>
+                <th className="text-right py-2 px-3 text-[11px] font-bold text-tx-3 uppercase tracking-wide bg-bg">Tiempo Caídos (Hrs)</th>
+              </tr>
+            </thead>
           <tbody>
             {relevantAssets.map(asset => {
               const assetCorrectives = correctiveCompleted.filter(w => w.assetId === asset.id)
@@ -242,6 +281,7 @@ export function Indicators() {
             )}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   )

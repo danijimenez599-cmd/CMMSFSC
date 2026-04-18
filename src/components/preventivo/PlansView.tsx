@@ -14,6 +14,7 @@ function PlanForm({ planId, onClose }: { planId: string | null; onClose: () => v
   const [form, setForm] = useState({
     name: existing?.name ?? '',
     frequencyDays: existing?.frequencyDays ?? 30,
+    toleranceDays: existing?.toleranceDays ?? 3,
     defaultAssignId: existing?.defaultAssignId ?? '',
     notes: existing?.notes ?? '',
     active: existing?.active ?? true,
@@ -54,10 +55,14 @@ function PlanForm({ planId, onClose }: { planId: string | null; onClose: () => v
         <Input value={form.name} onChange={(e) => set('name', e.target.value)} placeholder="Ej. Lubricación mensual compresor" />
       </FormField>
 
-      <div className="grid grid-cols-2 gap-3">
-        <FormField label="Frecuencia (días)" hint="30 = mensual · 90 = trimestral · 365 = anual">
+      <div className="grid grid-cols-3 gap-3">
+        <FormField label="Frecuencia (días)" hint="30 = mensual · 90 = trimestral">
           <Input type="number" min={1} value={form.frequencyDays}
             onChange={(e) => set('frequencyDays', parseInt(e.target.value) || 30)} />
+        </FormField>
+        <FormField label="Tolerancia (días)" hint="Margen de cumplimiento (Ej: ±3 días)">
+          <Input type="number" min={0} value={form.toleranceDays}
+            onChange={(e) => set('toleranceDays', parseInt(e.target.value) || 0)} />
         </FormField>
         <FormField label="Técnico por defecto">
           <Select value={form.defaultAssignId} onChange={(e) => set('defaultAssignId', e.target.value)}>
@@ -124,7 +129,7 @@ function PlanCard({ plan, onEdit }: { plan: PmPlan; onEdit: () => void }) {
     <div className={`border border-gray-100 rounded-cmms overflow-hidden shadow-card hover:-translate-y-0.5 transition-transform flex flex-col bg-white ${!plan.active ? 'opacity-60' : ''}`}>
       <div className="flex items-start justify-between gap-3 p-4 bg-bg border-b border-gray-100">
         <div className="flex-1 min-w-0">
-          <div className="text-[11px] text-tx-3">⏰ Cada {plan.frequencyDays} días · {tasks.length} tarea{tasks.length !== 1 ? 's' : ''}</div>
+          <div className="text-[11px] text-tx-3">⏰ Cada {plan.frequencyDays} días (±{plan.toleranceDays} días) · {tasks.length} tarea{tasks.length !== 1 ? 's' : ''}</div>
           <div className="font-display font-bold text-sm text-tx mt-1 leading-snug">{plan.name}</div>
         </div>
         <Badge variant={plan.active ? 'ok' : 'neutral'}>{plan.active ? 'Activo' : 'Inactivo'}</Badge>
@@ -183,7 +188,7 @@ export function PlansView() {
           action={<Button onClick={() => setEditId(null)}>+ Crear primer plan</Button>}
         />
       ) : (
-        <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))' }}>
+        <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
           {db.pmPlans.map((plan) => (
             <PlanCard key={plan.id} plan={plan} onEdit={() => setEditId(plan.id)} />
           ))}

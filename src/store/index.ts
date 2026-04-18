@@ -4,7 +4,6 @@
 // ================================================================
 
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
 import type {
   AppDB, AppView, User, Asset, WorkOrder, PmPlan,
   PmTask, AssetPlan, InventoryItem, WoComment, PartUsage
@@ -27,6 +26,7 @@ interface AppState {
   woEditorInitial: Partial<WorkOrder> | null
   expandedAssets:  string[]
   woFilter:        { status: string; type: string; priority: string }
+  isMobileMenuOpen: boolean
 
   navigate:        (view: AppView) => void
   setSelectedAsset:(id: string | null) => void
@@ -36,9 +36,11 @@ interface AppState {
   toggleAssetNode: (id: string) => void
   setCurrentUser:  (user: User | null) => void
   setWOFilter:     (f: Partial<AppState['woFilter']>) => void
+  setMobileMenuOpen: (o: boolean) => void
 
   // Carga inicial desde Supabase
   loadFromSupabase: () => Promise<void>
+  autoGeneratePMs: () => Promise<void>
 
   // Assets
   saveAsset:   (data: Partial<Asset> & { id?: string }) => Promise<void>
@@ -69,24 +71,27 @@ interface AppState {
   deleteInventoryItem: (id: string) => Promise<void>
   adjustStock:         (id: string, newStock: number) => Promise<void>
 
-  resetDemo: () => void
+  seedSupabase: () => Promise<void>
 }
 
 // ── Store ─────────────────────────────────────────────────────────
-export const useStore = create<AppState>()(
-  persist(
-    (set, get) => ({
-      db:              JSON.parse(JSON.stringify(DB_DEFAULTS)),
+export const useStore = create<AppState>()((set, get) => ({
+      db: {
+         users: [], locations: [], assets: [], workOrders: [], woComments: [], woAttachments: [],
+         woTasks: [], pmPlans: [], pmTasks: [], assetPlans: [], meterReadings: [], inventoryItems: [],
+         partUsages: [], notifications: []
+      },
       view:            'dashboard',
-      currentUser:     DB_DEFAULTS.users[0] ?? null,
+      currentUser:     null,
       selectedAssetId: null,
       selectedWOId:    null,
       editingWOId:     false,
       woEditorInitial: null,
       expandedAssets:  ['asset-1', 'asset-2', 'asset-11', 'asset-16'],
       woFilter:        { status: 'all', type: 'all', priority: 'all' },
+      isMobileMenuOpen: false,
 
-      navigate:        (view) => set({ view }),
+      navigate:        (view) => set({ view, isMobileMenuOpen: false }),
       setSelectedAsset:(id)   => set({ selectedAssetId: id }),
       setSelectedWO:   (id)   => set({ selectedWOId: id }),
       openWOEditor:    (id, d)=> set({ editingWOId: id, woEditorInitial: d ?? null }),
@@ -98,6 +103,7 @@ export const useStore = create<AppState>()(
       })),
       setCurrentUser: (user) => set({ currentUser: user }),
       setWOFilter:    (f)    => set((s) => ({ woFilter: { ...s.woFilter, ...f } })),
+      setMobileMenuOpen: (o) => set({ isMobileMenuOpen: o }),
 
       // ── Carga inicial desde Supabase ─────────────────────────────
       loadFromSupabase: async () => {
@@ -106,17 +112,59 @@ export const useStore = create<AppState>()(
           set((s) => ({
             db: {
               ...s.db,
-              assets:         data.assets.length         > 0 ? data.assets         : s.db.assets,
-              workOrders:     data.workOrders.length     > 0 ? data.workOrders     : s.db.workOrders,
-              pmPlans:        data.pmPlans.length        > 0 ? data.pmPlans        : s.db.pmPlans,
-              assetPlans:     data.assetPlans.length     > 0 ? data.assetPlans     : s.db.assetPlans,
-              inventoryItems: data.inventoryItems.length > 0 ? data.inventoryItems : s.db.inventoryItems,
-              users:          data.users.length          > 0 ? data.users          : s.db.users,
+              assets:         data.assets,
+              workOrders:     data.workOrders,
+              pmPlans:        data.pmPlans,
+              assetPlans:     data.assetPlans,
+              inventoryItems: data.inventoryItems,
+              users:          data.users,
+              locations:      data.locations,
+              woTasks:        data.woTasks,
+              pmTasks:        data.pmTasks,
+              woComments:     data.woComments,
+              partUsages:     data.partUsages,
             },
+            currentUser: s.currentUser?.id ? s.currentUser : (data.users?.[0] ?? null)
           }))
         } catch (e) {
-          console.warn('Supabase no disponible, usando datos locales:', e)
+          console.warn('Error fetching Supabase, verificando si está vacía', e)
         }
+      },
+
+      autoGeneratePMs: async () => {
+        const s = get()
+        const HorizonDays = 7
+        const now = new Date()
+        const horizonDate = new Date()
+        horizonDate.setDate(now.getDate() + HorizonDays)
+
+        s.db.assetPlans.forEach(ap => {
+          if (!ap.active || !ap.nextDueDate) return
+          const due = new Date(ap.nextDueDate)
+          if (due <= horizonDate) {
+            // Revisar si ya hay una OT abierta (OPEN, ASSIGNED, IN_PROGRESS, o COMPLETED) que pertenezca a esta ocurrencia
+            // Podemos usar la regla de si hay una OT asociada a este plan que no esté CANCELLED
+            const isLatestWOPending = s.db.workOrders
+                 .filter(w => w.pmPlanId === ap.id)
+                 .sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0]
+            
+            // Si no hay OTs en absoluto, generamos
+            if (!isLatestWOPending) {
+               s.generateWO(ap.id)
+               return
+            }
+
+            // Si hay una OT, y esta no pertenece al mismo ciclo (ej completada hace mucho) -
+            // el store updateWOStatus adelanta la fecha del nextDueDate, pero nosotros vemos la ap.nextDueDate.
+            // Si la OT viva más reciente ya está completada pero we haven't reached the new plan, 
+            // the date would have advanced to the future. If it's still before the horizon, we should generate it.
+            // Note: If the nextDueDate is in the horizon, and there are NO OPEN/ASSIGNED/IN_PROGRESS WOs, we generate it.
+            const hasActiveOrRecentWO = s.db.workOrders.find(w => w.pmPlanId === ap.id && ['OPEN', 'ASSIGNED', 'IN_PROGRESS'].includes(w.status))
+            if (!hasActiveOrRecentWO) {
+              s.generateWO(ap.id)
+            }
+          }
+        })
       },
 
       // ── ASSETS ──────────────────────────────────────────────────
@@ -260,7 +308,22 @@ export const useStore = create<AppState>()(
       updateWOStatus: async (id, status, extra = {}) => {
         const now      = new Date().toISOString()
         const snapshot = get().db
+
+        // Calcular nextDueDate ANTES del set() para evitar problema de tipos
         let nextDueDateUpdate: { apId: string; date: string } | null = null
+        if (status === 'COMPLETED' || status === 'CANCELLED') {
+          const wo = snapshot.workOrders.find((w) => w.id === id)
+          if (wo?.pmPlanId) {
+            const ap   = snapshot.assetPlans.find((a) => a.id === wo.pmPlanId)
+            const plan = ap ? snapshot.pmPlans.find((p) => p.id === ap.pmPlanId) : null
+            if (ap && plan) {
+              const base = (status === 'CANCELLED' && ap.nextDueDate) ? new Date(ap.nextDueDate) : (wo.dueDate ? new Date(wo.dueDate) : new Date(now))
+              const next = new Date(base)
+              next.setDate(next.getDate() + plan.frequencyDays)
+              nextDueDateUpdate = { apId: ap.id, date: next.toISOString() }
+            }
+          }
+        }
 
         set((s) => {
           let dbOut = { ...s.db }
@@ -275,24 +338,17 @@ export const useStore = create<AppState>()(
                   (new Date(now).getTime() - new Date(w.startedAt).getTime()) / 60000
                 )
               }
-              // Recalcular nextDueDate al completar OT preventiva
-              if (w.pmPlanId) {
-                const ap   = dbOut.assetPlans.find((a) => a.id === w.pmPlanId)
-                const plan = ap ? dbOut.pmPlans.find((p) => p.id === ap.pmPlanId) : null
-                if (ap && plan) {
-                  const base = w.dueDate ? new Date(w.dueDate) : new Date(now)
-                  const next = new Date(base)
-                  next.setDate(next.getDate() + plan.frequencyDays)
-                  const nextStr = next.toISOString()
-                  dbOut.assetPlans = dbOut.assetPlans.map((a) =>
-                    a.id === ap.id ? { ...a, nextDueDate: nextStr } : a
-                  )
-                  nextDueDateUpdate = { apId: ap.id, date: nextStr }
-                }
-              }
             }
             return { ...w, ...updates }
           })
+          // Actualizar nextDueDate en assetPlans si corresponde
+          if (nextDueDateUpdate) {
+            dbOut.assetPlans = dbOut.assetPlans.map((a) =>
+              a.id === nextDueDateUpdate!.apId
+                ? { ...a, nextDueDate: nextDueDateUpdate!.date }
+                : a
+            )
+          }
           return { db: dbOut }
         })
 
@@ -407,7 +463,7 @@ export const useStore = create<AppState>()(
           }))
         } else {
           const newPlan: PmPlan = {
-            id: planId, name: '', triggerType: 'TIME_BASED', frequencyDays: 30,
+            id: planId, name: '', triggerType: 'TIME_BASED', frequencyDays: 30, toleranceDays: 3,
             meterUnit: null, meterInterval: null, defaultAssignId: null,
             active: true, notes: '', createdAt: now, updatedAt: now, ...data,
           }
@@ -532,7 +588,6 @@ export const useStore = create<AppState>()(
           (w) => w.pmPlanId === apId && ['OPEN', 'ASSIGNED', 'IN_PROGRESS'].includes(w.status)
         )
         if (existingActive) {
-          ;(window as any)._toast?.(`Ya existe una OT activa para este plan`, 'warn')
           return null
         }
 
@@ -648,24 +703,17 @@ export const useStore = create<AppState>()(
       },
 
       // ── Reset demo ───────────────────────────────────────────────
-      resetDemo: () => set({
-        db: JSON.parse(JSON.stringify(DB_DEFAULTS)),
-        selectedAssetId: null,
-        selectedWOId:    null,
-        view:            'dashboard',
-        currentUser:     DB_DEFAULTS.users[0] ?? null,
-      }),
-    }),
-    {
-      name:    'apex-cmms-db',
-      version: 5,
-      migrate: (persistedState: any, version: number) => {
-        if (version < 5) return { ...persistedState, db: JSON.parse(JSON.stringify(DB_DEFAULTS)) } as any
-        return persistedState as any
+      seedSupabase: async () => {
+        ;(window as any)._toast?.('Borrando datos y restaurando demo...', 'info')
+        try {
+          await api.seedDatabase(DB_DEFAULTS)
+          ;(window as any)._toast?.('Restauración completa. Obteniendo datos...', 'success')
+          await get().loadFromSupabase()
+        } catch (e: any) {
+          ;(window as any)._toast?.('Error al restaurar datos: ' + e.message, 'error')
+        }
       },
-      partialize: (s) => ({ db: s.db, currentUser: s.currentUser }),
-    }
-  )
+    })
 )
 
 // ── Selectores derivados ──────────────────────────────────────────

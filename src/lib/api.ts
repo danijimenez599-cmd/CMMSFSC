@@ -33,13 +33,22 @@ const mapAsset  = (r: any): Asset         => ({ id: r.id, parentId: r.parent_id,
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mapWO     = (r: any): WorkOrder     => ({ id: r.id, title: r.title, description: r.description, assetId: r.asset_id, reportedById: r.reported_by_id, assignedToId: r.assigned_to_id, priority: r.priority, status: r.status, type: r.type, dueDate: r.due_date, startedAt: r.started_at, completedAt: r.completed_at, timeSpentMin: r.time_spent_min, resolutionNotes: r.resolution_notes, pmPlanId: r.pm_plan_id, createdAt: r.created_at, updatedAt: r.updated_at })
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const mapPlan   = (r: any): PmPlan        => ({ id: r.id, name: r.name, triggerType: r.trigger_type, frequencyDays: r.frequency_days, meterUnit: r.meter_unit, meterInterval: r.meter_interval, defaultAssignId: r.default_assign_id, active: r.active, notes: r.notes, createdAt: r.created_at, updatedAt: r.updated_at })
+const mapPlan   = (r: any): PmPlan        => ({ id: r.id, name: r.name, triggerType: r.trigger_type, frequencyDays: r.frequency_days, toleranceDays: r.tolerance_days, meterUnit: r.meter_unit, meterInterval: r.meter_interval, defaultAssignId: r.default_assign_id, active: r.active, notes: r.notes, createdAt: r.created_at, updatedAt: r.updated_at })
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mapAP     = (r: any): AssetPlan     => ({ id: r.id, assetId: r.asset_id, pmPlanId: r.pm_plan_id, nextDueDate: r.next_due_date, active: r.active, createdAt: r.created_at })
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mapItem   = (r: any): InventoryItem => ({ id: r.id, name: r.name, sku: r.sku, category: r.category, currentStock: r.current_stock, minStock: r.min_stock, unit: r.unit, unitCost: r.unit_cost, location: r.location, supplier: r.supplier, notes: r.notes, createdAt: r.created_at, updatedAt: r.updated_at })
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mapWoTask = (r: any): WoTask        => ({ id: r.id, woId: r.wo_id, description: r.description, completed: r.completed, order: r.order })
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const mapLocation = (r: any) => ({ id: r.id, name: r.name, description: r.description })
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const mapWoComment = (r: any) => ({ id: r.id, workOrderId: r.work_order_id, userId: r.user_id, text: r.text, createdAt: r.created_at })
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const mapPmTask = (r: any) => ({ id: r.id, pmPlanId: r.pm_plan_id, description: r.description, order: r.order })
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const mapPartUsage = (r: any) => ({ id: r.id, workOrderId: r.work_order_id, inventoryItemId: r.inventory_item_id, quantity: r.quantity, usedAt: r.used_at })
 
 // ── API ───────────────────────────────────────────────────────────
 export const api = {
@@ -158,6 +167,7 @@ export const api = {
         name:              p.name            ?? '',
         trigger_type:      p.triggerType     ?? 'TIME_BASED',
         frequency_days:    p.frequencyDays   ?? 30,
+        tolerance_days:    p.toleranceDays   ?? 3,
         meter_unit:        p.meterUnit       ?? null,
         meter_interval:    p.meterInterval   ?? null,
         default_assign_id: p.defaultAssignId ?? null,
@@ -267,14 +277,75 @@ export const api = {
 
   // ── CARGA INICIAL ─────────────────────────────────────────────────
   async loadAll() {
-    const [assets, workOrders, pmPlans, assetPlans, inventoryItems, users] = await Promise.all([
+    const [assets, workOrders, pmPlans, assetPlans, inventoryItems, users, locations, woTasks, pmTasks, woComments, partUsages] = await Promise.all([
       api.assets.list(),
       api.workOrders.list(),
       api.pmPlans.list(),
       api.assetPlans.list(),
       api.inventory.list(),
       api.users.list(),
+      run<AnyRecord[]>(db.from('locations').select('*')).then(r => r ? r.map(mapLocation) : []),
+      run<AnyRecord[]>(db.from('wo_tasks').select('*')).then(r => r ? r.map(mapWoTask) : []),
+      run<AnyRecord[]>(db.from('pm_tasks').select('*')).then(r => r ? r.map(mapPmTask) : []),
+      run<AnyRecord[]>(db.from('wo_comments').select('*')).then(r => r ? r.map(mapWoComment) : []),
+      run<AnyRecord[]>(db.from('part_usages').select('*')).then(r => r ? r.map(mapPartUsage) : []),
     ])
-    return { assets, workOrders, pmPlans, assetPlans, inventoryItems, users }
+    return { assets, workOrders, pmPlans, assetPlans, inventoryItems, users, locations, woTasks, pmTasks, woComments, partUsages }
   },
+
+  // ── SEEDING ───────────────────────────────────────────────────────
+  async seedDatabase(data: any) {
+    const clear = async (table: string) => {
+      console.log(`Clearing ${table}...`);
+      const { error } = await db.from(table).delete().neq('id', '0');
+      if (error) console.error(`Error clearing ${table}:`, error);
+    }
+
+    try {
+      await clear('part_usages');
+      await clear('asset_plans');
+      await clear('wo_tasks');
+      await clear('wo_comments');
+      await clear('work_orders');
+      await clear('pm_tasks');
+      await clear('pm_plans');
+      await clear('assets');
+      await clear('inventory_items');
+      await clear('locations');
+      await clear('users');
+    } catch (e) {
+      console.error('Error during database clear:', e);
+    }
+
+    const insert = async (table: string, rows: any[]) => {
+      if (rows.length === 0) return;
+      console.log(`Seeding ${table}...`);
+      const { error } = await db.from(table).insert(rows);
+      if (error) console.error(`Error seeding ${table}:`, error);
+    }
+    
+    await insert('users', data.users.map((u: any) => ({ id: u.id, email: u.email, password_hash: u.passwordHash, name: u.name, role: u.role, active: u.active })));
+    await insert('locations', data.locations.map((l: any) => ({ id: l.id, name: l.name, description: l.description })));
+    
+    const roots = data.assets.filter((a: any) => !a.parentId);
+    const children1 = data.assets.filter((a: any) => roots.some((r: any) => r.id === a.parentId));
+    const children2 = data.assets.filter((a: any) => children1.some((r: any) => r.id === a.parentId));
+    
+    const mapAssetToDb = (a: any) => ({ id: a.id, parent_id: a.parentId, name: a.name, location_id: a.locationId, category: a.category, brand: a.brand, model: a.model, serial_number: a.serialNumber, criticality: a.criticality, status: a.status, install_date: a.installDate });
+    
+    await insert('assets', roots.map(mapAssetToDb));
+    await insert('assets', children1.map(mapAssetToDb));
+    await insert('assets', children2.map(mapAssetToDb));
+    
+    await insert('pm_plans', data.pmPlans.map((p: any) => ({ id: p.id, name: p.name, trigger_type: p.triggerType, frequency_days: p.frequencyDays, meter_unit: p.meterUnit, meter_interval: p.meterInterval, default_assign_id: p.defaultAssignId, active: p.active, notes: p.notes })));
+    await insert('pm_tasks', data.pmTasks.map((t: any) => ({ id: t.id, pm_plan_id: t.pmPlanId, description: t.description, "order": t.order })));
+    await insert('asset_plans', data.assetPlans.map((ap: any) => ({ id: ap.id, asset_id: ap.assetId, pm_plan_id: ap.pmPlanId, next_due_date: ap.nextDueDate, active: ap.active })));
+    
+    await insert('work_orders', data.workOrders.map((w: any) => ({ id: w.id, title: w.title, description: w.description, asset_id: w.assetId, reported_by_id: w.reportedById, assigned_to_id: w.assignedToId, priority: w.priority, status: w.status, type: w.type, due_date: w.dueDate, started_at: w.startedAt, completed_at: w.completedAt, time_spent_min: w.timeSpentMin, resolution_notes: w.resolutionNotes, pm_plan_id: w.pmPlanId })));
+    await insert('wo_tasks', data.woTasks.map((t: any) => ({ id: t.id, wo_id: t.woId, description: t.description, completed: t.completed, "order": t.order })));
+    await insert('wo_comments', data.woComments.map((c: any) => ({ id: c.id, work_order_id: c.workOrderId, user_id: c.userId, text: c.text })));
+    
+    await insert('inventory_items', data.inventoryItems.map((i: any) => ({ id: i.id, name: i.name, sku: i.sku, category: i.category, current_stock: i.currentStock, min_stock: i.minStock, unit: i.unit, unit_cost: i.unitCost, location: i.location, supplier: i.supplier, notes: i.notes })));
+    await insert('part_usages', data.partUsages.map((pu: any) => ({ id: pu.id, work_order_id: pu.workOrderId, inventory_item_id: pu.inventoryItemId, quantity: pu.quantity, used_at: pu.usedAt })));
+  }
 }

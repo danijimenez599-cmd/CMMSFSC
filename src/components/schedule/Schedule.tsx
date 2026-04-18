@@ -13,16 +13,30 @@ type Mode = 'week' | 'month'
 // ── helpers ───────────────────────────────────────────────────────
 function isoDate(d: Date) { return format(d, 'yyyy-MM-dd') }
 
-function getEventClass(dueDate: string, status?: string): string {
+function getEventClass(dueDate: string, status?: string, toleranceDays?: number): string {
   if (status === 'COMPLETED') return 'ev-done'
   const d = new Date(dueDate)
-  if (isPast(d))                          return 'ev-over'
+  
+  if (isPast(d) && !isToday(d)) {
+    // Si ya pasó
+    if (toleranceDays === undefined) return 'ev-over' // Si no tenemos info de tolerancia, marcamos rojo
+    
+    const diff = differenceInDays(new Date(), d) // días transcurridos desde dueDate
+    if (diff <= toleranceDays) {
+      return 'ev-soon' // Dentro de tolerancia (naranja)
+    } else {
+      return 'ev-over' // Excedió tolerancia (rojo)
+    }
+  }
+
+  // Si no ha pasado
   if (differenceInDays(d, new Date()) <= 3) return 'ev-soon'
+  
   return 'ev-plan'
 }
 
 const evClasses: Record<string, string> = {
-  'ev-plan': 'bg-blue-100 text-blue-700 border border-blue-200',
+  'ev-plan': 'bg-gray-100 text-gray-700 border border-gray-300', // Modificado: Gris para planificado
   'ev-soon': 'bg-amber-100 text-amber-700 border border-amber-200',
   'ev-over': 'bg-red-100 text-red-700 border border-red-200',
   'ev-done': 'bg-green-100 text-green-700 border border-green-200',
@@ -43,6 +57,7 @@ export function Schedule() {
   const { db, navigate, openWOEditor } = useStore()
   const [mode,   setMode]   = useState<Mode>('week')
   const [offset, setOffset] = useState(0)
+  const [locationFilter, setLocationFilter] = useState<string>('all')
 
   // Calcular días del período
   const today = new Date(); today.setHours(0, 0, 0, 0)
@@ -66,32 +81,105 @@ export function Schedule() {
     ? `${format(days[0], "d 'de' MMM", { locale: es })} — ${format(days[6], "d 'de' MMM yyyy", { locale: es })}`
     : format(days[0], 'MMMM yyyy', { locale: es })
 
-  // Filas: solo assetPlans activos
-  const activeAPs = db.assetPlans.filter((ap) => ap.active)
+  // 1. Planes activos y aplicando filtro de ubicación
+  const activeAPs = db.assetPlans.filter((ap) => {
+    if (!ap.active) return false
+    if (locationFilter === 'all') return true
+    const asset = db.assets.find(a => a.id === ap.assetId)
+    return asset?.locationId === locationFilter
+  })
 
-  // Eventos por celda
-  function getEventsForCell(apId: string, day: Date) {
+  // 2. OTs en el período general filtradas por ubicación
+  const periodWOs = db.workOrders
+    .filter((wo) => {
+      const isPeriod = wo.dueDate && isoDate(new Date(wo.dueDate)) >= startStr && isoDate(new Date(wo.dueDate)) <= endStr
+      if (!isPeriod) return false
+      
+      if (locationFilter === 'all') return true
+      const asset = db.assets.find(a => a.id === wo.assetId)
+      return asset?.locationId === locationFilter
+    })
+    .sort((a, b) => isoDate(new Date(a.dueDate!)).localeCompare(isoDate(new Date(b.dueDate!))))
+
+  // 3. Evaluar OTs programadas en el periodo que NO pertenecen a un plan
+  const standaloneWOs = periodWOs.filter((wo) => !wo.pmPlanId && wo.assetId)
+  const standaloneByAsset = new Map<string, typeof periodWOs>()
+  standaloneWOs.forEach((wo) => {
+    if (!standaloneByAsset.has(wo.assetId!)) standaloneByAsset.set(wo.assetId!, [])
+    standaloneByAsset.get(wo.assetId!)!.push(wo)
+  })
+
+  // Generar array de filas para el calendario
+  type ScheduleRow = {
+    key: string
+    asset: typeof db.assets[0]
+    plan?: typeof db.pmPlans[0]
+    ap?: typeof activeAPs[0]
+    standaloneWOs?: typeof periodWOs
+  }
+
+  const scheduleRows: ScheduleRow[] = []
+  
+  activeAPs.forEach(ap => {
+     const asset = db.assets.find(a => a.id === ap.assetId)
+     const plan  = db.pmPlans.find(p => p.id === ap.pmPlanId)
+     if (asset && plan) scheduleRows.push({ key: `ap-${ap.id}`, asset, plan, ap })
+  })
+
+  standaloneByAsset.forEach((wos, assetId) => {
+     const asset = db.assets.find(a => a.id === assetId)
+     if (asset) scheduleRows.push({ key: `sa-${assetId}`, asset, standaloneWOs: wos })
+  })
+
+  // Eventos por celda (Lógica dinámica si es AP o Standalone)
+  function getEventsForCell(row: ScheduleRow, day: Date) {
     const ds = isoDate(day)
-    // OTs reales con este apId y esa fecha
-    const wos = db.workOrders.filter(
-      (wo) => wo.pmPlanId === apId && wo.dueDate && isoDate(new Date(wo.dueDate)) === ds
-    )
-    if (wos.length) {
-      return wos.map((wo) => ({
-        cls:   getEventClass(wo.dueDate!, wo.status),
-        label: wo.status === 'COMPLETED' ? 'Hecho' : 'OT',
-        woId:  wo.id,
-      }))
+    // Si la fila es de un Asset Plan
+    if (row.ap) {
+      // OTs asociadas a este plan que vencen EN ESTE DÍA exacto
+      const wosForDay = db.workOrders.filter(
+        (wo) => wo.pmPlanId === row.ap!.id && wo.dueDate && isoDate(new Date(wo.dueDate)) === ds
+      )
+      
+      const tolerance = row.plan?.toleranceDays ?? 3
+
+      if (wosForDay.length) {
+        // Mostrar OTs generadas para este plan que vencen hoy
+        return wosForDay.map((wo) => {
+           let sts = wo.status
+           let cls = getEventClass(wo.dueDate!, wo.status, tolerance)
+           if (cls === 'ev-plan' && sts !== 'COMPLETED') cls = 'bg-blue-100 text-blue-800 border-blue-300 border font-semibold' 
+           return { cls, label: sts === 'COMPLETED' ? 'Hecho' : 'OT', woId: wo.id }
+        })
+      }
+
+      // Si no hay OTs que vencen EXACTAMENTE en este día de la celda
+      if (row.ap.nextDueDate && isoDate(new Date(row.ap.nextDueDate)) === ds) {
+        // Verificar que NO exista una OT que esté programada para este plan y esta fecha,
+        // o si hay una OT viva (no cancelada y no completada) que se generó a partir de este plan y sigue abierta
+        const hasWOInCycle = db.workOrders.find(w => w.pmPlanId === row.ap!.id && ['OPEN', 'ASSIGNED', 'IN_PROGRESS'].includes(w.status))
+        if (!hasWOInCycle) {
+           return [{ cls: getEventClass(row.ap.nextDueDate, undefined, tolerance), label: 'Plan', woId: null }]
+        }
+      }
+      return []
     }
-    // nextDueDate del plan
-    const ap = db.assetPlans.find((a) => a.id === apId)
-    if (ap?.nextDueDate && isoDate(new Date(ap.nextDueDate)) === ds) {
-      return [{ cls: getEventClass(ap.nextDueDate), label: 'Plan', woId: null }]
+    
+    // Si la fila es de OTs huerfanas (standalone)
+    if (row.standaloneWOs) {
+      const wos = row.standaloneWOs.filter((wo) => wo.dueDate && isoDate(new Date(wo.dueDate)) === ds)
+      return wos.map((wo) => {
+         let sts = wo.status
+         let cls = getEventClass(wo.dueDate!, wo.status)
+         if (cls === 'ev-plan' && sts !== 'COMPLETED') cls = 'bg-blue-100 text-blue-800 border-blue-300 border font-semibold' 
+         return { cls, label: sts === 'COMPLETED' ? 'Hecho' : 'OT', woId: wo.id }
+      })
     }
+
     return []
   }
 
-  // Vencimientos en el período
+  // Vencimientos en el período (solo para APs)
   const upcoming = activeAPs
     .map((ap) => {
       if (!ap.nextDueDate) return null
@@ -105,11 +193,6 @@ export function Schedule() {
     .sort((a, b) => a!.dueDate.localeCompare(b!.dueDate)) as Array<{
       ap: typeof activeAPs[0]; plan: typeof db.pmPlans[0]; asset: typeof db.assets[0]; dueDate: string
     }>
-
-  // OTs en el período
-  const periodWOs = db.workOrders
-    .filter((wo) => wo.dueDate && isoDate(new Date(wo.dueDate)) >= startStr && isoDate(new Date(wo.dueDate)) <= endStr)
-    .sort((a, b) => isoDate(new Date(a.dueDate!)).localeCompare(isoDate(new Date(b.dueDate!))))
 
   const overdueCount = periodWOs.filter(
     (wo) => wo.status !== 'COMPLETED' && wo.status !== 'CANCELLED' && wo.dueDate && isPast(new Date(wo.dueDate))
@@ -126,6 +209,17 @@ export function Schedule() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <h1 className="font-display font-bold text-xl text-tx">Programación de Mantenimiento</h1>
         <div className="flex items-center gap-2 flex-wrap">
+          {/* Filtro de ubicación */}
+          <select 
+            value={locationFilter} 
+            onChange={(e) => setLocationFilter(e.target.value)}
+            className="border border-gray-300 rounded-lg px-3 py-1.5 text-xs font-semibold text-tx-2 bg-white"
+          >
+            <option value="all">Todas las ubicaciones</option>
+            {db.locations.map(l => (
+              <option key={l.id} value={l.id}>{l.name}</option>
+            ))}
+          </select>
           {/* Toggle semana/mes */}
           <div className="flex border border-gray-300 rounded-lg overflow-hidden">
             {(['week','month'] as Mode[]).map((m) => (
@@ -213,38 +307,37 @@ export function Schedule() {
           </div>
 
           {/* Filas */}
-          {activeAPs.length === 0 ? (
+          {scheduleRows.length === 0 ? (
             <div className="py-10 text-center text-sm text-tx-3">
-              Sin planes asignados a equipos.{' '}
+              Sin planes ni órdenes programadas en este período.{' '}
               <button className="text-brand underline" onClick={() => navigate('assets')}>
                 Ir al Árbol de Activos
               </button>{' '}
               para asignar planes a equipos.
             </div>
           ) : (
-            activeAPs.map((ap) => {
-              const plan  = db.pmPlans.find((p) => p.id === ap.pmPlanId)
-              const asset = db.assets.find((a) => a.id === ap.assetId)
-              if (!plan || !asset) return null
+            scheduleRows.map((row) => {
+              const asset = row.asset
+              const plan = row.plan
 
               return (
-                <div key={ap.id}
+                <div key={row.key}
                   className="grid border-b border-gray-50 last:border-0 hover:bg-bg-2/40 transition-colors"
                   style={{ gridTemplateColumns: gridCols, minHeight: '52px' }}>
 
-                  {/* Info del plan */}
+                  {/* Info del equipo/plan */}
                   <div className="px-3 py-2 border-r border-gray-100 flex flex-col justify-center bg-bg">
                     <div className="text-[12px] font-semibold text-tx-2 truncate" title={asset.name}>
                       {asset.name}
                     </div>
-                    <div className="text-[10px] text-tx-3 truncate mt-0.5" title={plan.name}>
-                      {plan.name}
+                    <div className="text-[10px] text-tx-3 truncate mt-0.5" title={plan ? plan.name : 'Órdenes Programadas'}>
+                      {plan ? plan.name : 'Órdenes Programadas'}
                     </div>
                   </div>
 
                   {/* Celdas de días */}
                   {days.map((d) => {
-                    const events  = getEventsForCell(ap.id, d)
+                    const events  = getEventsForCell(row, d)
                     const todayCol = isToday(d)
 
                     return (
@@ -259,7 +352,7 @@ export function Schedule() {
                             onClick={() => {
                               if (ev.woId) {
                                 openWOEditor(ev.woId)
-                              } else if (ev.label === 'Plan') {
+                              } else if (ev.label === 'Plan' && plan) {
                                 openWOEditor(null, {
                                   assetId: asset.id,
                                   pmPlanId: plan.id,
@@ -272,9 +365,9 @@ export function Schedule() {
                             }}
                             className={clsx(
                               'absolute inset-[3px] rounded-md flex items-center justify-center',
-                              'text-[9px] font-bold uppercase tracking-wide transition-transform',
-                              (ev.woId || ev.label === 'Plan') && 'cursor-pointer hover:scale-105',
-                              evClasses[ev.cls]
+                              'text-[9px] font-bold uppercase tracking-wide transition-transform shadow-sm',
+                              (ev.woId || ev.label === 'Plan') && 'cursor-pointer hover:scale-[1.03]',
+                              evClasses[ev.cls] || ev.cls
                             )}>
                             {ev.label}
                           </div>
@@ -290,7 +383,7 @@ export function Schedule() {
       </div>
 
       {/* Resumen inferior */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 
         {/* Vencimientos */}
         <div className="bg-white border border-gray-100 rounded-cmms p-4 shadow-card">

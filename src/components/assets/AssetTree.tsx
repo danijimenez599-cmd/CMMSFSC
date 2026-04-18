@@ -89,10 +89,10 @@ function AssetDetail({ assetId, onEdit, onAssignPlans }: {
   const workOrders = db.workOrders.filter((wo) => wo.assetId === assetId)
   const assetPlans = db.assetPlans.filter((ap) => ap.assetId === assetId)
 
-  const handleGenerateWO = (apId: string) => {
-    const wo = generateWO(apId)
+  const handleGenerateWO = async (apId: string) => {
+    const wo = await generateWO(apId)
     if (wo) {
-      ;(window as any)._toast?.('Generada', `OT Preventiva: ${wo.title}`, 'ok')
+      ;(window as any)._toast?.(`OT Preventiva generada: ${wo.title}`, 'success')
       openWOEditor(wo.id)
     }
   }
@@ -102,11 +102,17 @@ function AssetDetail({ assetId, onEdit, onAssignPlans }: {
   return (
     <div className="h-full overflow-y-auto">
       {/* Header */}
-      <div className="px-6 py-5 border-b border-gray-100 bg-bg sticky top-0">
+      <div className="px-5 md:px-6 py-5 border-b border-gray-100 bg-bg sticky top-0 z-10">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <div className="text-[11px] text-tx-3 font-semibold mb-1">
-              {asset.serialNumber || 'Sin serie'} · {CATEGORY_LABEL[asset.category]}
+            <div className="text-[11px] text-tx-3 font-semibold mb-1 flex items-center gap-2">
+              <button 
+                onClick={() => useStore.getState().setSelectedAsset(null)}
+                className="md:hidden text-brand hover:underline border-r border-gray-200 pr-2"
+              >
+                ← Volver
+              </button>
+              <span>{asset.serialNumber || 'Sin serie'} · {CATEGORY_LABEL[asset.category]}</span>
             </div>
             <h2 className="font-display font-bold text-xl text-tx">{asset.name}</h2>
           </div>
@@ -403,7 +409,10 @@ export function AssetTree() {
       style={{ height: 'calc(100vh - 58px - 44px)' }}>
 
       {/* Sidebar árbol */}
-      <div className="w-72 flex-shrink-0 flex flex-col border-r border-gray-100">
+      <div className={clsx(
+        "flex-shrink-0 flex flex-col border-r border-gray-100 transition-all duration-300 bg-white",
+        selectedAssetId ? "hidden md:flex md:w-72" : "w-full md:w-72"
+      )}>
         <div className="flex items-center justify-between px-3.5 py-3 border-b border-gray-100 bg-bg flex-shrink-0">
           <span className="text-sm font-bold text-tx">Árbol de Activos</span>
           <Button size="xs" onClick={() => setEditId(null)}>+ Nuevo</Button>
@@ -422,7 +431,10 @@ export function AssetTree() {
       </div>
 
       {/* Panel detalle */}
-      <div className="flex-1 overflow-hidden">
+      <div className={clsx(
+        "flex-1 overflow-hidden bg-white",
+        !selectedAssetId ? "hidden md:block" : "block w-full"
+      )}>
         {selectedAssetId ? (
           <AssetDetail
             assetId={selectedAssetId}

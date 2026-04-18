@@ -35,8 +35,8 @@ export const DB_DEFAULTS: AppDB = {
   ],
   woComments: [], woAttachments: [],
   pmPlans: [
-    { id:'pm-1', name:'Lubricación y Filtros — Compresor GA-15',      triggerType:'TIME_BASED', frequencyDays:30,  meterUnit:null, meterInterval:null, defaultAssignId:'user-3', active:true, notes:'Aceite: Atlas Copco Roto-Inject Fluid o equivalente SAE-46.', createdAt:'2025-01-01T00:00:00.000Z', updatedAt:'2025-01-01T00:00:00.000Z' },
-    { id:'pm-2', name:'Inspección Eléctrica — Motor WEG W22',         triggerType:'TIME_BASED', frequencyDays:90,  meterUnit:null, meterInterval:null, defaultAssignId:'user-4', active:true, notes:'Aislamiento mínimo: 1 MΩ @ 1000 VDC.', createdAt:'2025-01-01T00:00:00.000Z', updatedAt:'2025-01-01T00:00:00.000Z' },
+    { id:'pm-1', name:'Lubricación y Filtros — Compresor GA-15',      triggerType:'TIME_BASED', frequencyDays:30, toleranceDays: 3, meterUnit:null, meterInterval:null, defaultAssignId:'user-3', active:true, notes:'Aceite: Atlas Copco Roto-Inject Fluid o equivalente SAE-46.', createdAt:'2025-01-01T00:00:00.000Z', updatedAt:'2025-01-01T00:00:00.000Z' },
+    { id:'pm-2', name:'Inspección Eléctrica — Motor WEG W22',         triggerType:'TIME_BASED', frequencyDays:90, toleranceDays: 9, meterUnit:null, meterInterval:null, defaultAssignId:'user-4', active:true, notes:'Aislamiento mínimo: 1 MΩ @ 1000 VDC.', createdAt:'2025-01-01T00:00:00.000Z', updatedAt:'2025-01-01T00:00:00.000Z' },
   ],
   pmTasks: [
     { id:'task-1',  pmPlanId:'pm-1', description:'Verificar nivel de aceite',               order:1 },
@@ -91,8 +91,8 @@ export const DB_DEFAULTS: AppDB = {
   ],
   partUsages: [
     { id:'pu-1', workOrderId:'wo-6', inventoryItemId:'inv-3', quantity:1, usedAt:'2026-02-15T12:00:00.000Z' },
-    { id:'pu-2', workOrderId:'wo-7', inventoryItemId:'inv-10', quantity:2, usedAt:'2026-01-20T16:00:00.000Z' },
-    { id:'pu-3', workOrderId:'wo-11', inventoryItemId:'inv-1', quantity:1, usedAt:'2025-10-05T12:00:00.000Z' },
+    { id:'pu-2', workOrderId:'wo-9', inventoryItemId:'inv-10', quantity:2, usedAt:'2026-01-20T16:00:00.000Z' },
+    { id:'pu-3', workOrderId:'wo-21', inventoryItemId:'inv-1', quantity:1, usedAt:'2025-10-05T12:00:00.000Z' },
   ],
   notifications: [],
 }

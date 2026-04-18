@@ -100,6 +100,7 @@ CREATE TABLE pm_plans (
   name              TEXT NOT NULL,
   trigger_type      pm_trigger NOT NULL DEFAULT 'TIME_BASED',
   frequency_days    INTEGER NOT NULL DEFAULT 30,
+  tolerance_days    INTEGER NOT NULL DEFAULT 3,
   meter_unit        TEXT,
   meter_interval    NUMERIC,
   default_assign_id TEXT REFERENCES users(id) ON DELETE SET NULL,

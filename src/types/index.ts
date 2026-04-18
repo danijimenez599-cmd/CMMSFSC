@@ -92,6 +92,7 @@ export interface PmPlan {
   name: string
   triggerType: PmTrigger
   frequencyDays: number
+  toleranceDays: number
   meterUnit: string | null
   meterInterval: number | null
   defaultAssignId: string | null
