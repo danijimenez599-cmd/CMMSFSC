@@ -54,6 +54,11 @@ export interface MeasurementPoint {
   name: string;
   unit: string;
   currentValue: number | null;
+  minThreshold: number | null;
+  maxThreshold: number | null;
+  triggerWoTitle: string | null;
+  triggerPriority: string;
+  lastTriggerAt: string | null;
   lastReadingAt: string | null;
 }
 

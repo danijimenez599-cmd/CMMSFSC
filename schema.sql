@@ -69,6 +69,11 @@ CREATE TABLE public.measurement_points (
   name TEXT NOT NULL,
   unit TEXT NOT NULL,
   current_value NUMERIC,
+  min_threshold NUMERIC,
+  max_threshold NUMERIC,
+  trigger_wo_title TEXT,
+  trigger_priority TEXT DEFAULT 'high',
+  last_trigger_at TIMESTAMPTZ,
   last_reading_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );

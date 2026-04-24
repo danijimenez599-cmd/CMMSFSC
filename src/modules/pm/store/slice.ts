@@ -112,6 +112,11 @@ export const createPmSlice: StateCreator<StoreState, [], [], PmSlice> = (set, ge
       name: mp.name,
       unit: mp.unit,
       currentValue: mp.current_value,
+      minThreshold: mp.min_threshold,
+      maxThreshold: mp.max_threshold,
+      triggerWoTitle: mp.trigger_wo_title,
+      triggerPriority: mp.trigger_priority || 'high',
+      lastTriggerAt: mp.last_trigger_at,
       lastReadingAt: mp.last_reading_at,
     }));
 
@@ -224,6 +229,11 @@ export const createPmSlice: StateCreator<StoreState, [], [], PmSlice> = (set, ge
       name: point.name,
       unit: point.unit,
       current_value: point.currentValue,
+      min_threshold: point.minThreshold || null,
+      max_threshold: point.maxThreshold || null,
+      trigger_wo_title: point.triggerWoTitle || null,
+      trigger_priority: point.triggerPriority || 'high',
+      last_trigger_at: point.lastTriggerAt || null,
       last_reading_at: point.lastReadingAt,
     });
     if (error) throw error;
@@ -253,23 +263,63 @@ export const createPmSlice: StateCreator<StoreState, [], [], PmSlice> = (set, ge
 
     await get().fetchPmData();
 
-    // After updating, check if this non-cumulative reading should trigger an alert
+    // CBM LOGIC: Trigger Work Order if thresholds are breached
     const point = get().measurementPoints.find(p => p.id === readingData.measurementPointId);
     const config = point ? get().measurementConfigs.find(c => c.id === point.configId) : null;
 
     if (point && config && !config.isCumulative) {
-      const asset = (get() as any).assets?.find((a: any) => a.id === point.assetId);
-      (get() as any).addMeterAlert?.({
-        type: 'limit',
-        title: `Lectura de ${point.name} requiere evaluación`,
-        message: `${asset?.name || 'Activo'} — ${point.name}: ${readingData.value} ${point.unit}. Considere si se requiere intervención.`,
-        assetId: point.assetId,
-        assetName: asset?.name || 'Activo',
-        pointId: point.id,
-        pointName: point.name,
-        value: readingData.value,
-        unit: point.unit,
-      });
+      const isLow = point.minThreshold !== null && readingData.value < point.minThreshold;
+      const isHigh = point.maxThreshold !== null && readingData.value > point.maxThreshold;
+
+      if (isLow || isHigh) {
+        // Cooldown: Check if we triggered an alert recently (e.g. last 24h) or if there's an open WO
+        const lastTrigger = point.lastTriggerAt ? new Date(point.lastTriggerAt).getTime() : 0;
+        const cooldownMs = 24 * 60 * 60 * 1000; // 24h cooldown
+        const inCooldown = (Date.now() - lastTrigger) < cooldownMs;
+
+        if (!inCooldown) {
+          const asset = (get() as any).assets?.find((a: any) => a.id === point.assetId);
+          const woTitle = point.triggerWoTitle || `Alerta CBM: ${point.name} fuera de rango`;
+          
+          // 1. Create Predictive Work Order
+          const woId = generateId();
+          const timestampStr = new Date().toLocaleString('es-SV', { dateStyle: 'medium', timeStyle: 'short' });
+          const { error: woError } = await supabase.from('work_orders').insert({
+            id: woId,
+            asset_id: point.assetId,
+            title: woTitle,
+            description: `Disparo automático por Monitoreo de Condición detectado el ${timestampStr}.\nInstrumento: ${point.name}\nValor detectado: ${readingData.value} ${point.unit}\nRango esperado: ${point.minThreshold ?? '—'} a ${point.maxThreshold ?? '—'}`,
+            wo_type: 'predictive',
+            priority: point.triggerPriority || 'high',
+            status: 'open',
+            created_by: get().currentUser?.id || null,
+          });
+
+          if (!woError) {
+            // 2. Add automatic comment to Bitácora
+            await supabase.from('wo_comments').insert({
+              id: generateId(),
+              work_order_id: woId,
+              body: `SISTEMA: Alerta CBM disparada automáticamente. Lectura fuera de rango detectada: ${readingData.value} ${point.unit} en ${point.name}.`,
+              created_by: get().currentUser?.id || null,
+            });
+
+            // 3. Update Point with last trigger timestamp
+            await supabase.from('measurement_points').update({
+              last_trigger_at: now
+            }).eq('id', point.id);
+            
+            showToast({ 
+              type: 'warning', 
+              title: 'Alerta de Condición', 
+              message: `Se ha generado una OT automática para ${asset?.name || 'el activo'}.` 
+            });
+            
+            if ((get() as any).fetchWorkOrders) await (get() as any).fetchWorkOrders();
+            await get().fetchPmData();
+          }
+        }
+      }
     }
   },
 
