@@ -50,7 +50,6 @@ export const createInventorySlice: StateCreator<InventorySlice, [], []> = (set, 
       locationBin: i.location_bin,
       unitCost: i.unit_cost,
       supplierId: i.supplier_id,
-      supplierRef: i.supplier_ref,
       active: i.active,
       createdAt: i.created_at,
       updatedAt: i.updated_at,
@@ -87,7 +86,6 @@ export const createInventorySlice: StateCreator<InventorySlice, [], []> = (set, 
         stock_max: input.stockMax ?? null,
         location_bin: input.locationBin || null,
         unit_cost: input.unitCost ?? null,
-        supplier_ref: input.supplierRef || null,
         active: true,
       })
       .select()
@@ -109,7 +107,6 @@ export const createInventorySlice: StateCreator<InventorySlice, [], []> = (set, 
     if (input.stockMax !== undefined) updates.stock_max = input.stockMax;
     if (input.locationBin !== undefined) updates.location_bin = input.locationBin;
     if (input.unitCost !== undefined) updates.unit_cost = input.unitCost;
-    if (input.supplierRef !== undefined) updates.supplier_ref = input.supplierRef;
 
     const { error } = await supabase.from('inventory_items').update(updates).eq('id', id);
     if (error) throw error;

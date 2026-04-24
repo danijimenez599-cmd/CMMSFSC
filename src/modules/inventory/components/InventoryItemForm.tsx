@@ -28,7 +28,6 @@ export default function InventoryItemForm({ isOpen, item, onClose }: InventoryIt
     stockMax: item.stockMax ?? undefined,
     locationBin: item.locationBin || '',
     unitCost: item.unitCost ?? undefined,
-    supplierRef: item.supplierRef || '',
   } : {
     name: '',
     partNumber: '',
@@ -137,9 +136,6 @@ export default function InventoryItemForm({ isOpen, item, onClose }: InventoryIt
             <Input name="locationBin" value={form.locationBin || ''} onChange={handleChange} placeholder="Ej. Bodega A, Estante 3" />
           </FormField>
 
-          <FormField label="Ref. proveedor">
-            <Input name="supplierRef" value={form.supplierRef || ''} onChange={handleChange} placeholder="Código del proveedor" />
-          </FormField>
 
           <FormField label="Descripción" className="sm:col-span-2">
             <Textarea name="description" value={form.description || ''} onChange={handleChange} rows={2} placeholder="Descripción o notas adicionales..." />

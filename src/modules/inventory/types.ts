@@ -11,7 +11,6 @@ export interface InventoryItem {
   locationBin: string | null;
   unitCost: number | null;
   supplierId: string | null;
-  supplierRef: string | null;
   active: boolean;
   createdAt: string;
   updatedAt: string;
@@ -48,5 +47,4 @@ export interface InventoryItemInput {
   stockMax?: number | null;
   locationBin?: string | null;
   unitCost?: number | null;
-  supplierRef?: string | null;
 }

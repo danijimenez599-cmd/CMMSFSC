@@ -45,7 +45,7 @@ export const createWoSlice: StateCreator<WoSlice & { currentUser?: any; inventor
       supabase.from('work_orders').select('*').order('created_at', { ascending: false }),
       supabase.from('wo_tasks').select('*').order('sort_order'),
       supabase.from('wo_comments').select('*').order('created_at'),
-      supabase.from('part_usages').select('*').order('created_at'),
+      supabase.from('part_usages').select('*').order('added_at'),
     ]);
 
     if (woRes.error) {
@@ -277,11 +277,16 @@ export const createWoSlice: StateCreator<WoSlice & { currentUser?: any; inventor
   },
 
   addPartUsage: async (woId, itemId, qty) => {
+    // Iteration 2: Capture current cost to ensure historical integrity
+    const item = get().inventoryItems?.find((i: any) => i.id === itemId);
+    const unitCost = item?.unitCost || 0;
+
     const { error } = await supabase.from('part_usages').insert({
       id: generateId(),
       work_order_id: woId,
       inventory_item_id: itemId,
       quantity: qty,
+      unit_cost: unitCost,
       added_by: get().currentUser?.id,
     });
     if (error) throw error;

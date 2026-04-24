@@ -99,7 +99,6 @@ export default function InventoryDetailPanel({ onEdit, onAdjust }: InventoryDeta
             { label: 'Costo unitario', value: item.unitCost ? formatCurrency(item.unitCost) : '—' },
             { label: 'Valor total', value: item.unitCost ? formatCurrency(totalValue) : '—' },
             { label: 'Ubicación', value: item.locationBin || '—' },
-            { label: 'Proveedor ref.', value: item.supplierRef || '—' },
           ].map(({ label, value }) => (
             <div key={label} className="bg-bg-3 rounded-xl px-3 py-2">
               <p className="text-[10px] font-bold text-tx-4 uppercase tracking-wider mb-0.5">{label}</p>
