@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Menu, X, LayoutDashboard, Wrench, Package, Settings,
   CalendarClock, Factory, Bell, ChevronDown, LogOut, User,
-  Mail, ShieldCheck, Cpu, FileText
+  Mail, ShieldCheck, Cpu, FileText, HelpCircle
 } from 'lucide-react';
 import { useStore } from './store';
 import { AppModule } from './shared/types';
@@ -14,6 +14,7 @@ import InventoryView from './modules/inventory';
 import DashboardView from './modules/dashboard';
 import PmEngineView from './modules/pm';
 import SettingsView from './modules/settings';
+import HelpView from './modules/help/HelpView';
 
 const MODULES: { id: AppModule; label: string; icon: React.ReactNode; shortLabel: string }[] = [
   { id: 'dashboard',   label: 'Dashboard',        shortLabel: 'Inicio',    icon: <LayoutDashboard size={18} /> },
@@ -23,6 +24,7 @@ const MODULES: { id: AppModule; label: string; icon: React.ReactNode; shortLabel
   { id: 'pm',          label: 'Planes PM',          shortLabel: 'Planes',    icon: <FileText size={18} /> },
   { id: 'scheduler',   label: 'Programador',        shortLabel: 'Agenda',    icon: <CalendarClock size={18} /> },
   { id: 'settings',    label: 'Configuración',      shortLabel: 'Config',    icon: <Settings size={18} /> },
+  { id: 'help',        label: 'Ayuda / Trainer',    shortLabel: 'Ayuda',     icon: <HelpCircle size={18} /> },
 ];
 
 export default function App() {
@@ -447,6 +449,7 @@ export default function App() {
               {activeModule === 'pm'         && <PmEngineView mode="plans" />}
               {activeModule === 'scheduler'  && <PmEngineView mode="scheduler" />}
               {activeModule === 'settings'   && <SettingsView />}
+              {activeModule === 'help'       && <HelpView />}
             </motion.div>
           </AnimatePresence>
         </div>

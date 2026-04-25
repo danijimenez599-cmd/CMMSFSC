@@ -17,7 +17,7 @@ export interface Location {
   level: number;
 }
 
-export type AppModule = 'dashboard' | 'assets' | 'workorders' | 'inventory' | 'pm' | 'scheduler' | 'settings';
+export type AppModule = 'dashboard' | 'assets' | 'workorders' | 'inventory' | 'pm' | 'scheduler' | 'settings' | 'help';
 
 export interface ToastPayload {
   id: string;
