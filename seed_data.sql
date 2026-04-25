@@ -1,107 +1,97 @@
--- ========================================================
--- APEX CMMS - TITAN ENGINEERING SEED
--- Version: 1.3.1 (post-audit fixes)
--- Two deeply configured assets for demo and QA.
--- ========================================================
+-- APEX CMMS - SEED DATA: VARIANTE TOTAL (Showroom de Ciclos)
+-- Limpieza profunda
+DELETE FROM public.wo_tasks;
+DELETE FROM public.part_usages;
+DELETE FROM public.wo_comments;
+DELETE FROM public.work_orders;
+DELETE FROM public.asset_plans;
+DELETE FROM public.pm_tasks;
+DELETE FROM public.pm_plans;
+DELETE FROM public.meter_readings;
+DELETE FROM public.measurement_points;
+DELETE FROM public.measurement_configs;
+DELETE FROM public.assets;
 
--- 0. CLEANUP
-TRUNCATE public.profiles, public.assets, public.pm_plans, public.asset_plans,
-         public.work_orders, public.measurement_points, public.pm_tasks,
-         public.wo_tasks, public.measurement_configs, public.vendors,
-         public.inventory_items, public.part_usages, public.stock_movements CASCADE;
+-- 1. ASSETS
+INSERT INTO public.assets (id, name, code, asset_type, criticality, status) VALUES
+('00000000-0000-4000-b000-000000000001', 'Planta Central', 'PLT-01', 'plant', 'high', 'active'),
+('00000000-0000-4000-b000-000000000002', 'Compresor GA-30', 'COMP-01', 'equipment', 'high', 'active'),
+('00000000-0000-4000-b000-000000000003', 'Motor Principal Extrusora', 'MOT-01', 'equipment', 'high', 'active'),
+('00000000-0000-4000-b000-000000000004', 'Torre de Enfriamiento', 'TOW-01', 'equipment', 'medium', 'active');
 
--- Reset WO sequence so seed always starts from 00001
-ALTER SEQUENCE public.wo_number_seq RESTART WITH 1;
+UPDATE public.assets SET parent_id = '00000000-0000-4000-b000-000000000001' WHERE id != '00000000-0000-4000-b000-000000000001';
 
--- 1. TEAM
--- FIX 4.3: roles use 'supervisor' (not 'manager') to match TypeScript UserRole type.
-INSERT INTO public.profiles (id, full_name, role, specialty) VALUES
-('00000000-0000-4000-a000-000000000000', 'Ing. Daniel Jiménez',   'admin',      'Reliability Engineering'),
-(uuid_generate_v4(),                    'Ing. Senior Rotativa',   'technician', 'Vibration Analysis'),
-(uuid_generate_v4(),                    'Especialista Eléctrico', 'technician', 'High Voltage / SF6');
+-- 2. CONFIGURACIÓN DE MEDICIÓN
+INSERT INTO public.measurement_configs (id, name, unit, is_cumulative) VALUES
+('00000000-0000-4000-c000-000000000001', 'Horas de Operación', 'hrs', true);
 
--- 2. TITAN ASSETS
-DO $$
-DECLARE
-    plant_id   UUID := uuid_generate_v4();
-    -- Titan 1: Centac Compressor
-    centac_id   UUID := uuid_generate_v4();
-    centac_plan UUID := uuid_generate_v4();
-    centac_mp   UUID := uuid_generate_v4();
-    -- Titan 2: GIS Substation
-    gis_id   UUID := uuid_generate_v4();
-    gis_plan UUID := uuid_generate_v4();
-BEGIN
+-- 3. PUNTOS DE MEDICIÓN
+INSERT INTO public.measurement_points (id, asset_id, config_id, name, unit, current_value) VALUES
+('00000000-0000-4000-f000-000000000001', '00000000-0000-4000-b000-000000000003', '00000000-0000-4000-c000-000000000001', 'Horómetro Motor', 'hrs', 1250),
+('00000000-0000-4000-f000-000000000002', '00000000-0000-4000-b000-000000000004', '00000000-0000-4000-c000-000000000001', 'Horómetro Torre', 'hrs', 800);
 
-    -- Plant root
-    INSERT INTO public.assets (id, name, code, asset_type, category, criticality)
-    VALUES (plant_id, 'Complejo Industrial de Alta Disponibilidad', 'PL-HIGH-AVAIL', 'plant', 'other', 'high');
+-- 4. PLANES MAESTROS
+-- A. Calendario (Mensual)
+INSERT INTO public.pm_plans (id, name, trigger_type, interval_value, interval_unit, criticality) VALUES
+('00000000-0000-4000-a000-000000000001', 'Plan Mecánico Mensual', 'calendar', 1, 'months', 'high');
+INSERT INTO public.pm_tasks (id, pm_plan_id, description, sort_order, frequency_multiplier) VALUES
+(uuid_generate_v4(), '00000000-0000-4000-a000-000000000001', 'Inspección de fajas', 1, 1),
+(uuid_generate_v4(), '00000000-0000-4000-a000-000000000001', 'Cambio de filtros (Trimestral)', 2, 3);
 
-    -- ── TITAN 1: TURBOCOMPRESOR CENTRÍFUGO (CENTAC 3000) ──────────────────────
-    INSERT INTO public.assets (id, parent_id, name, code, asset_type, category, criticality, manufacturer, model, serial_number)
-    VALUES (centac_id, plant_id,
-            'Turbocompresor Centrífugo de Aire (Centac 3000)', 'AIR-CENT-01',
-            'equipment', 'rotating', 'high', 'Ingersoll Rand', 'Centac 3000', 'IR-998822');
+-- B. Medidor (500h)
+INSERT INTO public.pm_plans (id, name, trigger_type, meter_interval_value, meter_interval_unit, criticality) VALUES
+('00000000-0000-4000-a000-000000000002', 'Plan por Horas (Motor)', 'meter', 500, 'hrs', 'high');
+INSERT INTO public.pm_tasks (id, pm_plan_id, description, sort_order, frequency_multiplier) VALUES
+(uuid_generate_v4(), '00000000-0000-4000-a000-000000000002', 'Lubricación básica', 1, 1),
+(uuid_generate_v4(), '00000000-0000-4000-a000-000000000002', 'Alineamiento láser (Cada 1000h)', 2, 2);
 
-    INSERT INTO public.measurement_points (id, asset_id, name, unit, current_value)
-    VALUES (centac_mp, centac_id, 'Horas de Operación Totales', 'hrs', 14250.0);
+-- C. Híbrido (6 Meses o 2000h)
+INSERT INTO public.pm_plans (id, name, trigger_type, interval_value, interval_unit, meter_interval_value, meter_interval_unit, criticality) VALUES
+('00000000-0000-4000-a000-000000000003', 'Plan Híbrido (Torre)', 'hybrid', 6, 'months', 2000, 'hrs', 'medium');
+INSERT INTO public.pm_tasks (id, pm_plan_id, description, sort_order, frequency_multiplier) VALUES
+(uuid_generate_v4(), '00000000-0000-4000-a000-000000000003', 'Limpieza de boquillas', 1, 1),
+(uuid_generate_v4(), '00000000-0000-4000-a000-000000000003', 'Inspección estructural anual', 2, 2);
 
-    -- Multi-tier plan: x1 monthly, x3 quarterly, x12 annual, x48 4-year overhaul
-    INSERT INTO public.pm_plans (id, name, trigger_type, interval_value, interval_unit, interval_mode,
-                                  meter_interval_value, criticality, lead_days)
-    VALUES (centac_plan, 'Estrategia de Mantenimiento Centac 3000',
-            'hybrid', 1, 'months', 'floating', 2000, 'high', 10);
+-- 5. ASIGNACIÓN DE PLANES
+INSERT INTO public.asset_plans (id, asset_id, pm_plan_id, next_due_date, current_cycle_index) VALUES
+('00000000-0000-4000-e000-000000000001', '00000000-0000-4000-b000-000000000002', '00000000-0000-4000-a000-000000000001', (NOW() + interval '15 days')::date, 3); -- Va por el ciclo 3
 
-    INSERT INTO public.pm_tasks (pm_plan_id, description, sort_order, frequency_multiplier) VALUES
-    (centac_plan, 'Inspección visual de fugas y niveles de aceite',                              1,  1),
-    (centac_plan, 'Drenado manual de condensados en intercoolers',                               2,  1),
-    (centac_plan, 'Análisis espectrométrico de aceite lubricante',                               3,  3),
-    (centac_plan, 'Verificación de diferencial de presión en filtros de aire',                   4,  3),
-    (centac_plan, 'Limpieza química de intercambiadores de calor (Coolers)',                     5, 12),
-    (centac_plan, 'Análisis de firma de vibraciones (FFT)',                                      6, 12),
-    (centac_plan, 'Overhaul de Etapa 1 y 2: Inspección de Impulsores y Sellos (4 Años)',        7, 48);
+INSERT INTO public.asset_plans (id, asset_id, pm_plan_id, measurement_point_id, next_due_meter, current_cycle_index) VALUES
+('00000000-0000-4000-e000-000000000002', '00000000-0000-4000-b000-000000000003', '00000000-0000-4000-a000-000000000002', '00000000-0000-4000-f000-000000000001', 1500, 2); -- Va por el ciclo 2
 
-    -- Asset plan: start at cycle 12 so the demo shows an annual-scope WO on next run
-    INSERT INTO public.asset_plans (asset_id, pm_plan_id, measurement_point_id, next_due_date, current_cycle_index)
-    VALUES (centac_id, centac_plan, centac_mp, CURRENT_DATE + INTERVAL '5 days', 12);
+INSERT INTO public.asset_plans (id, asset_id, pm_plan_id, measurement_point_id, next_due_date, next_due_meter, current_cycle_index) VALUES
+('00000000-0000-4000-e000-000000000003', '00000000-0000-4000-b000-000000000004', '00000000-0000-4000-a000-000000000003', '00000000-0000-4000-f000-000000000002', (NOW() + interval '6 months')::date, 2800, 1);
 
-    -- ── TITAN 2: SUBESTACIÓN BLINDADA (GIS 115 kV) ────────────────────────────
-    INSERT INTO public.assets (id, parent_id, name, code, asset_type, category, criticality, manufacturer, model)
-    VALUES (gis_id, plant_id,
-            'Subestación Blindada en SF6 (GIS - 115kV)', 'ELEC-GIS-01',
-            'system', 'electrical', 'high', 'Siemens', '8DN8-Switchgear');
+-- 6. ÓRDENES DE TRABAJO (HISTÓRICAS Y ACTIVAS)
+-- OT 1: Cerrada del Ciclo 1 (Compresor)
+INSERT INTO public.work_orders (id, asset_id, asset_plan_id, wo_number, title, wo_type, status, pm_cycle_index, pm_plan_name_snapshot, completed_at) VALUES
+('00000000-0000-4000-d000-000000000001', '00000000-0000-4000-b000-000000000002', '00000000-0000-4000-e000-000000000001', 'OT-1001', 'PM Mensual - Ciclo 1', 'preventive', 'completed', 1, 'Plan Mecánico Mensual', (NOW() - interval '60 days'));
 
-    -- Multi-tier plan: x1 monthly, x12 annual, x60 5-year
-    INSERT INTO public.pm_plans (id, name, trigger_type, interval_value, interval_unit, interval_mode,
-                                  criticality, lead_days)
-    VALUES (gis_plan, 'Protocolo de Mantenimiento Subestación GIS',
-            'calendar', 1, 'months', 'fixed', 'critical', 15);
+-- OT 2: Cerrada del Ciclo 2 (Compresor)
+INSERT INTO public.work_orders (id, asset_id, asset_plan_id, wo_number, title, wo_type, status, pm_cycle_index, pm_plan_name_snapshot, completed_at) VALUES
+('00000000-0000-4000-d000-000000000002', '00000000-0000-4000-b000-000000000002', '00000000-0000-4000-e000-000000000001', 'OT-1002', 'PM Mensual - Ciclo 2', 'preventive', 'completed', 2, 'Plan Mecánico Mensual', (NOW() - interval '30 days'));
 
-    INSERT INTO public.pm_tasks (pm_plan_id, description, sort_order, frequency_multiplier) VALUES
-    (gis_plan, 'Lectura de manómetros de presión de gas SF6',                           1,  1),
-    (gis_plan, 'Verificación de contadores de maniobra de interruptores',               2,  1),
-    (gis_plan, 'Medición de Descargas Parciales (Método Acústico/UHF)',                 3, 12),
-    (gis_plan, 'Inspección termográfica de celdas y compartimientos',                   4, 12),
-    (gis_plan, 'Análisis de calidad del gas SF6 (Humedad, Pureza, SO2)',                5, 60),
-    (gis_plan, 'Pruebas de tiempos de apertura y simultaneidad (Ciclo 5 Años)',         6, 60),
-    (gis_plan, 'Medición de resistencia de contacto (Ducter)',                          7, 60);
+-- OT 3: Abierta del Ciclo 1 (Motor - 500h)
+INSERT INTO public.work_orders (id, asset_id, asset_plan_id, wo_number, title, wo_type, status, pm_cycle_index, pm_plan_name_snapshot) VALUES
+('00000000-0000-4000-d000-000000000003', '00000000-0000-4000-b000-000000000003', '00000000-0000-4000-e000-000000000002', 'OT-1003', 'PM 500h - Ciclo 1', 'preventive', 'in_progress', 1, 'Plan por Horas (Motor)');
 
-    -- Asset plan: start at cycle 59 — one step before the 5-year overhaul for demo impact
-    INSERT INTO public.asset_plans (asset_id, pm_plan_id, next_due_date, current_cycle_index)
-    VALUES (gis_id, gis_plan, CURRENT_DATE + INTERVAL '10 days', 59);
+-- OT 4: Correctiva Manual (Sin ciclo)
+INSERT INTO public.work_orders (id, asset_id, wo_number, title, wo_type, status) VALUES
+('00000000-0000-4000-d000-000000000004', '00000000-0000-4000-b000-000000000002', 'OT-1004', 'Reparación de fuga de aceite', 'inspection', 'open');
 
-    -- ── HISTORICAL WO (success record) ────────────────────────────────────────
-    -- FIX 4.2: wo_number removed from INSERT — the trigger always overwrites it anyway.
-    -- The trigger fn_assign_wo_number fires BEFORE INSERT and sets wo_number from the
-    -- sequence, so any value supplied here would be silently discarded.
-    INSERT INTO public.work_orders
-        (id, asset_id, title, wo_type, status, priority,
-         scheduled_date, completed_at, resolution)
-    VALUES
-        (uuid_generate_v4(), centac_id,
-         'PM Mensual — Inspección Centac', 'preventive', 'completed', 'high',
-         CURRENT_DATE - INTERVAL '30 days',
-         CURRENT_DATE - INTERVAL '29 days',
-         'Inspección satisfactoria. Sin fugas detectadas. Niveles de aceite dentro de especificación.');
+-- 7. TAREAS DE LAS ÓRDENES (Checklist persistente)
+INSERT INTO public.wo_tasks (id, work_order_id, description, sort_order, completed) VALUES
+-- Tareas OT-1001 (Ciclo 1 - Solo Rutina)
+(uuid_generate_v4(), '00000000-0000-4000-d000-000000000001', 'Inspección de fajas', 1, true),
+-- Tareas OT-1002 (Ciclo 2 - Solo Rutina)
+(uuid_generate_v4(), '00000000-0000-4000-d000-000000000002', 'Inspección de fajas', 1, true),
+-- Tareas OT-1003 (Ciclo 1 del Motor)
+(uuid_generate_v4(), '00000000-0000-4000-d000-000000000003', 'Lubricación básica', 1, false),
+-- Tareas OT-1004 (Correctiva)
+(uuid_generate_v4(), '00000000-0000-4000-d000-000000000004', 'Localizar punto de fuga', 1, true),
+(uuid_generate_v4(), '00000000-0000-4000-d000-000000000004', 'Cambio de sello de manguera', 2, false);
 
-END $$;
+-- 8. PERFILES
+INSERT INTO public.profiles (id, full_name, role)
+VALUES ('00000000-0000-4000-a000-000000000000', 'Administrador (Dev)', 'admin')
+ON CONFLICT (id) DO NOTHING;

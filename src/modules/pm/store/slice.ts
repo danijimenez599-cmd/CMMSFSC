@@ -318,10 +318,10 @@ export const createPmSlice: StateCreator<StoreState, [], [], PmSlice> = (set, ge
               last_trigger_at: now
             }).eq('id', point.id);
             
-            (get() as any).showToast?.({
-              type: 'warning',
-              title: 'Alerta de Condición',
-              message: `Se ha generado una OT automática para ${asset?.name || 'el activo'}.`
+            showToast({ 
+              type: 'warning', 
+              title: 'Alerta de Condición', 
+              message: `Se ha generado una OT automática para ${asset?.name || 'el activo'}.` 
             });
             
             if ((get() as any).fetchWorkOrders) await (get() as any).fetchWorkOrders();
@@ -364,61 +364,34 @@ export const createPmSlice: StateCreator<StoreState, [], [], PmSlice> = (set, ge
       for (const woWithTasks of generated) {
         const { tasks, ...wo } = woWithTasks;
 
-        let insertedWoId = wo.id;
-        let inserted = false;
-        let attempts = 0;
+        const { error: woError } = await supabase.from('work_orders').insert({
+          id: wo.id,
+          asset_id: wo.assetId,
+          asset_plan_id: wo.assetPlanId,
+          title: wo.title,
+          description: wo.description,
+          wo_type: wo.woType,
+          status: wo.status,
+          priority: wo.priority,
+          scheduled_date: wo.scheduledDate,
+          due_date: wo.dueDate,
+          pm_plan_name_snapshot: wo.pmPlanNameSnapshot,
+          pm_cycle_index: wo.pmCycleIndex,
+          created_by: bestUser,
+        });
 
-        while (!inserted && attempts < 3) {
-          attempts++;
-          const currentId = attempts > 1 ? generateId() : wo.id;
-          insertedWoId = currentId;
-
-          const { error: woError } = await supabase.from('work_orders').insert({
-            id: currentId,
-            asset_id: wo.assetId,
-            asset_plan_id: wo.assetPlanId,
-            title: wo.title,
-            description: wo.description,
-            wo_type: wo.woType,
-            status: wo.status,
-            priority: wo.priority,
-            scheduled_date: wo.scheduledDate,
-            due_date: wo.dueDate,
-            pm_plan_name_snapshot: wo.pmPlanNameSnapshot,
-            pm_cycle_index: wo.pmCycleIndex,
-            created_by: bestUser,
-          });
-
-          if (!woError) {
-            inserted = true;
-          } else if (woError.code === '23505') {
-            // Duplicate wo_number from concurrent insert — retry with new ID
-            console.warn(`[Engine] Colisión de wo_number, reintento ${attempts}...`);
-          } else if (woError.code === '23503') {
+        if (woError) {
+          console.error('Error persisting WO:', woError);
+          if (woError.code === '23503') {
             throw new Error(`Fallo de Auditoría: Tu usuario no existe en la tabla de perfiles. Por favor, re-ejecuta el SQL con el Backfill.`);
-          } else {
-            throw new Error(`Fallo de persistencia en OT: ${woError.message}`);
           }
-        }
-
-        if (!inserted) {
-          throw new Error('No se pudo generar la OT después de 3 intentos (colisión persistente de wo_number).');
-        }
-
-        // Anchor the asset plan's next_due_date if it was null so the scheduler
-        // does not regenerate on the next run (existingOpenWo guard will block it
-        // while open; once closed, recalcNextDue will set the real next date).
-        const sourceAp = dbData.assetPlans.find(ap => ap.id === wo.assetPlanId);
-        if (sourceAp && !sourceAp.nextDueDate && wo.dueDate) {
-          await supabase.from('asset_plans').update({
-            next_due_date: wo.dueDate,
-          }).eq('id', wo.assetPlanId);
+          throw new Error(`Fallo de persistencia en OT: ${woError.message}`);
         }
 
         if (tasks.length > 0) {
           const dbTasks = tasks.map((t, idx) => ({
             id: generateId(),
-            work_order_id: insertedWoId,
+            work_order_id: wo.id,
             sort_order: t.sortOrder ?? idx,
             description: t.description,
           }));

@@ -1,26 +1,10 @@
-import { createClient } from '@supabase/supabase-js'
-import type { Database } from './database.types'
+import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl  = import.meta.env.VITE_SUPABASE_URL  as string
-const supabaseKey  = import.meta.env.VITE_SUPABASE_ANON_KEY as string
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseKey) {
-  throw new Error(
-    '❌ Faltan variables VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY.\n' +
-    'Crea un archivo .env.local basado en .env.example'
-  )
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error('Faltan las variables de entorno de Supabase (VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY)');
 }
 
-export const supabase = createClient<Database>(supabaseUrl, supabaseKey, {
-  auth: {
-    persistSession:    true,
-    autoRefreshToken:  true,
-    detectSessionInUrl: true,
-  },
-})
-
-// ── Helper: obtener usuario actual de Supabase ──────────────────
-export async function getCurrentSession() {
-  const { data: { session } } = await supabase.auth.getSession()
-  return session
-}
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);

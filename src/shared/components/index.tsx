@@ -253,9 +253,9 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaHTMLAttrib
 Textarea.displayName = 'Textarea';
 
 interface FormFieldProps {
-  label: ReactNode;
+  label: string;
   error?: string;
-  hint?: ReactNode;
+  hint?: string;
   children: ReactNode;
   id?: string;
   required?: boolean;

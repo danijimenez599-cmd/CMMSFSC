@@ -5,12 +5,10 @@ import AssetTreePanel from './components/AssetTreePanel';
 import AssetDetailPanel from './components/AssetDetailPanel';
 import AssetSidePanel from './components/AssetSidePanel';
 import AssetForm from './components/AssetForm';
-import { checkAssetDeletability } from './utils/assetHelpers';
+import { canDeleteAsset } from './utils/assetHelpers';
 
 export default function AssetRegistryView() {
-  const store = useStore() as any;
-  const { fetchAssets, assets, selectedAssetId, deleteAsset, showToast, currentUser,
-          assetPlans = [], workOrders = [], measurementPoints = [] } = store;
+  const { fetchAssets, assets, selectedAssetId, deleteAsset, showToast, currentUser } = useStore() as any;
   const [formOpen, setFormOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [defaultParentId, setDefaultParentId] = useState<string | null>(null);
@@ -20,24 +18,12 @@ export default function AssetRegistryView() {
   const editingAsset = editingId ? assets.find((a: any) => a.id === editingId) : null;
 
   const handleDelete = async (id: string) => {
-    const check = checkAssetDeletability(id, assets, assetPlans, workOrders, measurementPoints);
-
-    if (!check.canDelete) {
+    if (!canDeleteAsset(id, assets)) {
       showToast({ type: 'error', title: 'No se puede eliminar', message: 'El activo tiene sub-activos vinculados.' });
       return;
     }
-
-    const warnings: string[] = [];
-    if (check.linkedPlans > 0) warnings.push(`${check.linkedPlans} plan(es) PM`);
-    if (check.linkedWorkOrders > 0) warnings.push(`${check.linkedWorkOrders} orden(es) de trabajo`);
-    if (check.linkedPoints > 0) warnings.push(`${check.linkedPoints} punto(s) de medición`);
-
-    const msg = warnings.length > 0
-      ? `Este activo tiene ${warnings.join(', ')} vinculados que serán eliminados permanentemente.\n\n¿Confirma la eliminación?`
-      : '¿Eliminar este activo? No se puede deshacer.';
-
-    if (!window.confirm(msg)) return;
-
+    // Using simple confirm as requested to not invent logic, but ideally this would be a ConfirmDialog
+    if (!window.confirm('¿Eliminar este activo? No se puede deshacer.')) return;
     try {
       await deleteAsset(id);
       showToast({ type: 'success', title: 'Activo eliminado' });

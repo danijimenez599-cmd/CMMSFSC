@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { shouldRefetch } from '../../shared/utils/fetchGuard';
 import { motion } from 'framer-motion';
 import { useDashboardMetrics } from './hooks/useDashboardMetrics';
 import PmGauge from './components/PmGauge';
@@ -39,10 +38,10 @@ export default function DashboardView() {
   const workOrders = store.workOrders || [];
 
   useEffect(() => {
-    if (shouldRefetch('assets')) fetchAssets();
-    if (shouldRefetch('workorders')) fetchWorkOrders();
-    if (shouldRefetch('inventory')) fetchInventory();
-    if (shouldRefetch('pm')) fetchPmData();
+    fetchAssets();
+    fetchWorkOrders();
+    fetchInventory();
+    fetchPmData();
   }, []);
 
   const pieData = (() => {

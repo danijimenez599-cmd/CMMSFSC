@@ -22,6 +22,4 @@ export type AppModule = 'dashboard' | 'assets' | 'workorders' | 'inventory' | 'p
 export interface ToastPayload {
   id: string;
   type: 'success' | 'error' | 'info' | 'warning';
-  title: string;
-  message?: string;
-}
+  
