@@ -1,0 +1,90 @@
+﻿0,1,2,3,4,5,6
+,,,,,,
+,,,Plan de mantenimiento de MI,,,
+,,,,,,
+,,,Especificaciones tecnicas ,,,Ilustración del equipo 
+,,,"Mixer direccional
+Motor de 7.5 HP 60 HZ
+460V/20.1 AMP(90%)  230V/40.1 AMP(90%)
+RPM 880
+Ensamble de Flotador FRP
+2 Frames de Amarre 304 SS
+ Hélice, pin de hélice acero inoxidable 17-4 PH",,,
+,,,Partes,Intervalo,Labor de Mantenimiento,Materiales y Herramientas
+,,,Motores,Semestral,Verifique que los drenajes de condensado del motor estén limpios.,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Kit de limpieza
+•	Llaves de boca y llaves de cubo"
+,,,Motores,Semestral,Inspección general de los motores (Verificar temperatura y parametros eléctricos),"•	Equipo de protección 
+•	Osciloscopio
+•	Megóhmetro
+•	Multimetro
+•	Cámara térmica
+•	Equipo de calibración
+•	Llaves de boca y llaves de cubo
+•	Retenedores, Juntas y selladores
+•	Alicates y tenazas
+•	Extractores de rodamientos
+•	Disolvente desengrasante
+En caso de repuestos contactar Aqua-Aerobic "
+,,,Motores,Cada 2 años,"Cambio de los rodamientos(Cambio de empaques, retenedores, O-rings)","•	Equipo de protección 
+•	Llaves de boca y llaves de tubo
+•	Cámara termográfica, Equipo de calibración 
+•	Extractores de rodamientos
+•	Rodamientos, Retenedores, Juntas y selladores
+En caso del cambio de rodamiento usar D.E. 7213DBD Y O.D.E. 6310ZC3"
+,,,Estructura,Bimensual,Inspeccionar visualmente el mixer en busca de basura o residuos acumulados,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Kit de limpieza
+•	Llaves de boca y llaves de  cubo"
+,,,Estructura,Mensual ,Verificar y ajustar todas las líneas de amarre a la tensión adecuada,"•	Equipo de protección 
+•	Cables de seguridad 
+•	Kit de limpieza
+•	Llaves de boca
+•	Kit de amarre (Cable, Clips, Thimble, Gancho, Grillete, Muelles de extensión, Abrazadera, Empuñadura de alivio de tensión)"
+,,,Estructura,Cada 2 años,Inspeccionar Placa de sellado (arandela de retención de grasa) o cambiar si es necesario,"•	Equipo de protección 
+•	Kit de instalación de la Placa de sellado
+•	Tempilstick o Markall
+•	Llaves de boca y llaves de cubo
+•	Kit de Destornilladores
+•	Lubricante antigripante Thread-Eze Ultra
+•	Disolvente desengrasante"
+,,,Estructura,Cada 2 años,Inspeccionar Retenedor (Sellador de grasa) o cambiar si es necesario,"•	Equipo de protección 
+•	Kit de instalación del Retén  (Sellador de grasa)
+•	Tempilstick o Markall
+•	Llaves de boca y llaves de cubo
+•	Kit de Destornilladores"
+,,,Estructura,Cada 2 años,Inspeccionar Inserto antirreflejos o cambiar si es necesario,"•	Equipo de protección 
+•	Kit de instalación del Inserto antirreflejos
+•	Tempilstick o Markall
+•	Llaves de boca y llaves de cubo
+•	Kit de Destornilladores"
+,,,Estructura,Cada 2 años,Inspeccionar Rotating Slinger (Deflector de fluidos) o cambiar si es necesario,"•	Equipo de protección 
+•	Kit de instalación del Rotating Slinger (Deflector de fluidos)
+•	Tempilstick o Markall
+•	Llaves de boca y llaves de cubo
+•	Kit de Destornilladores"
+,,,Estructura,Cada 2 años,Inspeccionar Juntas de la base del motor o cambiar si es necesario,"•	Equipo de protección 
+•	Kit de instalación de la juntas de la base del motor
+•	Loctite® #660 Quick Metal
+•	Llaves de boca y llaves de cubo
+•	Cables de seguridad 
+•	Loctite® Stud Lock #271
+•	Disolvente desengrasante"
+,,,Estructura,Cada 2 años,Inspeccionar la Hélice o cambiar si es necesario,"•	Equipo de protección 
+•	Kit de instalación de la Hélice (Pin de la hélice, Loctite #660 Quick Metal, y el fijador de roscas Loctite® #271, el tornillo de fijación y el manual)
+•	Tempilstick o Markall
+•	Llaves de boca y llaves de cubo
+•	Kit de Destornilladores
+•	Lubricante antigripante Thread-Eze Ultra
+•	Disolvente desengrasante
+"
+,,,Sistema eléctrico,Semestral,"Comprobar el estado y la seguridad del cableado y de las conexiones eléctricas (Medir tensión, corriente y medir aislamiento)","•	Equipo de protección 
+•	Cámara termográfica
+•	Equipo de calibración
+•	Selladores dieléctricos
+•	Kit de Destornilladores
+•	Pinzas, Alicates y Tenazas
+•	Megóhmetro
+•	Multimetro
+•	Llaves de cubo"

@@ -1,0 +1,100 @@
+﻿0,1,2,3,4,5
+,,,,,
+,,Plan de mantenimiento DTO,,,
+,,,,,
+,,Especificaciones,,,Ilustración de equipo
+,,"•	Un Soplador AB 200 0.33 HP, 35 CFM, 220 VC, SINGLE PHASE, 1.6Δ/0.9Y AMPS
+•	Sistema de válvulas y tuberías
+•	Actuadores neumáticos
+•	Sensor de presión (Sensor IFM Efector modelo PX3229)
+•	Monitor de OZONO modelo 932C
+•	Panel de control
+•	Ensamble 1400 LPM DESTRUCTOR",,,
+,,Partes,Intervalo,Labor de mantenimiento  ,Materiales y Herramientas
+,,Soplador,Semestral,Inspecciones generales del soplador (Verificar temperatura y parametros eléctricos),"•	Equipo de protección 
+•	Osciloscopio
+•	Megóhmetro
+•	Multímetro
+•	Cámara térmica
+•	Equipo de calibración
+•	Llaves y llaves de tubo
+•	Kit de Destornilladores
+•	Alicates y tenazas
+•	Extractores de rodamientos y poleas
+•	Juntas y selladores 
+En caso de repuestos originales 
+•	Atlantic Bowlers modelo de soplador AB-200 SINGLE STAGE"
+,,Soplador,Anualmente,"Mantenimiento de los rodamientos del soplador (Verificar temperatura, Lubricación y si es necesario cambio de rodamientos, empaques, retenedores, O-rings)","•	Equipo de protección
+•	Grasa para rodamientos NLGI grado N3 o sus equivalentes
+•	Rodamientos NSK grado C3, DE 6204ZZ Y ODE 6203ZZ 
+•	Kit de limpieza
+•	Kit de Destornilladores 
+•	Cámara termográfica
+•	Equipo de calibración
+•	Extractores de rodamientos y poleas."
+,,Panel de control,Anualmente,"Comprobar el estado y la seguridad del cableado y de las conexiones eléctricas en el hardware(Medir tensión, corriente y medir aislamiento)","•	Equipo de protección 
+•	Cámara termográfica
+•	Equipo de calibración
+•	Selladores dieléctricos
+•	Kit de Destornilladores
+•	Pinzas y Tenazas
+•	Multímetro"
+,,Panel de control,Diariamente,Revisar datos y sus parámetros de los Sensores de presión,"•	Equipo de protección 
+•	Tener un formato de revision de rutinas y base de datos
+En caso de cambio
+•	Repuestos originales (Sensor IFM Efector modelo PX3229)
+•	Selladores
+•	Llaves y llaves de tubo
+•	Multímetro"
+,,Panel de control,Semestral,Inspección visual y limpieza a los ventiladores de refrigeración y a los componentes eléctricos,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Aire comprimido
+•	Alicates y tenazas
+•	Kit de limpieza
+•	Kit de Destornilladores"
+,,Panel de control,Diariamente,Revisar el monitor de OZONO,"•	Equipo de protección 
+•	Tener un formato de revisión de rutinas y base de datos
+En caso de cambio
+•	Repuestos originales (Monitor de ozono marca BMT modelo 932C)
+•	Multímetro
+•	Kit de Destornilladores
+•	Cámara termográfica
+•	Equipo de calibración
+•	Selladores dieléctricos
+•	Pinzas y Tenazas"
+,,Sistema de Válvulas y Tuberias,Anualmente,Comprobar el estado y la seguridad de las conexiones de las tuberías.,"•	Equipo de protección 
+•	Cámara acústica o Manómetro 
+•	Abrazaderas y Selladores
+•	Llaves y llaves de tubo
+"
+,,Sistema de Válvulas y Tuberias,Anualmente,Comprobar el estado y la seguridad de las conexiones de las mangueras.,"•	Equipo de protección 
+•	Cámara acústica o Manómetro 
+•	Abrazaderas y Selladores
+•	Llaves y llaves de tubo
+•	Kit de Destornilladores
+•	Cambio mangueras y mangueras para vacío 40 PSI marca McMaster."
+,,Sistema de Válvulas y Tuberias,Anualmente,Comprobar el estado y funcionamiento de los actuadores automáticos.,"•	Equipo de protección 
+•	Manómetro
+•	Cámara termográfica
+•	Equipo de calibración
+•	Kit de Destornillador
+•	Selladores
+•	Llaves de tubo, Llaves de boca
+•	Repuestos INLINE SR050-12-0-BS, N4-NMR-1 y Válvula INLINE Serie 304C"
+,,Ensamble del Destructor de Ozono,Semanal,Vaciar y limpiar el WATER TRAP,"•	Equipo de protección 
+•	Inspección visual en busca de residuos
+•	Kit de limpieza
+•	Llaves de boca y llaves de cubo"
+,,Ensamble del Destructor de Ozono,Semestral ,Comprobar el estado y la seguridad de la caja de policarbonato,"•	Equipo de protección 
+•	Cámara acústica o Manómetro
+•	Cámara termográfica
+•	Equipo de calibración 
+•	Selladores
+•	Llaves y llaves de tubo"
+,,Ensamble del Destructor de Ozono,Anualmente,Comprobar el estado de las mallas térmicas y de las Tiras de tela de silicia,"•	Equipo de protección 
+•	Selladores
+•	Cámara termográfica
+•	Equipo de calibración
+En caso de cambio 
+•	Malla termica de 3"" x 24"", 360 W, 3.13 A 
+•	Tela de silicia de  1"" de ancho"

@@ -1,0 +1,94 @@
+﻿0,1,2,3,4,5
+,,,,,
+,,Plan de mantenimiento de CMQ,,,
+,,,,,
+,,Especificaciones,,,Ilustración del equipo 
+,,"•	Reductor Brawn Mixer BGMF 200                                                       •	Motor Baldor EM3664T 1170RPM, 2HP, 60HZ, VOLTS 230/460 AMPS 6.3/3.15, 184T, 0640M, TEFC, F1
+•	Sensor de temperatura y oxigeno
+•	Panel de control",,,
+,,Partes,Intervalo,Labor de Mantenimiento,Materiales y Herramientas
+,,Motor,Semestral,Inspecciones generales del motor (Verificar parametros eléctricos y temperatura),"•	Equipo de protección 
+•	Osciloscopio
+•	Megóhmetro
+•	Multímetro
+•	Cámara térmica
+•	Equipo de calibración
+•	Llaves y llaves de tubo
+•	Mazo
+•	Alicates y tenazas
+•	Extractores de rodamientos
+•	Retenedores, Juntas y selladores
+•	Repuestos originales con BALDOR"
+,,Motor,Anualmente,"Mantenimiento de los rodamientos(Verificar temperatura, Lubricación y si es necesario cambio de rodamientos, empaques, retenedores, O-rings)","•	Equipo de protección 
+•	Grasa para rodamientos Exxon Polyrex®EM o sus equivalentes
+•	Kit de limpieza
+•	Llaves y llaves de tubo
+•	Cámara termográfica
+•	Equipo de calibración
+•	Extractores de rodamientos
+•	Retenedores, Juntas y selladores
+•	En caso de cambio de rodamientos usar en DE 6206 Y ODE 6205"
+,,Reductor,Mensual,Comprobar nivel de aceite y verificar que no hay agua en el interior,"•	Equipo de protección 
+•	ASEGÚRESE de desconectar o bloquear la alimentación de la unidad
+•	Inspección visual del nivel de aceite
+•	Kit de limpieza
+•	Llaves de boca y llaves de cubo"
+,,Reductor,Semestral,Limpiar el reductor,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Kit de Destornilladores 
+•	Kit de limpieza
+•	Llaves de boca y llaves de cubo"
+,,Reductor,Anualmente,"Mantenimiento del Reductor (Verificar temperatura, Lubricación y si es necesario cambio de rodamientos, empaques, retenedores, O-rings)","•	Equipo de protección 
+•	ASEGÚRESE de desconectar o bloquear la alimentación de la unidad 
+•	Grasa para rodamientos NLGI grado 2 o sus equivalentes
+•	Kit de limpieza
+•	Llaves y llaves de tubo
+•	Cámara termográfica
+•	Equipo de calibración
+•	Extractores de rodamientos
+•	Retenedores, Juntas y selladores
+•	En caso de cambio de rodamientos usar rodamientos de bola de 1 hilera"
+,,Reductor,Semestral,Drenar y sustituir el aceite ,"•	Equipo de protección 
+•	Aceite AGMA #7C o sus equivalentes
+•	Recolector de aceite
+•	Kit de limpieza
+•	Llaves de boca y llaves de cubo
+•	Extractores de rodamientos
+•	Retenedores, Juntas y selladores"
+,,Panel de control,Anualmente,"Comprobar el estado y la seguridad del cableado y de las conexiones eléctricas en el hardware(Medir tensión, corriente y medir aislamiento)","•	Equipo de protección 
+•	Cámara termográfica
+•	Equipo de calibración
+•	Selladores dieléctricos
+•	Kit de Destornilladores
+•	Pinzas, Alicates y Tenazas
+•	Megóhmetro
+•	Multimetro
+•	Llaves de cubo"
+,,Panel de control,Trimestral,Inspección visual y limpieza a los componentes eléctricos,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Aire comprimido
+•	Alicates y tenazas
+•	Kit de limpieza
+•	Kit de Destornilladores"
+,,Sensores,Diariamente,Revisar datos y parámetros de Sensor de temperatura y oxigeno,"•	Equipo de protección 
+•	Tener un formato de revision de rutinas y base de datos"
+,,Sensores,Trimestral,Limpiar el sensor,"•	Equipo de protección 
+•	Kit de limpieza
+•	Kit de destornilladores
+•	Llaves y llaves de tubo"
+,,Sensores,Trimestral,Calibrar el sensor,"•	Equipo de protección 
+•	Equipo de calibracion
+•	Llaves y llaves de tubo
+•	kit de destornilladores"
+,,Sensores,Cada 2 años,Cambiar la cápsula del sensor,"•	Equipo de protección 
+•	Kit de repuesto original del sensor LDO
+•	Kit de limpieza
+•	Equipo de calibración
+•	Llaves y llaves de tubo
+•	kit de destornilladores"
+,,Estructura,Anualmente,Comprobar la integridad de todos los pernos y vigas de soporte,"•	Equipo de protección 
+•	Inspección visual en busca de daños  
+•	Kit de limpieza
+•	Llaves de boca y llaves de cubo
+•	Cinta métrica
+•	Medidor de torque de tuercas "

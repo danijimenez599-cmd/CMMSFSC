@@ -1,0 +1,152 @@
+﻿0,1,2,3,4,5
+,,,,,
+,,Plan de mantenimiento de FP,,,
+,,,,,
+,,Especificaciones tecnicas ,,,Ilustración del equipo 
+,,"•	Filtro Prensa Modelo 1200G32-95-125SYLC 110-120V/1Ph/60Hz
+•	Presión máxima de alimentación de entrada 6,8 bar [100 psi]
+•	Volumen total de 3,4 m³ [125 pies³].
+•	Superficie total de filtración 224 m² [2413 pies²].
+•	Tamaño de la placa 1200 mm
+•	Presión de cierre hidráulica 204 bar [3000 psi]
+•	Ajuste de la válvula de alivio 231 bar [3400 psi]
+•	Cilindro hidráulico - Tamaño 254 mm X 762 mm
+•	Capacidad del depósito hidráulico 40,7 litros / 11 galones
+•	Aceite hidráulico recomendado* Shell Tellus Plus 46 o equivalente",,,
+,,Partes,Intervalo,Labor de Mantenimiento,Materiales y Herramientas
+,,Filtro de Placas y Membrana,Semanal o En Función de uso,Limpiar y lavar superficial de las membranas filtrantes (Reemplazar las membranas filtrantes y las juntas de los filtro si es necesario),"•	Equipo de protección 
+•	Agua a presión
+•	Kit de limpieza
+•	Kit de Destornilladores
+•	Espátula
+En caso de cambio
+•	Repuestos de membranas filtrantes y las juntas de los filtros con EVOQUA"
+,,Filtro de Placas y Membrana,Anualmente,Limpieza y lavado exhaustivo en cada uno de las membranas filtrantes (Reemplazar las membranas filtrantes y las juntas de los filtro si es necesario),"•	Equipo de protección 
+•	Agua a presión
+•	Kit de limpieza
+•	Kit de Destornilladores
+•	Espátula
+En caso de cambio
+•	Repuestos de membranas filtrantes y las juntas de los filtros con EVOQUA"
+,,Unidad de potencia hidráulica Mark V,Semanal,Desechar el aceite de escape del vaso del filtro.,"•	Equipo de protección 
+•	Recolector de aceite
+•	Kit de limpieza
+•	Selladores y retenedores
+•	Llaves de boca y llaves de cubo"
+,,Unidad de potencia hidráulica Mark V,Semanal,Inspeccionar integridad y funcionamiento del filtro de aire si hay roturas o agujeros. Reparar/sustituir si es necesario,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Kit de Destornilladores
+•	Kit de limpieza
+•	Llaves de boca y llaves de cubo
+En caso de cambio 
+•	Repuestos originales con EVOQUA del Filtro de Aire"
+,,Unidad de potencia hidráulica Mark V,Semanal,Inspeccionar integridad y funcionamiento del filtro de aceite hidráulico si hay roturas o agujeros. Reparar/sustituir si es necesario,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Kit de Destornilladores
+•	Kit de limpieza
+•	Llaves de boca y llaves de cubo
+En caso de cambio 
+•	Repuestos originales con EVOQUA del Filtro de Aceite"
+,,Unidad de potencia hidráulica Mark V,Semanal,Inspeccionar integridad y funcionamiento del Manifold de ensamble Aire/Hidráulico,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Kit de Destornilladores
+•	Kit de limpieza
+•	Llaves de boca y llaves de cubo
+En caso de cambio 
+•	Repuestos originales con EVOQUA del Manifold de ensamble Aire/Hidráulico"
+,,Unidad de potencia hidráulica Mark V,Semanal,Inspeccionar integridad y funcionamiento de la bomba hidráulica y regulador,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Kit de Destornilladores
+•	Kit de limpieza
+•	Llaves de boca y llaves de cubo
+En caso de cambio 
+•	Repuestos originales con EVOQUA de la bomba hidráulica y regulador"
+,,Unidad de potencia hidráulica Mark V,Mensual,Comprobar niveles de aceite,"•	Equipo de protección 
+•	ASEGÚRESE de desconectar o bloquear la alimentación de la unidad
+•	Inspección visual del nivel de aceite a través del tubo
+•	Kit de limpieza
+•	Llaves de boca y llaves de cubo
+•	En caso de rellenar usar Aceite Shell Tellus Plus 46 o sus equivalentes"
+,,Unidad de potencia hidráulica Mark V,Diariamente,Comprobar que la presión de apriete es correcta,"•	Equipo de protección 
+•	Inspeccíón visual en busca de daños
+•	Kit de limpieza
+•	Llaves y llaves de tubo, en caso de re apriete"
+,,Unidad de potencia hidráulica Mark V,Cuatrimestral,Comprobar que la válvula de alivio este ajustada correctamente ,"•	Equipo de protección 
+•	Llevar un formato de ajustes y base de datos
+•	Inspeccíón visual en busca de daños
+•	Kit de limpieza
+•	Selladores
+•	Llaves y llaves de tubo"
+,,Unidad de potencia hidráulica Mark V,Anualmente,Reemplazar Aceite hidráulico y Filtros ,"•	Equipo de protección 
+•	Aceite Shell Tellus Plus 46 o sus equivalentes
+•	Recolector de aceite
+•	Kit de limpieza
+•	Selladores y retenedores
+•	Llaves de boca y llaves de cubo
+•	Nuevo Filtro de aire y filtro de aceite de EVOQUA"
+,,Unidad de potencia hidráulica Mark V,Anualmente,"Comprobar integridad y funcionamiento de la válvula check, válvula de alivio y válvula de liberación/compresión","•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Cámara acústica o Manómetro 
+•	Kit de limpieza
+•	Llaves de boca y llaves de cubo"
+,,Unidad de potencia hidráulica Mark V,Anualmente,Comprobar el estado y la seguridad de las conexiones de las mangueras y tubos.,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Abrazaderas y Selladores
+•	Llaves y llaves de tubo
+•	Cambio de mangueras y tubos con el color correspondiente"
+,,Sistema de Válvulas y Tuberias,Anualmente,Comprobar el estado y la seguridad de las conexiones de las tuberías.,"•	Equipo de protección 
+•	Cámara acústica o Manómetro 
+•	Abrazaderas y Selladores
+•	Llaves y llaves de tubo"
+,,Sistema de Válvulas y Tuberias,Anualmente,Comprobar el estado y la seguridad de las conexiones de las válvulas,"•	Equipo de protección 
+•	Cámara acústica o Manómetro 
+•	Abrazaderas y Selladores
+•	Llaves y llaves de tubo"
+,,Desplazador de platos semiautomático,Semanal,Limpiar las varillas guía del cilindro de empuje,"•	Equipo de protección 
+•	Agua a presión
+•	Kit de limpieza
+•	Llaves y llaves de tubo
+•	Espátula
+En caso de cambio
+•	Repuestos del cilindro de empuje con EVOQUA"
+,,Desplazador de platos semiautomático,Mensual,Operar el cilindro de elevación sin placas. Las placas de empuje deben subir y bajar suavemente.,"•	Equipo de protección 
+•	Llevar un formato de ajustes y base de datos
+•	Inspeccíón visual en busca de daños
+•	Kit de limpieza
+•	Llaves y llaves de tubo"
+,,Desplazador de platos semiautomático,Mensual,Operar el cilindro de empuje sin placas. Las placas de empuje deben subir y bajar suavemente.,"•	Equipo de protección 
+•	Llevar un formato de ajustes y base de datos
+•	Inspeccíón visual en busca de daños
+•	Kit de limpieza
+•	Llaves y llaves de tubo"
+,,Desplazador de platos semiautomático,Mensual,Limpiar las barras guía del cilindro elevador,"•	Equipo de protección 
+•	Agua a presión
+•	Kit de limpieza
+•	Llaves y llaves de tubo
+•	Espátula
+En caso de cambio
+•	Repuestos del cilindro elevador con EVOQUA"
+,,Bombas diafragma,Semestral,Inspecionar integridad y funcionamiento de la bombas de diafragma ,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Kit de limpieza
+•	Llaves de boca y llaves de cubo"
+,,Bombas diafragma,Anualmente,"Mantenimiento de la bomba (Cambio de empaques, retenedores, O-rings, Copas ""U"", Kit de Muffler)","•	Equipo de protección 
+•	Repuestos originales ARO
+•	O-Rings
+•	Nuevas abrazaderas, arandelas, Empaques, Retenedores, Copas en ""U"", Kit de Muffler y Placa del  adaptador
+•	Grasa Lubriplate FML-2 o sus equivalentes
+•	Sellador Loctite 271 o sus equivalentes
+•	Llaves y llaves de tubo
+•	Kit de Destornilladores"
+,,APCS,Semanal,Comprobar que los parámetros y configuraciones sean las correctos,"•	Equipo de protección 
+•	Llevar un formato de ajustes y base de datos"
+,, APCS,Diariamente,"Inspeccionar unidad de mantenimiento y cambiar envases, si es necesario. ","•	Equipo de protección 
+•	Inspección visual en busca de daños  
+•	Llevar un formato de revisión de rutinas y base de datos"
+,, APCS,Anualmente,Comprobar el estado y la seguridad del cableado y de las conexiones eléctricas,"•	Equipo de protección 
+•	Cámara termográfica
+•	Equipo de calibración
+•	Selladores dieléctricos
+•	Kit de Destornilladores
+•	Pinzas y Tenazas
+•	Multímetro"

@@ -1,0 +1,69 @@
+﻿0,1,2,3,4,5
+,,,,,
+,,Plan de mantenimiento de WASP,,,
+,,,,,
+,,Especificaciones tecnicas ,,,Ilustración del equipo 
+,,"Bomba ABS EJ 10D-4
+•	10 HP de 3 Fases, 1750 RPM
+•	Voltaje de 230/460.575, 28/14-11.2 Amps
+•	Descarga Brida horizontal
+•	Altura maxima(pies) 70
+•	Caudal maximo (620 gpm)
+•	Peso (170 libs)
+•	Proteción tipo IP68
+•	Sistema ContraBlock",,,
+,,Partes,Intervalo,Labor de Mantenimiento,Materiales y Herramientas
+,,Bomba,Semestral,Limpiar la bomba,"•	Equipo de protección 
+•	Kit de limpieza
+•	Llaves y llaves de tubo 
+"
+,,Bomba,Semestral,Inspeccionar correcto funcionamiento del Impulsor,"•	Equipo de protección 
+•	Inspección visual en busca de daños o desgaste
+•	Kit de limpieza
+•	Llaves de boca y llaves de tubo "
+,,Bomba,Al Fallo,"Mantenimiento interno de la bomba (Cambio de los rodamientos, de empaques, retenedores y O-rings)","•	Equipo de protección 
+•	Grasa para rodamientos no toxica 
+•	Kit de limpieza
+•	Cambio de rodamineto de bola
+•	Cámara termográfica, Equipo de calibración 
+•	Extractores de rodamientos"
+,,Bomba,Al Fallo,Cambio de Aceite,"•	Equipo de protección 
+•	Aceite no toxica 
+•	Kit de limpieza
+•	Kit de destornilladores
+•	Llaves y llaves de tubo 
+•	Extractores de rodamientos"
+,,Panel de control,Bimestral,"Comprobar el estado y la seguridad del cableado y de las conexiones eléctricas en el hardware(Medir tensión, corriente y medir aislamiento)","•	Equipo de protección 
+•	Cámara termográfica
+•	Equipo de calibración
+•	Selladores dieléctricos
+•	Kit de Destornilladores
+•	Pinzas, Alicates y Tenazas
+•	Megóhmetro
+•	Multimetro
+•	Llaves de cubo"
+,,Panel de control,Semestral,Inspección visual y limpieza a los ventiladores de refrigeración y a los componentes eléctricos,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Aire comprimido
+•	Alicates y tenazas
+•	Kit de limpieza
+•	Kit de Destornilladores"
+,,Panel de control,Anualmente,"Comprobar el estado y la seguridad del cableado en los variadores de frecuencia(Medir tensión, corriente y medir aislamiento)","•	Equipo de protección 
+•	Cámara termográfica
+•	Equipo de calibración
+•	Selladores dieléctricos
+•	Kit de Destornilladores
+•	Pinzas y Tenazas
+•	Multímetro
+•	Megóhmetro
+•	Osciloscopio
+•	Llaves dinamométricas
+•	Alicates"
+,,Sensores,Diariamente,Revisar datos y parámetros de Sensor de fluidos ,"•	Equipo de protección 
+•	Tener un formato de revision de rutinas y base de datos
+En caso de cambio
+•	Repuestos originales (SIEMENS)
+•	Equipo de calibracion
+•	Kit de destornilladores
+•	Llaves y llaves de tub
+•	Selladores"

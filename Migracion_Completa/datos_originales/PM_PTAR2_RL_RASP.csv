@@ -1,0 +1,110 @@
+﻿0,1,2,3,4,5
+,,,,,
+,,Plan de mantenimiento RASP,,,
+,,,,,
+,,Especificaciones,,,Ilustración de equipo
+,,"•	Bomba marca GR T10A60S-B SELF PRIMING, 1750 RPM
+•	Motor marca Marathon, 30 HP 60 HZ, 1800 RPM, 230/460 V, 286T FRAME, TEFC 
+",,,
+,,Partes,Intervalo,Labor de mantenimiento  ,Materiales y Herramientas
+,,Bomba,Cada 2 años,"Cambio de los rodamientos(Lubricación y cambio de empaques, retenedores, O-rings)","•	Equipo de protección 
+•	Grasa para rodamientos SAE No. 30, en caso de cambio rodamiento 5300M o 5300E en DE y ODE
+•	Kit de limpieza
+•	Kit de Destornilladores 
+•	Llaves y llaves de tubo
+•	Cámara termográfica
+•	Equipo de calibración
+•	Extractores de rodamientos y poleas 
+•	Selladores y retenedores"
+,,Bomba,Anualmente,Verificar funcionamiento y limpiar impulsor de la bomba y cambiar si es necesario ,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Kit de limpieza
+•	Kit de Destornilladores 
+•	Llaves y llaves de tubo"
+,,Bomba,Mensual,"Revisar las Poleas y Fajas, cambiar si es nesecario","•	Equipo de protección 
+•	Inspección visual en busca de daños o desgastes (Registro de base de datos)
+•	Cámara térmico 
+•	Equipo de calibración y alineación 
+•	Medidor de tensión
+•	Kit de Destornilladores 
+•	Llaves y llaves de tubo
+En caso de repuestos originales 
+•	GORMAN‐RUPP PUMPS, y Fajas Trapezoidales 5VX730 de Elementos Industriales S.A. de C.V."
+,,Motor,Diariamente,Revisar datos de contra entrega de lodo,"•	Equipo de protección 
+•	Tener un formato de revision de rutinas y base de datos"
+,,Motor,Semestral,"Inspecciones generales de los motores(Verificar temperatura, parametros eléctricos)","•	Equipo de protección 
+•	Osciloscopio
+•	Megóhmetro
+•	Multímetro
+•	Cámara térmica
+•	Equipo de calibración
+•	Llaves y llaves de tubo
+•	Kit de Destornilladores
+•	Alicates y tenazas
+•	Extractores de rodamientos y poleas
+•	Juntas y selladores
+•	Repuestos originales con Marathon"
+,,Motor,Semestral,Limpiar el motor y mantener las aberturas de ventilación despejadas,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Kit de Destornilladores
+•	Kit de limpieza
+•	Llaves de boca y llaves de cubo"
+,,Motor,Cada 2 años,"Cambio de los rodamientos(Lubricación y cambio empaques, retenedores, O-rings)","•	Equipo de protección 
+•	Grasa para rodamientos Mobil Polyrex® EM o sus equivalentes, en caso de cambio rodamientos 6311 DE y 6210 ODE
+•	Kit de limpieza
+•	Kit de Destornilladores 
+•	Llaves y llaves de tubo
+•	Cámara termográfica
+•	Equipo de calibración
+•	Extractores de rodamientos y poleas 
+•	Selladores y retenedores"
+,,Panel de control,Semestral,Inspección visual y limpieza a los ventiladores de refrigeración y a los componentes eléctricos,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Aire comprimido
+•	Alicates y tenazas
+•	Kit de limpieza
+•	Kit de Destornilladores"
+,,Panel de control,Anualmente,"Comprobar el estado y la seguridad del cableado y de las conexiones eléctricas en el hardware(Medir tensión, corriente y medir aislamiento)","•	Equipo de protección 
+•	Cámara termográfica
+•	Equipo de calibración
+•	Selladores dieléctricos
+•	Kit de Destornilladores
+•	Pinzas, Alicates y Tenazas
+•	Megóhmetro
+•	Multimetro
+•	Llaves de cubo"
+,,Panel de control,Anualmente,"Comprobar el estado y la seguridad del cableado en los variadores de frecuencia(Medir tensión, corriente y medir aislamiento)","•	Equipo de protección 
+•	Cámara termográfica
+•	Equipo de calibración
+•	Selladores dieléctricos
+•	Kit de Destornilladores
+•	Pinzas y Tenazas
+•	Multímetro
+•	Megóhmetro
+•	Osciloscopio
+•	Llaves dinamométricas
+•	Alicates"
+,,Panel de control,Anualmente,"Comprobar el funcionamiento de los IGBT y Capacitores en el Bus de CC (Realizar pruebas de medición, verificar temperaturas y cambiar si es necesario)","•	Equipo de protección 
+•	Cámara termica
+•	Equipo de calibración
+•	Selladores dieléctricos
+•	Kit de Destornilladores
+•	Pinzas, Tenazas y Alicates
+•	Multímetro
+•	Llaves dinamométricas
+•	Kit de cambio IGBT
+•	Kit de Capacitadores"
+,,Sistema de Válvulas y Tuberias,Semestral,Comprobar el estado y la seguridad de las conexiones de las tuberías.,"•	Equipo de protección 
+•	Cámara acústica o Manómetro 
+•	Selladores
+•	Llaves y llaves de tubo"
+,,Sistema de Válvulas y Tuberias,Semestral,Inspeccionar el estado y la seguridad de la válvula de alivio de presión y válvula check,"•	Equipo de protección 
+•	Cámara acústica o Manómetro 
+•	Inspeccíón visual en busca de daños
+•	Kit de limpieza
+•	Selladores
+•	Llaves y llaves de tubo"
+,,Sistema de Válvulas y Tuberias,Anualmente,Comprobar el estado y la seguridad de las conexiones de las válvulas,"•	Equipo de protección 
+•	Cámara acústica o Manómetro 
+•	Selladores
+•	Llaves y llaves de tubo"

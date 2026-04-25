@@ -1,0 +1,96 @@
+﻿0,1,2,3,4,5
+,,,,,
+,,Plan de mantenimiento de AE,,,
+,,,,,
+,,Especificaciones tecnicas ,,,Ilustración del equipo 
+,,"Aireador
+Motor de 50 HP 60 HZ 1180 RPM
+460V/61.9AMP(90%)  230V/123AMP(90%)
+Ensamble de Flotador FRP y SS
+2 Frames de Amarre 304 SS
+ Hélice, pin de hélice acero inoxidable 17-4 PH",,,
+,,Partes,Intervalo,Labor de Mantenimiento,Materiales y Herramientas
+,,Motor,Cada 2 años,"Cambio de los rodamientos (Cambio de  empaques, retenedores, O-rings)","•	Equipo de protección 
+•	Llaves de boca y llaves de tubo
+•	Cámara termográfica, Equipo de calibración 
+•	Extractores de rodamientos
+•	Rodamientos, Retenedores, Juntas y selladores"
+,,Motor,Semestral,Verifique que los drenajes de condensado del motor estén limpios.,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Kit de limpieza
+•	Llaves de boca y llaves de cubo"
+,,Motor,Semestral,Inspección general de los motores (Verificar temperatura y parametros elélctricos),"•	Equipo de protección 
+•	Osciloscopio
+•	Megóhmetro
+•	Multimetro
+•	Cámara térmica
+•	Equipo de calibración
+•	Llaves de boca y llaves de cubo
+•	Retenedores, Juntas y selladores
+•	Alicates y tenazas
+•	Extractores de rodamientos
+•	Disolvente desengrasante
+En caso de repuestos contactar Aqua-Aerobic modelo de motor Endura"
+,,Estructura,Anualmente,Inspección de Sello de junta laberínto o cambiar en caso de ser necesario,"•	Equipo de protección 
+•	Inspección visual en busca de daños
+En caso de cambio usar:
+•	Kit de instalación del Sello de junta laberínto
+•	Tempilstick o Markall
+•	Llaves de boca y llaves de cubo
+•	Kit de Destornilladores
+•	Lubricante antigripante Thread-Eze Ultra
+•	Disolvente desengrasante"
+,,Estructura,Anualmente,Inspección Inserto antirreflejos o cambiar en caso de ser necesario,"•	Equipo de protección 
+•	Inspección visual en busca de daños
+En caso de cambio usar:
+•	Kit de instalación del Inserto antirreflejos
+•	Tempilstick o Markall
+•	Llaves de boca y llaves de cubo
+•	Kit de Destornilladores"
+,,Estructura,Anualmente,Inspección Arandela de empuje o cambiar en caso de ser necesario,"•	Equipo de protección 
+•	Inspección visual en busca de daños
+En caso de cambio usar: 
+•	Kit de instalación del Arandela de empuje
+•	Tempilstick o Markall
+•	Llaves de boca y llaves de cubo
+•	Kit de Destornilladores"
+,,Estructura,Anualmente,Inspección Deflector de fluidos o cambiar en caso de ser necesario,"•	Equipo de protección 
+•	Inspección visual en busca de daños
+En caso de cambio usar:
+•	Kit de instalación del Deflector de fluidos
+•	Tempilstick o Markall
+•	Llaves de boca y llaves de cubo
+•	Kit de Destornilladores"
+,,Estructura,Anualmente,Inspección  de la Hélice o cambiar en caso de ser necesario,"•	Equipo de protección 
+•	Inspección visual en busca de daños
+En caso de cambio usar: 
+•	Kit de instalación de la Hélice (Pin de la hélice, Loctite #660 Quick Metal, y el fijador de roscas Loctite® #271, el tornillo de fijación y el manual)
+•	Tempilstick o Markall
+•	Llaves de boca y llaves de cubo
+•	Kit de Destornilladores
+•	Lubricante antigripante Thread-Eze Ultra
+•	Disolvente desengrasante
+"
+,,Estructura,Quincenal,Verificar y ajustar todas las líneas de amarre a la tensión adecuada,"•	Equipo de protección 
+•	Cables de seguridad 
+•	Kit de limpieza
+•	Llaves de boca
+•	Kit de amarre (Cable, Clips, Thimble, Gancho, Grillete, Muelles de extensión, Abrazadera, Empuñadura de alivio de tensión)"
+,,Estructura,Trimsetral,Inspeccionar visualmente el aireador en busca de basura o residuos acumulados,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Kit de limpieza
+•	Llaves de boca y llaves de  cubo"
+,,Estructura,Trimsetral,Comprobar la integridad del sistema de fijaccion en el aireador,"•	Equipo de protección 
+•	Cable de seguridad
+•	Kit de limpieza
+•	Llaves de boca y llaves de cubo
+•	Medidor de presión"
+,,Sistema electrico,Anualmente,"Comprobar el estado y la seguridad del cableado y de las conexiones eléctricas (Medir tensión, corriente y medir aislamiento)","•	Equipo de protección 
+•	Cámara termográfica
+•	Equipo de calibración
+•	Selladores dieléctricos
+•	Kit de Destornilladores
+•	Pinzas, Alicates y Tenazas
+•	Megóhmetro
+•	Multimetro
+•	Llaves de cubo"

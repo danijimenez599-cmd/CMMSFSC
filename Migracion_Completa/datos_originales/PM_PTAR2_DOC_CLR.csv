@@ -1,0 +1,120 @@
+﻿0,1,2,3,4,5
+,,,,,
+,,Plan de mantenimiento de CLR,,,
+,,,,,
+,,Especificaciones tecnicas ,,,Ilustración del equipo 
+,,"Clarificador 
+Modelo del mecanismo RSMTP
+Velocidad de rotación- Velocidad del brazo 0.271 RPM-8.423 RPM
+Torque del engranaje continuo 20000 ft-lbs
+Modelo del Sistema de Engranaje S42N12
+Engranaje recto – 42” diámetro, GRADO ASTM A536
+Engranaje Helicoidal- 12” diámetro, bronce 
+Motor SEW-EURODRIVE 1/2 HP 460V/60HZ",,,
+,,Partes,Intervalo,Labor de Mantenimiento,Materiales y Herramientas
+,,Ensamble del Sistema de engranajes,Semanal,Drenar condensado del engranje recto,"•	Equipo de protección 
+•	Reemplazo del tapón de drenaje
+•	Kit de limpieza
+•	Llaves de boca y llaves de cubo"
+,,Ensamble del Sistema de engranajes,Semanal,Drenar condensado del engranje Helicoidal,"•	Equipo de protección 
+•	Reemplazo del tapón de drenaje
+•	Kit de limpieza
+•	Llaves de boca y llaves de cubo"
+,,Ensamble del Sistema de engranajes,Mensual,"Revisar Tension, Alineamiento  y Reengrasar cadena de trasmisión (Lubricación y si es necesario cambio de cadena de transmisión)","•	Equipo de protección 
+•	Grasa NLGI grado 2 o sus equivalentes
+•	Kit de limpieza
+•	Inspección visual en busca de daños o desgastes
+•	Cámara térmico 
+•	Medidor laser de tensión 
+•	Kirkit
+•	Equipo de calibración y alineación 
+•	Kit de Destornilladores 
+•	Llaves de boca y llaves de cubo"
+,,Ensamble del Sistema de engranajes,Semestral,"Reengrasar rodamientos y piñones motrices (Lubricación y si es necesario cambio de rodamientos, piñones, empaques, retenedores, O-rings)","•	Equipo de protección 
+•	Grasa NLGI grado 2 o sus equivalentes
+•	Kit de limpieza
+•	Kit de Destornilladores 
+•	Llaves de boca y llaves de cubo 
+•	Extractores de rodamientos
+•	Retenedores, Juntas y selladores 
+En caso de cambio usar rodamiento de  Walker Process Equipment "
+,,Ensamble del Sistema de engranajes,Semestral,"Drenar, descargar y reemplazar aceite del engranje recto","•	Equipo de protección 
+•	Aceite AGMA 6EP ISO 320 o sus equvivalentes
+•	Recolector de aceite
+•	Kit de limpieza
+•	Sellador
+•	Llaves de boca y llaves de cubo"
+,,Ensamble del Sistema de engranajes,Semestral,"Drenar, descargar y reemplazar aceite del engranje Helicoidal","•	Equipo de protección 
+•	Aceite AGMA 6EP ISO 320 o sus equvivalentes
+•	Recolector de aceite
+•	Kit de limpieza
+•	Sellador
+•	Llaves de boca y llaves de cubo"
+,,Colector ,Cada 2 años,"Inspección general de la caja de engranaje (Verificar temperatura, si es necesario cambio de rodamientos, retenedores y Verificar temperatura)","•	Equipo de protección 
+•	ASEGÚRESE de desconectar o bloquear la alimentación de la unidad
+•	Kit de limpieza
+•	Llaves de boca y llaves de cubo
+•	Cámara térmica
+•	Equipo de calibración"
+,,Colector ,Cada 2 años,Inspección general del motor (Verificar temperatura y parametros elélctricos),"•	Equipo de protección 
+•	Osciloscopio
+•	Megóhmetro
+•	Multimetro
+•	Cámara térmica
+•	Equipo de calibración
+•	Llaves de boca y llaves de cubo
+•	Kit de Destornilladores
+•	Alicates y tenazas
+•	Extractores de rodamientos y poleas
+•	Retenedores, Juntas y selladores
+En caso de repuestos Walker Process Equipment modelo de motor SEW-EURODRIVE"
+,,Colector,Cada 2 años,Limpiar óxido en todo  el colector,"•	Removedor de oxido
+•	Cepillo de alambre
+•	Lija de grano grueso
+•	Kit de limpieza
+•	Pintura antioxidante
+•	Llaves y llaves de tubo
+•	Kit de destornilladores
+•	Brochas o pistola de pintura
+•	Mazo"
+,,Colector ,Cada 2 años  ,"Mantenimiento general de los rodamientos del motor y caja de engranaje(Verificar temperatura, Lubricación y si es necesario cambio de rodamientos, empaques, retenedores, O-rings)","•	Equipo de protección 
+•	Grasa NLGI grado 2 para rodamientos  o sus equivalentes, repuesto de rodamiento con Walker Process Equipment 
+•	Llaves de boca y llaves de tubo
+•	Kit de Destornilladores
+•	Cámara termográfica, Equipo de calibración 
+•	Extractores de rodamientos y poleas
+•	Retenedores, Juntas y selladores"
+,,Colector ,Cada 2 años  ,"Drenar, descargar y reemplazar aceite de la caja de engranaje","•	Equipo de protección 
+•	Aceite AGMA 6EP ISO 320 o sus equvivalentes
+•	Recolector de aceite
+•	Kit de limpieza
+•	Retenedores, Juntas y selladores 
+•	Llaves de boca y llaves de cubo"
+,,Estructura,Cada 2 años,Limpiar y Repintar,"•	Removedor de oxido
+•	Cepillo de alambre
+•	Lija de grano grueso
+•	Kit de limpieza
+•	Pintura anticorrosiva HI-BUILD EPOXOLINE SERIE 66
+•	Llaves y llaves de tubo
+•	Kit de destornilladores
+•	Brochas o pistola de pintura
+•	Mazo"
+,,Estructura,Cada 2 años,Comprobar la integridad de todas las fijaciones,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Kit de limpieza
+•	Llaves de boca y llaves de cubo"
+,,Estructura,Cada 2 años,Comprobar la integridad y seguridad del brazo guia,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Kit de limpieza
+•	Llaves de boca y llaves de cubo"
+,,Indicador de Torque,Mensual,Realizar prueba manual de las alarmas,"•	Equipo de protección 
+•	Llevar un formato de ajustes y base de datos"
+,,Indicador de Torque,Cada 2 años,"Comprobar el estado y la seguridad del cableado y de las conexiones eléctricas en el hardware(Medir tensión, corriente y medir aislamiento)","•	Equipo de protección 
+•	Cámara termográfica
+•	Equipo de calibración
+•	Selladores dieléctricos
+•	Kit de Destornilladores
+•	Pinzas, Alicates y Tenazas
+•	Megóhmetro
+•	Multimetro
+•	Llaves de cubo"

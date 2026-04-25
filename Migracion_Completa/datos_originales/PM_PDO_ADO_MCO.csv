@@ -1,0 +1,60 @@
+﻿0,1,2,3,4,5
+,,,,,
+,,Plan de mantenimiento MCO,,,
+,,,,,
+,,Especificaciones,,,Ilustración de equipo
+,,"•	Medidor de Flujo de ozono
+•	Panel de Control ",,,
+,,Partes,Intervalo,Labor de mantenimiento  ,Materiales y Herramientas
+,,Medidor,Diariamente,Revisar datos y parámetros en el Medidor de control de fluidos y Controlador de Fluidos Masico,"•	Equipo de protección 
+•	Tener un formato de revision de rutinas y base de datos
+En caso de cambio
+•	Repuestos originales (Sensor ALICAT modelo MCRS-2000SLPM-D-DB15B-CM, CIN, GASO2, Sensor IFM Efector Modelo PN2684)
+•	Equipo de calibracion
+•	Llaves y llaves de tubo
+•	Multímetro"
+,,Medidor,Anualmente,Revissar y Calibrar el Controlador de Fluidos Masico,"•	Equipo de protección 
+•	Cámara termográfica
+•	Equipo de calibración
+•	Llaves y llaves de tubo
+•	Multímetro
+•	Kit de Destornilladores
+•	Pinzas y Tenazas
+En caso de repuestos
+•	Repuestos originales (Sensor ALICAT modelo MCRS-2000SLPM-D-DB15B-CM, CIN)"
+,,Panel de control ,Anualmente,Comprobar el estado y la seguridad de las conexiones de las mangueras.,"•	Equipo de protección 
+•	Inspección visual en busca de daños  
+•	Abrazaderas y Selladores
+•	Llaves y llaves de tubo
+•	Repuestos Mangueras flexibles"
+,,Panel de control ,Anualmente,"Comprobar el estado y la seguridad del cableado y de las conexiones eléctricas en el hardware(Medir tensión, corriente y medir aislamiento)","•	Equipo de protección 
+•	Cámara termica
+•	Equipo de calibración
+•	Selladores dieléctricos
+•	Kit de Destornilladores
+•	Pinzas, Alicates y Tenazas
+•	Multímetro
+•	Megóhmetro
+•	Llaves de cubo"
+,,Panel de control ,Anualmente,Verificar funcionamiento de las Electro válvulas,"•	Equipo de protección 
+•	Inspección visual en busca de daños  
+•	Llevar un formato de revisión de rutinas y base de datos"
+,,Panel de control ,Anualmente,Inspección visual y limpieza a los componentes eléctricos,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Aire comprimido
+•	Alicates y tenazas
+•	Kit de limpieza
+•	Kit de Destornilladores"
+,,Valvulas y Tuberias,Anualmente,Comprobar el estado y la seguridad de las conexiones de las tuberías.,"•	Equipo de protección 
+•	Cámara acústica o Manómetro 
+•	Abrazaderas y Selladores
+•	Llaves y llaves de tubo
+•	Mangueras de cambio"
+,,Valvulas y Tuberias,Anualmente,Comprobar el estado y la seguridad de las conexiones de los actuadores automáticos,"•	Equipo de protección 
+•	Manómetro
+•	Cámara termográfica
+•	Equipo de calibración
+•	Kit de Destornillador
+•	Selladores
+•	Llaves de tubo, Llaves de boca
+•	Repuestos INLINE SR063-12-0-KS, N4-NMR-1 y Válvula INLINE Serie 304C"

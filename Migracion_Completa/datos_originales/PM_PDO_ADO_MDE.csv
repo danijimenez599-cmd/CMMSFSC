@@ -1,0 +1,57 @@
+﻿0,1,2,3,4,5
+,,,,,
+,,Plan de mantenimiento MDE,,,
+,,,,,
+,,Especificaciones ,,,Ilustración de equipo
+,,"Muestreador de efluente
+•	Configuración de Botellas:  4 botellas de 10 litros de PE o vidrio
+•	Cuerpo del frigorífico: Polietileno lineal de baja densidad (LLDPE)
+•	Requisitos de alimentación:  230 VAC ±10%, 50 Hz Muestreador, Corriente en marcha 0,82 amperios, Corriente de parada 17 amperios
+•	Temperatura de funcionamiento: de -29 a 49 °C
+•	Vida útil del tubo de la bomba: 1.000.000 de bombeos",,,
+,,Partes,Intervalo,Labor de mantenimiento  ,Materiales y Herramientas
+,,Bomba Peristáltica,Semanal,"Inspeccionar funcionamiento de la Bomba(Revisar si el muestreador no bombea líquido, la bomba se atasca )","•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Llaves 
+•	Kit de Destornilladores 
+•	Kit de limpieza"
+,,Bomba Peristáltica,Trimestral,Inspeccionar integridad y estado de las carcasa y rodillos de la bomba ,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Llaves 
+•	Kit de Destornilladores 
+•	Kit de limpieza"
+,,Bomba Peristáltica,Trimestral,"Limpiar o reemplazar las piezas húmedas (botellas, tubo de aspiración colador, tubo de la bomba y tubo de descarga)","•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Aire comprimido
+•	Llaves 
+•	Kit de Destornilladores 
+•	Kit de limpieza
+•	Kit de Repuesto en caso de ser necesarioo reemplazar marca TELEDYNE"
+,,Panel de Control,Trimestral,Realizar pruebas de diagnosticos para verificar parámetros (Revisar Detección defectuosa de líquidos y Volúmenes de muestra inexacto),"•	Equipo de protección 
+•	Tener un formato de revision de rutinas y base de datos"
+,,Panel de Control,Trimestral,Realizar pruebas de temperatura para verificar que se encuentra en los parámetros adecuados,"•	Equipo de protección 
+•	Tener un formato de revision de rutinas y base de datos"
+,,Panel de control,Semestral,Inspección visual y limpieza a los ventiladores de refrigeración y a los componentes eléctricos,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Aire comprimido
+•	Alicates y tenazas
+•	Kit de limpieza
+•	Kit de Destornilladores"
+,,Panel de control,Anualmente,"Comprobar el estado y la seguridad del cableado y de las conexiones eléctricas en el hardware(Medir tensión, corriente y medir aislamiento)","•	Equipo de protección 
+•	Cámara termográfica
+•	Equipo de calibración
+•	Selladores dieléctricos
+•	Kit de Destornilladores
+•	Pinzas, Alicates y Tenazas
+•	Megóhmetro
+•	Multimetro
+•	Llaves de cubo"
+,,Estructura,Anualmente,Limpieza del exterior y interior del muestreador,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Aire comprimido
+•	Alicates y tenazas
+•	Kit de limpieza
+•	Kit de Destornilladores"
+,,Estructura,Trimestral,Limpieza de Manguera de succión,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Kit de limpieza"

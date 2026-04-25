@@ -1,0 +1,136 @@
+﻿0,1,2,3,4,5
+,,,,,
+,,Plan de mantenimiento de BTS,,,
+,,,,,
+,,Especificaciones,,,Ilustración del equipo 
+,,"TANQUE SUAVIZADOR 1
+•	Motor marca marathon 15 HP 60HZ 254T
+460V/18.8 AMP(90%) 230V/37.5 AMP(90%)
+RPM 1775
+•	Bomba marca PENTAIR AURORA 3X4X9.5 
+RPM 3550
+TANQUE SUAVIADOR 2 y 3
+•	Motor marca marathon de 20 HP 60 HZ 256T
+460V/24.2 AMP(90%) 230V/48.5 AMP(90%)
+RPM 1768
+•	Bomba marca PENTAIR AURORA 3X4X9.5 
+RPM 3550
+TANQUE SUAVIADOR 4 y 5
+•	Motor marca American Marsh de 30 HP 60 HZ 286T
+460V/35.5 AMP(90%) 230V/71.1 AMP(90%)
+RPM 1770
+•	Bomba marca American Marsh 3X4-10 
+RPM 1800",,,
+,,Partes,Intervalo,Labor de Mantenimiento,Materiales y Herramientas
+,,MOTOR,Mensual,Revisar acople,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Llaves y llaves de tubo
+•	Mazo
+•	Equipo de calibración"
+,,MOTOR,Trimestral,Inspecciones generales del Motor (Verificar temperatura y parámetros eléctricos),"•	Equipo de protección 
+•	Osciloscopio
+•	Megóhmetro
+•	Multímetro
+•	Cámara térmica
+•	Equipo de calibración
+•	Vibrómetro
+•	Llaves y llaves de tubo
+•	Mazo
+•	Alicates y tenazas
+•	Extractores de rodamientos
+•	Juntas y selladores
+•	Repuestos originales con Marathon"
+,,MOTOR,Anualmente,"Mantenimiento de los rodamientos y sellos del motor (Verificar temperatura, Lubricación y si es necesario cambio de rodamientos, sellos, retenedores, O-rings)","•	Equipo de protección 
+•	Grasa para rodamientos NLGI grado 2, o sus equivalentes
+•	Kit de limpieza
+•	Llaves y llaves de tubo
+•	Cámara termográfica
+•	Equipo de calibración
+•	Extractores de rodamientos
+•	En caso de cambio de rodamientos usar en DE 6309-2Z/C3 y ODE 6209-2Z/C3
+•	En caso de cambio de Selladores mecanicos usar Sellos Tipo 1"
+,,MOTOR,Anualmente,Limpiar el motor y mantener las aberturas de ventilación despejadas,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Kit de Destornilladores
+•	Kit de limpieza
+•	Llaves de boca y llaves de cubo"
+,,BOMBA,Semestral,Inspecciones generales de las Bomba (Verificar temperatura),"•	Equipo de protección 
+•	Grasa para sellos y rodamientos Chevron® SRI Grease NLGI grado 2. o sus equivalentes
+•	Cámara térmica
+•	Equipo de calibración
+•	Vibrómetro
+•	Mazo
+•	Alicates y tenazas
+•	Extractores de rodamientos
+•	Llaves y llaves de tubo
+•	Repuestos originales con PENTAIR AURORA MODEL 3804"
+,,BOMBA,Anualmente,Verificar funcionamiento y limpiar impulsor de la bomba,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Kit de limpieza
+•	Kit de Destornilladores 
+•	Llaves y llaves de tubo"
+,,BOMBA,Anualmente,"Mantenimiento de los Sellos de labio, Sellos mecanicos y Rodamientos de la bomba (Verificar temperatura, Lubricación y si es necesario cambio de rodamientos, sellos, retenedores, O-rings)","•	Equipo de protección 
+•	Grasa para sellos y rodamientos Chevron® SRI NLGI grado 2, o sus equivalentes
+•	Kit de limpieza
+•	Llaves y llaves de tubo
+•	Cámara termográfica
+•	Equipo de calibración
+•	Extractores de rodamientos
+•	En caso de cambio de sellos mecanicos usar sellos tipo 21, KIt de sellos AURORA incluye (Sello, Anillos de desgaste
+Juntas, O-rings)"
+,,Sistema de tuberias y válvulas,Anualmente,Comprobar el estado y la seguridad de las conexiones de las tuberías.,"•	Equipo de protección 
+•	Cámara acústica
+•	Abrazaderas y Selladores
+•	Llaves y llaves de tubo
+•	Mazo"
+,,Sistema de tuberias y válvulas,Anualmente,Comprobar el estado y la seguridad de las conexiones de las válvulas,"•	Equipo de protección 
+•	Cámara acústica
+•	Selladores
+•	Llaves y llaves de tubo"
+,,Sistema de tuberias y válvulas,Anualmente,Comprobar  funcionamiento de la válvula de Pie,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Kit de limpieza
+•	Kit de Destornilladores 
+•	Llaves y llaves de tubo"
+,,Panel de control,Semestral,Inspección visual y limpieza a los ventiladores de refrigeración y a los componentes eléctricos,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Aire comprimido
+•	Alicates y tenazas
+•	Kit de limpieza
+•	Kit de Destornilladores"
+,,Panel de control,Anualmente,"Comprobar el estado y la seguridad del cableado y de las conexiones eléctricas en el hardware(Medir tensión, corriente y medir aislamiento)","•	Equipo de protección 
+•	Cámara termográfica
+•	Equipo de calibración
+•	Selladores dieléctricos
+•	Kit de Destornilladores
+•	Pinzas, Alicates y Tenazas
+•	Megóhmetro
+•	Multimetro
+•	Llaves de cubo"
+,,Panel de control,Anualmente,"Comprobar el estado y la seguridad del cableado en los variadores de frecuencia(Medir tensión, corriente y medir aislamiento)","•	Equipo de protección 
+•	Cámara termográfica
+•	Equipo de calibración
+•	Selladores dieléctricos
+•	Kit de Destornilladores
+•	Pinzas y Tenazas
+•	Multímetro
+•	Megóhmetro
+•	Osciloscopio
+•	Llaves dinamométricas
+•	Alicates"
+,,Panel de control,Anualmente,"Comprobar el funcionamiento de los IGBT y Capacitores en el Bus de CC (Realizar pruebas de medición, verificar temperaturas y cambiar si es necesario)","•	Equipo de protección 
+•	Cámara termica
+•	Equipo de calibración
+•	Selladores dieléctricos
+•	Kit de Destornilladores
+•	Pinzas, Tenazas y Alicates
+•	Multímetro
+•	Llaves dinamométricas
+•	Kit de cambio IGBT
+•	Kit de Capacitadores"
+,,Estructura,Anualmente,"Comprobar la integridad de todos los pernos, y Alineamiento entre Bomba y Motor","•	Equipo de protección 
+•	Inspección visual en busca de daños  
+•	Kit de limpieza
+•	Llaves de boca y llaves de cubo
+•	Equipo de calibración 
+•	Medidor de torque de tuercas"

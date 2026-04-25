@@ -1,0 +1,87 @@
+﻿0,1,2,3,4,5
+,,,,,
+,,Plan de mantenimiento de BCOS,,,
+,,,,,
+,,Especificaciones,,,Ilustración del equipo 
+,,"•	bombas marca Waukesha Cherry-Burrell modelo C216 de 7.5 HP a 3500 RPM
+•	bombas marca SUMMIT modelo 1.5X2-6J de 7.5 HP a 3500 RPM",,,
+,,Partes,Intervalo,Labor de Mantenimiento,Materiales y Herramientas
+,,Bombas,Anualmente,Inspecciones generales de las bombas (Verificar temperatura y parámetros eléctricos),"•	Equipo de protección 
+•	Osciloscopio
+•	Megóhmetro
+•	Multímetro
+•	Cámara térmica
+•	Equipo de calibración
+•	Llaves y llaves de allen
+•	Mazo
+• Cuñas de 0.060 pulgadas
+• Compuesto antiadherente
+•	Extractores de rodamientos
+•	Juntas y selladores
+•	Repuestos originales con Waukesha Cherry-Burrell o SUMMlT"
+,,Bombas,Semestral o 2500 Horas de trabajo,"Mantenimiento de los Rodamientos (Verificar temperatura, Lubricación y si es necesario cambio de rodamientos, sellos, retenedores, O-rings)  ","•	Equipo de protección 
+•	Grasa para rodamientos SLF LGFG 2 o sus equivalentes
+•	Kit de limpieza
+•	Llaves y llaves de tubo
+•	Cámara termográfica
+•	Equipo de calibración
+•	Extractores de rodamientos
+•	Sellos de labio y Sellos mecanicos
+•	En caso de cambio de rodamientos usar en DE 6307, y en ODE 6206 para Waukesha o rodamientos rígidos de bolas SKF de una hilera con un mínimo de B-10 para SUMMIT"
+,,Sistema de Válvulas y Tuberias,Anualmente,Comprobar el estado y la seguridad de las conexiones de las tuberías.,"•	Equipo de protección 
+•	Cámara acústica o Manómetro 
+•	Abrazaderas y Selladores
+•	Llaves y llaves de tubo
+•	Mazo"
+,,Sistema de Válvulas y Tuberias,Anualmente,Comprobar el estado y la seguridad de las conexiones de las válvulas,"•	Equipo de protección 
+•	Cámara acústica o Manómetro 
+•	Selladores
+•	Llaves y llaves de tubo
+•	Repuestos Genebre Valves de 1"" y 2"""
+,,Sistema de tuberias y válvulas,Anualmente,Comprobar  funcionamiento de la válvula de Pie,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Kit de limpieza
+•	Kit de Destornilladores 
+•	Llaves y llaves de tubo"
+,,Panel de control,Anualmente,"Comprobar el estado y la seguridad del cableado y de las conexiones eléctricas en el hardware(Medir tensión, corriente y medir aislamiento)","•	Equipo de protección 
+•	Cámara termográfica
+•	Equipo de calibración
+•	Selladores dieléctricos
+•	Kit de Destornilladores
+•	Pinzas, Alicates y Tenazas
+•	Megóhmetro
+•	Multimetro
+•	Llaves de cubo"
+,,Panel de control,Semestral,Inspección visual y limpieza a los ventiladores de refrigeración y a los componentes eléctricos,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Aire comprimido
+•	Alicates y tenazas
+•	Kit de limpieza
+•	Kit de Destornilladores"
+,,Estructura,Anualmente,Comprobar la integridad de todos los pernos ,"•	Equipo de protección 
+•	Inspección visual en busca de daños  
+•	Kit de limpieza
+•	Llaves de boca y llaves de cubo
+•	Cinta métrica
+•	Medidor de torque de tuercas "
+,,Estructura,Anualmente,Limpiar y Repintar,"•	Removedor de oxido
+•	Cepillo de alambre
+•	Lija de grano grueso
+•	Kit de limpieza
+•	Pintura anticorrosiva
+•	Llaves y llaves de tubo
+•	Kit de destornilladores
+•	Brochas o pistola de pintura
+•	Mazo"
+,,Sensores,Diariamente,Revisar datos y parámetros de Medidor de fluidos ,"•	Equipo de protección 
+•	Tener un formato de revision de rutinas y base de datos"
+,,Sensores,Anualmente,"Verificacion de funcionamiento de medidores de flujo (Medir Temperatura, Tension, Corriente y Aislamiento)","•	Equipo de protección 
+•	Megóhmetro
+•	Multímetro
+•	Cámara térmica
+•	Equipo de calibración 
+•	Inspeccion visual en busca de daños
+En caso de cambio
+•	Repuestos originales (Krohne)
+•	Llaves y llaves de tubo
+•	Selladores"

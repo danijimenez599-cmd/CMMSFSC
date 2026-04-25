@@ -1,0 +1,85 @@
+﻿0,1,2,3,4,5
+,,,,,
+,,Plan de mantenimiento de BDT,,,
+,,,,,
+,,Especificaciones,,,Ilustración del equipo 
+,,"Bomba dosificadora S1CB
+Dosificacion 52 L/h-102psi-13.7GPI
+Suministro eléctrico 120/240 V  50/60HZ, 0.6-1.5 A 110W
+",,,
+,,Partes,Intervalo,Labor de Mantenimiento,Materiales y Herramientas
+,,Motor(Si aplica),Semestral,Inspecciones generales de los motores (Verificar parametros eléctricos y temperatura),"•	Equipo de protección 
+•	Osciloscopio
+•	Megóhmetro
+•	Multímetro
+•	Cámara térmica
+•	Equipo de calibración
+•	Llaves y llaves de tubo
+•	Mazo
+•	Alicates y tenazas
+•	Extractores de rodamientos
+•	Retenedores, Juntas y selladores"
+,,Motor(Si aplica),Anualmente,"Mantenimiento de los rodamientos (Lubricación y si es necesario cambio de rodamientos, empaques, retenedores, O-rings)","•	Equipo de protección 
+•	Grasa para rodamientos Mobil Grease XHP222 o sus equivalentes
+•	Kit de limpieza
+•	Llaves y llaves de tubo
+•	Cámara termográfica
+•	Equipo de calibración
+•	Extractores de rodamientos
+•	Retenedores, Juntas y selladores
+•	En caso de cambio de rodamientos usar rodamientos de bola de 1 hilera"
+,,Bomba,Trimestral,Comprobar el nivel de aceite.,"•	Equipo de protección 
+•	Inspección visual 
+•	Kit de limpieza"
+,,Bomba,Trimestral,Comprobarque los tubos de dosificación estén bien sujetos a la unidad de transporte.,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Kit de limpieza
+•	Kit de Destornilladores
+•	Llaves de boca y llaves de cubo"
+,,Bomba,Trimestral,Comprobar que los tornillos del cabezal dosificador estén bien ajustados.,"•	Equipo de protección 
+•	Kit de Destornilladores
+•	Llaves de boca y llaves de cubo"
+,,Bomba,Trimestral,Comprobar el estado de la membrana de dosificación y si es necesario cambiarla,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Kit de cambio de Membrana
+•	Kit de limpieza
+•	Selladores
+•	Kit de Destornilladores
+•	Llaves de boca y llaves de cubo"
+,,Bomba,Trimestral,Comprobar que el bombeo se realiza correctamente: Dejar que la bomba succione brevemente.,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Tener un formato de revision de rutinas y base de datos"
+,,Bomba,Trimestral,Comprobar el funcionamiento y comprobar que esten bien apretadas la válvula de purga de aire y la válvula de rebose.,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Kit de limpieza
+•	Selladores
+•	Llaves de boca y llaves de cubo"
+,,Sistema de Válvulas y Tuberias,Anualmente,Comprobar el estado y la seguridad de las conexiones de las tuberías.,"•	Equipo de protección 
+•	Cámara acústica o Manómetro 
+•	Selladores
+•	Llaves y llaves de tubo"
+,,Sistema de Válvulas y Tuberias,Anualmente,Inspeccionar el estado y la seguridad de la válvula de alivio de presión,"•	Equipo de protección 
+•	Cámara acústica o Manómetro 
+•	Inspeccíón visual en busca de daños
+•	Kit de limpieza
+•	Selladores
+•	Llaves y llaves de tubo"
+,,Sistema de Válvulas y Tuberias,Mensual,"Inspeccion de condición de tubo de nivel y limpiar, si es necesario reemplazar","•	Equipo de protección 
+•	Inspección visual en busca de daños y suciedad 
+•	Agua tibia con jabón suave
+•	Kit de limpieza"
+,,Panel de control,Diariamente,Revisar datos y parámetros ,"•	Equipo de protección 
+•	Tener un formato de revision de rutinas y base de datos"
+,,Panel de control,Semestral,Inspección visual y limpieza a los componentes eléctricos,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Aire comprimido
+•	Alicates y tenazas
+•	Kit de limpieza
+•	Kit de Destornilladores"
+,,Panel de control,Anualmente,"Comprobar el estado y la seguridad del cableado y de las conexiones eléctricas (Medir tensión, corriente y medir aislamiento)","•	Equipo de protección 
+•	Cámara termográfica
+•	Equipo de calibración
+•	Selladores dieléctricos
+•	Kit de Destornilladores
+•	Pinzas y Tenazas
+•	Multímetro"

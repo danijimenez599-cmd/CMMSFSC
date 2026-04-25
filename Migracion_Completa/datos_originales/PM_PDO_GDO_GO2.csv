@@ -1,0 +1,95 @@
+﻿0,1,2,3,4,5
+,,,,,
+,,,,,
+,,Plan de mantenimiento GO2,,,
+,,,,,
+,,Especificaciones tecnicas,,,Ilustración de equipo
+,,"Generador de oxígeno MODELO AS-N                                                                                        
+Caudal del producto 1.500 - 1.800 SCFH (39,43 - 47,32 Nm3/hr o 707 - 849 SLPM)1
+Presión del producto 310 kPa (45 psig o 3,0 barg)
+Concentración del producto Hasta 95% 
+Punto de rocío del producto -73°C (-100°F)
+Conexiones físicas
+  -Entrada de aire comprimido 1½"" FNPT
+  -Salida de gas del producto ¾"" FNPT
+Almacenamiento
+  -Temperatura -13ºF (-25ºC) a 131ºF (55ºC)
+  -Humedad 0-90% (sin condensación)
+Presión: 621 kPa o 6,2 barg (90 psig) mínimo
+Requisitos de alimentación del control (monofásico) 120 V ~ ±10%, 50/60 Hz, 3,0 A",,,
+,,Partes,Intervalo,Labor de mantenimiento  ,Materiales y Herramientas
+,,Filtros y cubetas,Mensual,Inspeccionar los filtros y las cubetas,"•	Equipo de protección 
+•	Cámara acústica o Manómetro 
+•	Inspección visual en busca de daños
+•	Kit de limpieza
+•	Kit de Destornilladores "
+,,Filtros y cubetas,Mensual,Limpiar las cubetas ,"•	Equipo de protección 
+•	Cámara acústica o Manómetro 
+•	Kit de limpieza 
+•	Kit de Destornilladores
+•	Mangueras de cambio
+•	Abrazaderas y Selladores "
+,,Filtros y cubetas,Semestral,Sustituir el elemento filtrante de partículas.,"•	Equipo de protección 
+•	Kit de Destornillador
+•	Selladores
+•	Llaves y llaves de tubo
+•	Repuestos originales Wilkerson (Filtros F35 TIPO D, O-Ring, Abrazadera para los O-Ring y kit de drenado automático)"
+,,Filtros y cubetas,Anualmente,Sustituir el elemento filtrante coalescente. ,"•	Equipo de protección 
+•	Kit de Destornillador
+•	Selladores y Abrazaderas
+•	Llaves y llaves de tubo
+•	Repuestos originales Wilkerson (Filtros M35 TIPO B1, O-Ring, Abrazadera para los O-Ring y kit de drenado automático)"
+,,Sistema de Válvulas y Actuadores,Diariamente,Asegurarse de que el drenaje automático funciona correctamente. ,"•	Equipo de protección
+•	Llevar un formato de revisión de rutinas y base de datos"
+,,Sistema de Válvulas y Actuadores,Semanal,Revision de fugas y oxigeno,"•	Equipo de protección 
+•	Cámara acústica o Manómetro 
+•	Inspección visual en busca de fugas
+•	Kit de limpieza
+•	Llaves y Llaves de tubo"
+,,Sistema de Válvulas y Actuadores,Anualmente,"Comprobar el estado y funcionamiento de las válvulas: Solenoide, Bola, De Piston(Flujo de Aire). ","•	Equipo de protección 
+•	Manómetro
+•	Equipo de calibración
+•	Kit de Destornillador
+•	Selladores y Abrazaderas 
+•	Multímetro
+•	Llaves de tubo
+•	Llaves de boca
+•	Repuestos para todos las válvulas: ASCO Valves Series SD8320G174, ASCO Valves 2-way Auxiliary-Operated Pilot Series 8290, ASCO Valves  8263"
+,,Sistema de Válvulas y Actuadores,Anualmente,Comprobar el estado y funcionamiento de los actuadores automáticos. ,"•	Equipo de protección 
+•	Manómetro
+•	Cámara termográfica 
+•	Equipo de calibración
+•	Kit de Destornillador
+•	Selladores
+•	Llaves de tubo
+•	Llaves de boca
+•	Repuestos INLINE SR050-12-0-BS, N4-NMR-1 y Válvula INLINE Serie 304C"
+,,Regulador de aire y swicth de presión,Anualmente,Limpiar y calibrar el regulador de aire y switch de presión,"•	Equipo de protección 
+•	Kit de Destornilladores 
+•	Selladores
+•	Llaves y llaves de tubo
+•	Kit de limpieza
+•	Equipo de calibración
+•	Repuestos para Wilkerson 1-1/2” FPT Dial-Air™ Regulator
+•	Repuestos para Allen-Balley modelo Bulletin 826"
+,,Panel de Control,Diariamente,Revisar datos y parámetros de Sensor de oxigeno,"•	Equipo de protección 
+•	Tener un formato de revision de rutinas y base de datos"
+,,Panel de Control,Trimestral,Limpiar y Calibrar los sensores,"•	Equipo de protección 
+•	Equipo de calibracion
+•	Kit de limpieza
+•	Kit de destornilladores"
+,,Panel de Control,Semestral,Inspección visual y limpieza de los componentes eléctricos,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Aire comprimido
+•	Alicates y tenazas
+•	Kit de limpieza
+•	Kit de Destornilladores"
+,,Panel de Control,Anualmente,"Comprobar el estado y la seguridad del cableado y de las conexiones eléctricas en el hardware(Medir tensión, corriente y medir aislamiento)","•	Equipo de protección 
+•	Cámara termográfica
+•	Equipo de calibración
+•	Selladores dieléctricos
+•	Kit de Destornilladores
+•	Pinzas, Alicates y Tenazas
+•	Megóhmetro
+•	Multimetro
+•	Llaves de cubo"

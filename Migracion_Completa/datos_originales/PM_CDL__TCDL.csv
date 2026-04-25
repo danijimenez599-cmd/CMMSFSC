@@ -1,0 +1,217 @@
+﻿0,1,2,3,4,5
+,,,,,
+,,Plan de mantenimiento de TCDL,,,
+,,,,,
+,,Especificaciones,,,Ilustración del equipo 
+,,"MODEL CB 
+PACKAGED BOILER
+Energía Principal 460V 3PH 60HZ 87AMP
+MINIMA CAPACIDAD 103 AMP
+MAX CAPACIDAD 348 AMP
+MOTOR SOPLADOR 50 HP
+MOTOR COMPRESSOR 7.5 HP
+CALENTADOR DE ACEITE 7.5 KW
+CONTROL CIRCUITO 120V 1PH 60HZ 7AMP
+MOTOR BOMBA ACEITE 460V 3PH 60 HZ 1.6AMP",,,
+,,Partes,Intervalo,Labor de Mantenimiento,Materiales y Herramientas
+,,QUEMADOR,Cada 2 Dias,Cambio de boquillas,"•	Equipo de protección 
+•	Kit de limpieza
+•	Llaves de boca y llaves de cubo
+•	Repuestos de boquillas con CLEAVER BROOKS O POWERMASTER"
+,,QUEMADOR,Semanal,Revisar el quemador (Verificar funcionamiento) ,"•	Equipo de protección
+•	Llevar un formato de revisión de rutinas y base de datos"
+,,QUEMADOR,Semanal,Verificar que exista buena Combustión (Observando la temperatura de la chimenea),"•	Equipo de protección
+•	Llevar un formato de revisión de rutinas y base de datos"
+,,QUEMADOR,Mensual,Limpiar electrodos ,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Kit de limpieza
+•	Llaves de boca y llaves de cubo"
+,,QUEMADOR,Mensual,Revisar cables de ignición y aisladores de ignición,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Kit de limpieza
+•	Llaves de boca y llaves de cubo"
+,,QUEMADOR,Mensual,Limpiar Fotocelda,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Kit de limpieza
+•	Llaves de boca y llaves de cubo"
+,,QUEMADOR,Trimestral,Revisar aisladores de ignición,"•	Equipo de protección
+•	Llevar un formato de revisión de rutinas y base de datos"
+,,QUEMADOR,Trimestral,Revision de Piloto de Gas( fugas y limpiar la salida de conducción),"•	Equipo de protección 
+•	Llevar un formato de revisión de rutinas y base de datos
+•	Kit de limpieza
+•	Llaves de boca y llaves de cubo"
+,,QUEMADOR,Trimestral,Limpiar el quemador,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Kit de limpieza
+•	Llaves de boca y llaves de cubo"
+,,Estructura de Caldera,Semestral,Inspeccionar funcionamiento válvula de seguridad,"•	Equipo de protección 
+•	Inspección visual
+•	Llevar un formato de revisión de rutinas y base de datos"
+,,Estructura de Caldera,Semestral,Inspeciona válvula dosificadora de fuel-oil (Buscar fugas y reemplazar si es necesario),"•	Equipo de protección 
+•	Inspección visual en busca de fugas
+•	Llevar un formato de revisión de rutinas y base de datos"
+,,Estructura de Caldera,Semestral,"Inspección visual en busca de daños o fugas y limpieza de la tuberia de agua, vapor, gases de combustión. ","•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Kit de limpieza
+•	Llaves de boca y llaves de cubo"
+,,Estructura de Caldera,Semestral,Inspeccionar funcionamiento la trampa de vapor del precalentador de combustible bunker ,"•	Equipo de protección 
+•	Inspección visual
+•	Llevar un formato de revisión de rutinas y base de datos"
+,,Estructura de Caldera,Semestral,Cambio de empaque,"•	Equipo de protección 
+•	Kit de limpieza
+•	Llaves de boca y llaves de cubo
+•	Repuestos de Empaques con CLEAVER BROOKS O POWERMASTER"
+,,Estructura de Caldera,Semestral,Revision de pernos y tuercas de puertas,"•	Equipo de protección 
+•	Inspección visual en busca de daños  
+•	Kit de limpieza
+•	Llaves de boca y llaves de cubo
+•	Medidor de torque de tuercas "
+,,Estructura de Caldera,Semestral,Revisión de material refractario ,"•	Equipo de protección 
+•	Inspección visual
+•	Llevar un formato de revisión de rutinas y base de datos"
+,,Estructura de Caldera,Anualmente,Limpieza de chimenea,"•	Removedor de oxido
+•	Cepillo de alambre
+•	Lija de grano grueso
+•	Kit de limpieza
+•	Llaves y llaves de tubo
+•	Mazo"
+,,Estructura de Caldera,Cada 2 años,Limpieza general y repintar,"•	Removedor de oxido
+•	Cepillo de alambre
+•	Lija de grano grueso
+•	Kit de limpieza
+•	Pintura anticorrosiva
+•	Llaves y llaves de tubo
+•	Kit de destornilladores
+•	Brochas o pistola de pintura
+•	Mazo"
+,,Sistema de Combustible,Diariamente,Verificar funcionamiento del calentador,"•	Equipo de protección 
+•	Inspección visual en busca de daños
+•	Llevar un formato de revisión de rutinas y base de datos"
+,,Sistema de Combustible,Semanal,Revisar la linea de alimentación.,"•	Equipo de protección 
+•	Inspección visual en busca de fugas
+•	Llevar un formato de revisión de rutinas y base de datos"
+,,Sistema de Combustible,Semanal,"Limpiar filtro de canasta, y filtro de peineta","•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Kit de limpieza
+•	Llaves de boca y llaves de cubo"
+,,Sistema de Combustible,Semestral,Inspeccionar el funcionamiento de válvulas solenoides,"•	Equipo de protección 
+•	Inspección visual
+•	Llevar un formato de revisión de rutinas y base de datos"
+,,Sistema de Combustible,Semestral,Limpiar calentador,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Kit de limpieza
+•	Llaves de boca y llaves de cubo"
+,,Sistema de Combustible,Anualmente,"Inspecionar la fajas de transmisión, y revisar la alineacion de bomba a motor","•	Equipo de protección 
+•	Inspección visual en busca de daños o desgastes (Registro de base de datos)
+•	Cámara térmico 
+•	Medidor laser de tensión 
+•	Kirkit
+•	Equipo de calibración y alineación 
+•	Medidor de espesor
+•	Kit de Destornilladores 
+•	Llaves de boca y llaves de cubo"
+,,Sistema de Combustible,Anualmente,Inspecciones generales de las bombas de tanque principal a tanque diario (Verificar temperatura y parámetros eléctricos),"•	Equipo de protección 
+•	Grasa para sellos y rodamientos Chevron® SRI NLGI grado 2. o sus equivalentes
+•	Cámara térmica
+•	Equipo de calibración
+•	Vibrómetro
+•	Llaves y llaves de tubo
+•	Extractores de rodamientos
+•	En caso de cambio de sellos mecanicos y dinámico usar sellos mecánicos de cartucho y empaque de grafito respectivamente"
+,,Panel de control,Semestral,Inspección visual y limpieza a los ventiladores de refrigeración y componentes eléctricos,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Aire comprimido
+•	Alicates y tenazas
+•	Kit de limpieza
+•	Kit de Destornilladores"
+,,Panel de control,Semestral,Limpiar el presurestol ,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Kit de limpieza
+•	Kit de Destornilladores"
+,,Panel de control,Semestral,"Revisar cápsulas de mercurio, fusibles y terminales","•	Equipo de protección 
+•	Multimetro
+•	Cámara térmica
+•	Equipo de calibración
+•	Kit de Destornilladores"
+,,Panel de control,Semestral,Revisar termoestatos y contactores ,"•	Equipo de protección 
+•	Multimetro
+•	Cámara térmica
+•	Equipo de calibración
+•	Kit de Destornilladores"
+,,Panel de control,Anualmente,"Comprobar el estado y la seguridad del cableado y de las conexiones eléctricas en el hardware(Medir tensión, corriente y medir aislamiento)","•	Equipo de protección 
+•	Cámara termográfica
+•	Equipo de calibración
+•	Selladores dieléctricos
+•	Kit de Destornilladores
+•	Pinzas, Alicates y Tenazas
+•	Megóhmetro
+•	Multimetro"
+,,Sistema de aire secundario,Mensual,Limpieza de malla de ventilador,"•	Equipo de protección 
+•	Aspiradora
+•	Aire comprimido
+•	Kit de limpieza
+•	Kit de Destornilladores"
+,,Sistema de aire secundario,Semestral,Inspecciones generales de los motores (Verificar temperatura y parámetros eléctricos)  ,"•	Equipo de protección 
+•	Osciloscopio
+•	Megóhmetro
+•	Multimetro
+•	Cámara térmica
+•	Equipo de calibración
+•	Llaves y llaves de tubo
+•	Kit de Destornilladores
+•	Decibelímetro
+•	Extractores de rodamientos y poleas
+•	Juntas y selladores"
+,,Sistema de aire secundario,Semestral,"Mantenimiento de los rodamientos (Lubricación y si es necesario cambio de rodamientos, sellos, retenedores, O-rings)  ","•	Equipo de protección 
+•	Grasa para rodamientos Chevron® SRI NLGI grado 2. o sus equivalentes
+•	Kit de limpieza
+•	Kit de Destornilladores
+•	Cámara termográfica, Equipo de calibración 
+•	Extractores de rodamientos"
+,,Control de nivel de agua,Diariamente,Purgar el nivel de carga de vapor con la Válvula de purga de nivel,"•	Equipo de protección 
+•	Inspección visual
+•	Llevar un formato de revisión de rutinas y base de datos"
+,,Control de nivel de agua,Mensual,Inspeccion de condición tubo de nivel,"•	Equipo de protección 
+•	Inspección visual en busca de daño o desgaste
+•	Llevar un formato de revisión de rutinas y base de datos"
+,,Control de nivel de agua,Semestral,Limpieza del flotador y Revisar diafragma de flotador ,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Kit de Destornilladores 
+•	Kit de limpieza
+•	Llaves de boca y llaves de cubo"
+,,Control de nivel de agua,Anualmente,Desmontar y limpiar columna de Mcdonell,"•	Equipo de protección 
+•	Agua a presión
+•	Kit de limpieza
+•	Selladores y retenedores
+•	Llaves de boca y llaves de cubo
+•	Espátula"
+,,Bomba de aire y sistema de lubricación,Trimestral,Limpieza de Enfriador de aceite lubricante,"•	Equipo de protección 
+•	Recolector de aceite
+•	Kit de limpieza
+•	Selladores y retenedores
+•	Llaves de boca y llaves de cubo"
+,,Bomba de aire y sistema de lubricación,Semestral,Inspecciones generales de la bomba y verificar acople de transmisión con el motor  (Verificar temperatura y parámetros eléctricos)  ,"•	Equipo de protección 
+•	Osciloscopio
+•	Megóhmetro
+•	Multimetro
+•	Cámara térmica
+•	Equipo de calibración
+•	Llaves y llaves de tubo
+•	Kit de Destornilladores
+•	Decibelímetro
+•	Extractores de rodamientos y poleas
+•	Juntas y selladores"
+,,Bomba de aire y sistema de lubricación,Semestral,"Mantenimiento de los rodamientos (Lubricación y si es necesario cambio de rodamientos, sellos, retenedores, O-rings)  ","•	Equipo de protección 
+•	Grasa para rodamientos Chevron® SRI NLGI grado 2. o sus equivalentes
+•	Kit de limpieza
+•	Kit de Destornilladores
+•	Cámara termográfica, Equipo de calibración 
+•	Extractores de rodamientos"
+,,Bomba de aire y sistema de lubricación,Semestral,Remplazar filtro de aceite lubricante y serpentín de refrigeración,"•	Equipo de protección 
+•	Aceite lubricante
+•	Recolector de aceite
+•	Kit de limpieza
+•	Sellador
+•	Llaves de boca y llaves de cubo
+•	Nuevo Filtro de aceite
+•	Serpentín de refrigeración"

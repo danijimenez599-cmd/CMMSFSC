@@ -1,0 +1,1203 @@
+﻿ID,Codigo Equipo,Correlativo Equipo ,Fecha de Mantenimiento,Descripcion de actividad,Preventivo,Taller Externo,Costo ,OT,Modified,CodigoYCorr,Fecha Programado,Ejecutado,Actividades programadas,Created,Compliance Asset Id,Item Type,Path
+1,PTAR1.AA.AE,1.0,2023-09-23 00:00:00,"Mantenimiento correctivo por temperatura 
+",No,Si,,,2025-02-25 11:53:21,PTAR1.AA.AE.1,,,,2024-09-03 13:14:48,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+17,PTAR1.AA.AE,2.0,2022-11-15 00:00:00,"Temperatura normal al 5 Sep de 2024
+Pogramar pronto",No,SIMD,,,2025-02-26 11:57:50,PTAR1.AA.AE.2,,,,2024-09-05 11:33:49,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+18,PTAR1.AA.AE,3.0,2022-07-07 00:00:00,"Correctivo, Temperatura 84 y punta 77 programar pronto",No,Si,,,2024-09-05 11:34:38,PTAR1.AA.AE.3,,,,2024-09-05 11:34:38,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+19,PTAR1.AA.AE,4.0,2023-09-19 00:00:00,Temperatura normal programar pronto,No,Si,,,2024-09-05 11:35:20,PTAR1.AA.AE.4,,,,2024-09-05 11:35:20,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+20,PTAR1.AA.AE,5.0,2022-07-07 00:00:00,Temperatura noraml caja a 78C Sep 2024,No,Si,,,2024-09-05 11:36:07,PTAR1.AA.AE.5,,,,2024-09-05 11:36:07,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+21,PTAR1.AA.AE,6.0,2024-07-02 00:00:00,"Mantenimiento preventivo de aerador  6. incluye  motor, caja reductora ",Si,SIMD,6995.0,,2025-06-04 08:26:38,PTAR1.AA.AE.6,,,,2024-09-05 11:36:54,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+22,PTAR1.AA.AE,7.0,2023-05-09 00:00:00,"Caliente programar pronto temperatura de 90C en punta y 85C en Motor
+Agosto 2024",No,Si,,,2024-09-05 12:18:20,PTAR1.AA.AE.7,,,,2024-09-05 11:38:07,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+23,PTAR1.AA.AE,8.0,2023-07-26 00:00:00,TEmperatura normal sep 2024,No,Si,,,2024-09-05 11:39:06,PTAR1.AA.AE.8,,,,2024-09-05 11:39:06,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+24,PTAR1.DOC.CLR,1.0,2022-12-25 00:00:00,"Repello y nivelacion de pista, cambio de baleros en y rodos, revision de ambas cajas reductoras",Si,No,22500.0,,2024-09-06 13:10:26,PTAR1.DOC.CLR.1,,,,2024-09-06 13:09:55,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+25,PTAR2.DOC.CLR,1.0,2021-12-29 00:00:00,"SIMD 
+Mantener en observacion Tornillo por evidente desgaste de corona, se hizo junto con el espezador de lodos",Si,SIMD,24200.0,,2025-06-09 12:13:14,PTAR2.DOC.CLR.1,,,,2024-09-06 13:27:14,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+26,SB.46kV.TX,1.0,2024-05-08 00:00:00,"Se hizo solo muestreo en busca de furanos o humedad y el resultado fue ""Fuera de peligro"" SOLELECTRIC",Si,Si,500.0,,2025-05-30 08:07:35,SB.46kV.TX.1,,,,2024-09-06 14:13:30,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+27,SB.46kV.TX,1.0,2023-12-19 00:00:00,"Se hizo analisis de gases y pruebas electricas, a mantener en observacion y repetir pruebas de gases debido a probable alta humedad",Si,Si,3400.0,,2024-09-06 14:18:38,SB.46kV.TX.1,,,,2024-09-06 14:18:38,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+28,SB.46kV.INT,1.0,2023-12-20 00:00:00,Cambio de Gas SF6 debido a baja pureza,No,Si,10531.0,,2024-09-06 14:26:31,SB.46kV.INT.1,,,,2024-09-06 14:26:29,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+29,SB.46kV.TC,1.0,2023-12-20 00:00:00,"TCs bien sin embargo los 3 presentan arcoelectrico, se deben cambiar en menos de 24 meses. ",Si,Si,600.0,,2024-09-06 14:42:02,SB.46kV.TC.1,,,,2024-09-06 14:34:46,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+30,SB.46kV.TC,2.0,2023-12-20 00:00:00,"TCs bien sin embargo los 3 presentan arcoelectrico, se deben cambiar en menos de 24 meses. ",Si,Si,600.0,,2024-09-06 14:42:01,SB.46kV.TC.2,,,,2024-09-06 14:36:13,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+31,SB.46kV.TC,3.0,2023-12-20 00:00:00,"TCs bien sin embargo los 3 presentan arcoelectrico, se deben cambiar en menos de 24 meses. ",Si,Si,600.0,,2024-09-06 14:40:17,SB.46kV.TC.3,,,,2024-09-06 14:36:43,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+32,SB.46kV.TC,4.0,2023-12-20 00:00:00,"TCs de Opico, saturacion, exactitud bien, aptos para medicion Oficial, se enviara reporte a la UT ",Si,Si,600.0,,2024-09-06 14:39:11,SB.46kV.TC.4,,,,2024-09-06 14:39:09,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+33,SB.46kV.TC,5.0,2023-12-20 00:00:00,"TCs de Opico, saturacion, exactitud bien, aptos para medicion Oficial, se enviara reporte a la UT ",Si,Si,600.0,,2024-09-06 14:41:31,SB.46kV.TC.5,,,,2024-09-06 14:40:33,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+34,SB.46kV.TC,6.0,2023-12-20 00:00:00,"TCs de Opico, saturacion, exactitud bien, aptos para medicion Oficial, se enviara reporte a la UT ",Si,Si,600.0,,2024-09-06 14:41:32,SB.46kV.TC.6,,,,2024-09-06 14:40:41,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+36,PTAR1.AA.AE,9.0,2024-09-06 00:00:00,"Se realizo mtto correctivo debido a falla de piñones en caja reducturoa. ademas de mtto preventivo de motor, que incluye  cambio de rodamientos.",No,Si,9215.0,,2024-09-06 15:34:02,PTAR1.AA.AE.9,,,,2024-09-06 15:34:02,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+37,PTAR1.AA.AE,10.0,2024-09-09 00:00:00,"Mtto preventivo  que abarca:
+
+Mantenimiento preventivo de Caja Reductora.
+-Desmontaje de caja reductora del equipo aireador.
+-Desarmado de caja y revisión.
+-Lavado de piñones.
+- cambio de rodamientos
+-Cambio de retenedores de eje grande principal (4)
+-Cambio de retenedores de eje principal de polea (2)
+-Cambio de hule negro cobertor de retenedores.
+-Verificación de ejes 
+-Revisión de manguera de nivel de aceite y su cambio.
+-Sellado de caja reductora con silicón.
+-Cambio de pernos de armado de caja reductora (14) (si es necesario)
+-Aceite suministrado por HBI
+-Pintura general 
+
+Mantenimiento de motor 20 HP para equipo 
+-Desarmado de motor eléctrico en planta
+-Lavado con solvente dieléctrico a embobinado.
+-Cambio de rodamiento  
+-Sellado y armado de motor
+-Medición de parámetros eléctricos.
+-Pintura general 
+-Desmontaje y montaje.
+-Desconexión eléctrica para desmontaje
+-Conexión eléctrica para montaje
+
+
+Juego de chumaceras:
+1-Chumacera grande bipartida en polímero Nylatron 
+LIG, NSM, MC901
+-Diámetro interno 4.1/2”
+-2 ranuras limpiadoras de mota
+-2 agujeros de sujeción 
+-1 agujero con tapón para limpieza y lubricación
+-Desmontaje y montaje
+1-Chumacera pequeña en polímero Nylatron LIG, 
+NSM, MC901
+-Diámetro interno 3.1/2”
+-2 ranuras limpiadoras de mota
+-2 agujeros de sujeción 
+-1 agujero con tapón para limpieza y lubricación
+-Desmontaje y montaje
+",No,SIMD,6995.0,,2025-06-04 08:08:13,PTAR1.AA.AE.10,,,,2024-09-09 06:55:40,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+38,PTAR1.AA.AE,11.0,2023-11-03 00:00:00,"El mtto preventico incluye:
+Mantenimiento preventivo de Caja Reductora.
+-Desmontaje de caja reductora del equipo aireador.
+-Desarmado de caja y revisión.
+-Lavado de piñones.
+- cambio de rodamientos
+-Cambio de retenedores de eje grande principal (4)
+-Cambio de retenedores de eje principal de polea (2)
+-Cambio de hule negro cobertor de retenedores.
+-Verificación de ejes 
+-Revisión de manguera de nivel de aceite y su cambio.
+-Sellado de caja reductora con silicón.
+-Cambio de pernos de armado de caja reductora (14) (si es necesario)
+-Aceite suministrado por HBI
+-Pintura general 
+
+Mantenimiento de motor 20 HP para equipo 
+-Desarmado de motor eléctrico en planta
+-Lavado con solvente dieléctrico a embobinado.
+-Cambio de rodamiento  
+-Sellado y armado de motor
+-Medición de parámetros eléctricos.
+-Pintura general 
+-Desmontaje y montaje.
+-Desconexión eléctrica para desmontaje
+-Conexión eléctrica para montaje
+
+
+Juego de chumaceras:
+1-Chumacera grande bipartida en polímero Nylatron 
+LIG, NSM, MC901
+-Diámetro interno 4.1/2”
+-2 ranuras limpiadoras de mota
+-2 agujeros de sujeción 
+-1 agujero con tapón para limpieza y lubricación
+-Desmontaje y montaje
+1-Chumacera pequeña en polímero Nylatron LIG, 
+NSM, MC901
+-Diámetro interno 3.1/2”
+-2 ranuras limpiadoras de mota
+-2 agujeros de sujeción 
+-1 agujero con tapón para limpieza y lubricación
+-Desmontaje y montaje
+",Si,SIMD,6995.0,,2025-02-26 11:56:00,PTAR1.AA.AE.11,,,,2024-09-09 07:08:50,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+39,PTAR1.AA.AE,12.0,2022-04-01 00:00:00,"Ademas del mtto prevetivo se cambio punta grande , esta es la que hace la transmicion entre la caja reductora y las aspas de aereador. el costo solo de la punta esta al rededor de $3550 dolares",No,Si,,,2024-09-09 08:00:49,PTAR1.AA.AE.12,,,,2024-09-09 07:55:09,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+40,PTAR1.AA.AE,13.0,2022-02-01 00:00:00,"El mtto preventivo abarca:
+
+Mantenimiento preventivo de Caja Reductora.
+-Desmontaje de caja reductora del equipo aireador.
+-Desarmado de caja y revisión.
+-Lavado de piñones.
+- cambio de rodamientos
+-Cambio de retenedores de eje grande principal (4)
+-Cambio de retenedores de eje principal de polea (2)
+-Cambio de hule negro cobertor de retenedores.
+-Verificación de ejes 
+-Revisión de manguera de nivel de aceite y su cambio.
+-Sellado de caja reductora con silicón.
+-Cambio de pernos de armado de caja reductora (14) (si es necesario)
+-Aceite suministrado por HBI
+-Pintura general 
+
+Mantenimiento de motor 20 HP para equipo 
+-Desarmado de motor eléctrico en planta
+-Lavado con solvente dieléctrico a embobinado.
+-Cambio de rodamiento  
+-Sellado y armado de motor
+-Medición de parámetros eléctricos.
+-Pintura general 
+-Desmontaje y montaje.
+-Desconexión eléctrica para desmontaje
+-Conexión eléctrica para montaje
+
+
+Juego de chumaceras:
+1-Chumacera grande bipartida en polímero Nylatron 
+LIG, NSM, MC901
+-Diámetro interno 4.1/2”
+-2 ranuras limpiadoras de mota
+-2 agujeros de sujeción 
+-1 agujero con tapón para limpieza y lubricación
+-Desmontaje y montaje
+1-Chumacera pequeña en polímero Nylatron LIG, 
+NSM, MC901
+-Diámetro interno 3.1/2”
+-2 ranuras limpiadoras de mota
+-2 agujeros de sujeción 
+-1 agujero con tapón para limpieza y lubricación
+-Desmontaje y montaje
+",Si,Si,6995.0,,2024-09-09 07:59:12,PTAR1.AA.AE.13,,,,2024-09-09 07:59:12,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+41,PTAR1.AA.AE,14.0,2024-03-06 00:00:00,"Se realizo mtto preventivo de aerador 14, se fabricaron piñones de caja, flange de punta grande, punta grande. ademas de la sustitucion de rodamientos y mtto preventivo de motor de aerador.  ",No,Si,10705.0,,2024-09-09 08:14:13,PTAR1.AA.AE.14,,,,2024-09-09 08:14:13,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+42,PTAR1.AA.MI,1.0,2024-05-30 00:00:00,"Mixer se re embobino, ademas se le dio el mtto preventivo que incluye el cambio de rodamientos.
+Editado 2025",No,Taller Hernandez,2125.0,,2025-02-26 11:56:43,PTAR1.AA.MI.1,,,,2024-09-09 08:38:34,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+43,PTAR1.AA.MI,2.0,2022-12-22 00:00:00,"Mtto preventivo, incluye de cambio de rodamienos.",Si,Si,1325.0,,2024-09-09 08:40:35,PTAR1.AA.MI.2,,,,2024-09-09 08:40:35,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+44,PTAR1.AA.MI,3.0,2024-05-30 00:00:00,"Se envio  mtto por re embobindado, ademas se dio el preventivo que incluye el cambio de rodamientos y pruebas electricas. ",No,Si,2125.0,,2024-09-09 08:43:47,PTAR1.AA.MI.3,,,,2024-09-09 08:43:46,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+45,PTAR1.AA.MI,4.0,2022-12-22 00:00:00,"Mtto preventivo, inlcuye cambio de rodamientos.",Si,Si,1325.0,,2024-09-09 08:46:00,PTAR1.AA.MI.4,,,,2024-09-09 08:45:59,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+46,PTAR1.AA.MI,5.0,2024-07-16 00:00:00,"re embobinado, ademas de mtto preventivo. ",No,Si,2125.0,,2024-09-09 10:15:10,PTAR1.AA.MI.5,,,,2024-09-09 10:15:09,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+47,PTAR1.AA.MI,6.0,2024-07-16 00:00:00,"re embobinado, ademas de cambios de rodamientos. ",No,Si,2125.0,,2024-09-09 10:15:52,PTAR1.AA.MI.6,,,,2024-09-09 10:15:51,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+48,PTAR1.AA.MI,7.0,2022-12-22 00:00:00,mtto preventivo que incluye cambio de reodamientos e inspecciones electricas.,Si,Si,1325.0,,2024-09-09 12:06:46,PTAR1.AA.MI.7,,,,2024-09-09 12:06:46,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+49,PTAR1.AA.MI,8.0,2022-02-08 00:00:00,mtto preventivo incluye cambio de rodamientos.,Si,No,1325.0,,2024-09-09 12:08:15,PTAR1.AA.MI.8,,,,2024-09-09 12:08:14,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+50,PTAR1.AA.MI,9.0,2022-12-22 00:00:00,mtto preventivo. re embobinado.,No,Si,2125.0,,2024-09-09 12:09:35,PTAR1.AA.MI.9,,,,2024-09-09 12:09:34,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+51,PTAR1.AA.MI,10.0,2022-09-23 00:00:00,mtto preventivo que incluye cambio de rodamientos.,Si,Si,1325.0,,2024-09-09 12:10:47,PTAR1.AA.MI.10,,,,2024-09-09 12:10:47,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+52,PTAR1.AA.MI,11.0,2024-05-30 00:00:00,"mtto preventivo, inlcuye cambio de rodamientos",Si,Si,1325.0,,2024-09-09 12:12:39,PTAR1.AA.MI.11,,,,2024-09-09 12:12:39,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+53,PTAR1.AA.MI,12.0,2022-09-23 00:00:00,mtto preventido y re embobinado,No,Si,2125.0,,2024-09-09 12:13:30,PTAR1.AA.MI.12,,,,2024-09-09 12:13:29,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+54,PTAR2.AA.AE,1.0,2022-02-01 00:00:00,"mtto preventivo inlcuye cabio de rodamientos, inpesccion de parametros electricos. limpieza y pintura.",,,1406.5,,2025-05-02 08:48:45,PTAR2.AA.AE.1,,,,2024-09-09 12:51:19,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+55,PTAR2.AA.AE,2.0,2022-11-15 00:00:00,"mtto preventivo que incluye cambio de rodamientos, pintura, y medicion de parametros electricos. ",Si,Si,1406.0,,2024-09-09 12:53:22,PTAR2.AA.AE.2,,,,2024-09-09 12:53:21,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+56,PTAR2.AA.AE,3.0,2022-11-15 00:00:00,"mtto preventivo que incluye cambio de rodamientos, pintura, y medicion de parametros electricos. ",Si,Si,1406.5,,2024-09-09 12:54:14,PTAR2.AA.AE.3,,,,2024-09-09 12:54:13,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+57,PTAR2.AA.AE,4.0,2023-01-26 00:00:00,"mtto preventivo que incluye cambio de rodamientos, pintura, y medicion de parametros electricos. ",Si,Si,1406.5,,2024-09-09 12:55:10,PTAR2.AA.AE.4,,,,2024-09-09 12:55:09,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+58,PTAR2.AA.AE,5.0,2022-07-07 00:00:00,"mtto preventivo que incluye cambio de rodamientos, pintura, y medicion de parametros electricos. ",Si,No,1406.5,,2024-09-09 12:56:14,PTAR2.AA.AE.5,,,,2024-09-09 12:56:13,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+59,PTAR2.AA.AE,6.0,2022-07-07 00:00:00,"mtto preventivo que incluye cambio de rodamientos, pintura, y medicion de parametros electricos. ",Si,Si,1406.5,,2024-09-09 12:56:50,PTAR2.AA.AE.6,,,,2024-09-09 12:56:50,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+60,PTAR2.AA.AE,7.0,2023-12-12 00:00:00," mtto preventivo que incluye cambio de rodamientos, pintura, y medicion de parametros electricos. ",Si,Si,1406.0,,2024-09-09 15:07:31,PTAR2.AA.AE.7,,,,2024-09-09 15:07:30,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+61,PTAR2.AA.AE,8.0,2023-05-09 00:00:00,"mtto preventivo que incluye cambio de rodamientos, pintura, y medicion de parametros electricos. ",Si,Si,1406.0,,2024-09-09 15:11:47,PTAR2.AA.AE.8,,,,2024-09-09 15:11:47,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+62,PTAR2.AA.AE,9.0,2023-08-23 00:00:00,"mtto correctivo que incluye cambio de rodamientos, pintura, y medicion de parametros electricos. y re embobinado",No,Si,2460.0,,2024-09-09 15:14:15,PTAR2.AA.AE.9,,,,2024-09-09 15:14:15,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+63,PTAR2.AA.AE,10.0,2024-06-28 00:00:00,"mtto preventivo que incluye cambio de rodamientos, pintura, y medicion de parametros electricos. ",Si,Si,1406.0,,2024-09-09 15:19:53,PTAR2.AA.AE.10,,,,2024-09-09 15:19:52,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+64,PTAR2.AA.AE,11.0,2022-02-01 00:00:00,"mtto correctivo que incluye cambio de rodamientos, pintura, y medicion de parametros electricos. ",Si,No,2460.0,,2024-09-09 15:24:33,PTAR2.AA.AE.11,,,,2024-09-09 15:24:32,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+65,PTAR2.AA.AE,12.0,2023-05-23 00:00:00,"mtto preventivo que incluye cambio de rodamientos, pintura, y medicion de parametros electricos. ",Si,Si,1406.0,,2024-09-09 15:26:18,PTAR2.AA.AE.12,,,,2024-09-09 15:26:18,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+66,PTAR2.AA.AE,13.0,2024-07-26 00:00:00,"mtto correctovp que incluye cambio de rodamientos, pintura, y medicion de parametros electricos. y re embobinado",No,Si,2460.0,,2024-09-09 15:27:38,PTAR2.AA.AE.13,,,,2024-09-09 15:27:38,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+67,PTAR2.AA.AE,14.0,2024-09-09 00:00:00,"mtto preventivo que incluye cambio de rodamientos, pintura, y medicion de parametros electricos. ",Si,Si,1406.0,,2024-09-09 15:27:59,PTAR2.AA.AE.14,,,,2024-09-09 15:27:58,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+68,PDO.AEC.CTR,1.0,2024-08-25 00:00:00,Mtto preventivo programado tipo B.  datos segun contrato.,Si,Si,,,2024-09-10 14:47:53,PDO.AEC.CTR.1,,,,2024-09-10 14:47:52,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+69,PDO.AEC.CTR,2.0,2024-09-10 00:00:00,Mtto preventivo programado  tipo B. Datos segun contrato. ,Si,Si,,,2024-09-10 14:53:13,PDO.AEC.CTR.2,,,,2024-09-10 14:53:11,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+70,PTAR1.RL.RASP,1.0,2024-09-11 00:00:00,"No se tiene registro de ultimo mantenimiento preventivo o correctivo de la bomba sumergible. agregar que el costo por mtto y reembobinado si es necesario. es de de aproximadamente $2940 esto incluye:
+
+Rebobinado de motor
+-Cambio de baleros
+-Cambio de sellos
+-Cambio de orings
+-Pintura dieléctrica
+-Aceite para bobina
+-Aceite para sello mecánico",Si,Si,2.0,,2025-02-27 12:26:56,PTAR1.RL.RASP.1,,,,2024-09-11 06:55:09,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+71,PTAR1.RL.RASP,2.0,2024-09-11 00:00:00,"No se tiene registro de ultimo mantenimiento preventivo o correctivo de la bomba sumergible. agregar que el costo por mtto y reembobinado si es necesario. es de de aproximadamente $2940 esto incluye:
+
+Rebobinado de motor
+-Cambio de baleros
+-Cambio de sellos
+-Cambio de orings
+-Pintura dieléctrica
+-Aceite para bobina
+-Aceite para sello mecánico",Si,Si,,,2024-09-11 06:55:36,PTAR1.RL.RASP.2,,,,2024-09-11 06:55:36,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+72,PTAR1.RL.RASP,3.0,2024-09-11 00:00:00,"No se tiene registro de ultimo mantenimiento preventivo o correctivo de la bomba sumergible. agregar que el costo por mtto y reembobinado si es necesario. es de de aproximadamente $2940 esto incluye:
+
+Rebobinado de motor
+-Cambio de baleros
+-Cambio de sellos
+-Cambio de orings
+-Pintura dieléctrica
+-Aceite para bobina
+-Aceite para sello mecánico",Si,Si,,,2024-09-11 06:55:55,PTAR1.RL.RASP.3,,,,2024-09-11 06:55:55,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+73,PTAR1.RL.RASP,4.0,2024-09-11 00:00:00,"No se tiene registro de ultimo mantenimiento preventivo o correctivo de la bomba sumergible. agregar que el costo por mtto y reembobinado si es necesario. es de de aproximadamente $2940 esto incluye:
+
+Rebobinado de motor
+-Cambio de baleros
+-Cambio de sellos
+-Cambio de orings
+-Pintura dieléctrica
+-Aceite para bobina
+-Aceite para sello mecánico",Si,Si,,,2024-09-11 06:56:05,PTAR1.RL.RASP.4,,,,2024-09-11 06:56:05,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+74,PTAR1.RL.RASP,5.0,2024-09-11 00:00:00,"No se tiene registro de ultimo mantenimiento preventivo o correctivo de la bomba sumergible. agregar que el costo por mtto y reembobinado si es necesario. es de de aproximadamente $2940 esto incluye:
+
+Rebobinado de motor
+-Cambio de baleros
+-Cambio de sellos
+-Cambio de orings
+-Pintura dieléctrica
+-Aceite para bobina
+-Aceite para sello mecánico",Si,Si,,,2024-09-11 06:56:15,PTAR1.RL.RASP.5,,,,2024-09-11 06:56:15,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+75,PTAR1.RL.RASP,6.0,2024-09-11 00:00:00,"No se tiene registro de ultimo mantenimiento preventivo o correctivo de la bomba sumergible. agregar que el costo por mtto y reembobinado si es necesario. es de de aproximadamente $2940 esto incluye:
+
+Rebobinado de motor
+-Cambio de baleros
+-Cambio de sellos
+-Cambio de orings
+-Pintura dieléctrica
+-Aceite para bobina
+-Aceite para sello mecánico",Si,Si,,,2024-09-11 06:56:25,PTAR1.RL.RASP.6,,,,2024-09-11 06:56:25,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+76,PTAR1.RL.RASP,7.0,2024-09-11 00:00:00,"No se tiene registro de ultimo mantenimiento preventivo o correctivo de la bomba sumergible. agregar que el costo por mtto y reembobinado si es necesario. es de de aproximadamente $2940 esto incluye:
+
+Rebobinado de motor
+-Cambio de baleros
+-Cambio de sellos
+-Cambio de orings
+-Pintura dieléctrica
+-Aceite para bobina
+-Aceite para sello mecánico",Si,Si,,,2024-09-11 06:56:34,PTAR1.RL.RASP.7,,,,2024-09-11 06:56:34,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+77,PTAR1.RL.RASP,8.0,2024-09-11 00:00:00,"No se tiene registro de ultimo mantenimiento preventivo o correctivo de la bomba sumergible. agregar que el costo por mtto y reembobinado si es necesario. es de de aproximadamente $2940 esto incluye:
+
+Rebobinado de motor
+-Cambio de baleros
+-Cambio de sellos
+-Cambio de orings
+-Pintura dieléctrica
+-Aceite para bobina
+-Aceite para sello mecánico",Si,Si,,,2024-09-11 06:56:43,PTAR1.RL.RASP.8,,,,2024-09-11 06:56:43,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+78,PTAR1.RL.RASP,9.0,2024-09-11 00:00:00,"No se tiene registro de ultimo mantenimiento preventivo o correctivo de la bomba sumergible. agregar que el costo por mtto y reembobinado si es necesario. es de de aproximadamente $2940 esto incluye:
+
+Rebobinado de motor
+-Cambio de baleros
+-Cambio de sellos
+-Cambio de orings
+-Pintura dieléctrica
+-Aceite para bobina
+-Aceite para sello mecánico",Si,Si,,,2024-09-11 06:56:53,PTAR1.RL.RASP.9,,,,2024-09-11 06:56:53,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+79,PTAR1.RL.RASP,10.0,2024-09-11 00:00:00,"No se tiene registro de ultimo mantenimiento preventivo o correctivo de la bomba sumergible. agregar que el costo por mtto y reembobinado si es necesario. es de de aproximadamente $2940 esto incluye:
+
+Rebobinado de motor
+-Cambio de baleros
+-Cambio de sellos
+-Cambio de orings
+-Pintura dieléctrica
+-Aceite para bobina
+-Aceite para sello mecánico",Si,Si,,,2024-09-11 06:57:02,PTAR1.RL.RASP.10,,,,2024-09-11 06:57:02,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+80,PTAR1.RL.RASP,11.0,2024-09-11 00:00:00,"No se tiene registro de ultimo mantenimiento preventivo o correctivo de la bomba sumergible. agregar que el costo por mtto y reembobinado si es necesario. es de de aproximadamente $2940 esto incluye:
+
+Rebobinado de motor
+-Cambio de baleros
+-Cambio de sellos
+-Cambio de orings
+-Pintura dieléctrica
+-Aceite para bobina
+-Aceite para sello mecánico",Si,Si,,,2024-09-11 06:57:13,PTAR1.RL.RASP.11,,,,2024-09-11 06:57:13,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+81,PTAR1.RL.RASP,12.0,2024-09-11 00:00:00,"No se tiene registro de ultimo mantenimiento preventivo o correctivo de la bomba sumergible. agregar que el costo por mtto y reembobinado si es necesario. es de de aproximadamente $2940 esto incluye:
+
+Rebobinado de motor
+-Cambio de baleros
+-Cambio de sellos
+-Cambio de orings
+-Pintura dieléctrica
+-Aceite para bobina
+-Aceite para sello mecánico",Si,Si,,,2024-09-11 06:57:21,PTAR1.RL.RASP.12,,,,2024-09-11 06:57:21,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+83,PSVZ.MZS.BCS,1.0,2023-11-24 00:00:00,mtto preventivo incluye cambio de sello y rodamientos.,Si,Si,1115.0,,2024-09-11 09:27:05,PSVZ.MZS.BCS.1,,,,2024-09-11 09:27:05,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+84,PSVZ.MZS.BCS,2.0,2024-06-20 00:00:00,"Mtto preventivo, incluye  cambio de sellos y rodamientos . ",Si,Si,1115.0,,2024-09-11 09:28:04,PSVZ.MZS.BCS.2,,,,2024-09-11 09:28:04,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+85,PSVZ.MZS.BCS,3.0,2024-06-20 00:00:00,Mtto incluye cambio de rodamientos y sello.,Si,Si,1115.0,,2024-09-11 09:28:57,PSVZ.MZS.BCS.3,,,,2024-09-11 09:28:56,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+86,PSVZ.MZS.BCS,4.0,2024-09-11 00:00:00,Mtto incluye cambio de sello y rodamiento.,Si,Si,1115.0,,2024-09-11 09:29:23,PSVZ.MZS.BCS.4,,,,2024-09-11 09:29:23,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+87,PSVZ.CTN.BBS,1.0,2023-11-23 00:00:00,"mtto preventivo incluye :
+
+ -Motor maratón XRL USA
+-RPM 1780, VOLT 460, 125 HP
+-Mantenimiento preventivo y correctivo
+-Lavado de estator, secado y barnizado.
+-Cambio de baleros
+-Fabricación de camisa para baleros por vibración de 
+motor.
+",Si,Taller Hernandez,5500.0,,2025-06-09 10:51:45,PSVZ.CTN.BBS.1,,,,2024-09-11 09:43:37,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+88,PSVZ.CTN.BBS,2.0,2023-11-23 00:00:00," -Motor maratón XRL USA
+-RPM 1780, VOLT 460, 125 HP
+-Mantenimiento preventivo y correctivo
+-Lavado de estator, secado y barnizado.
+-Cambio de baleros
+-Fabricación de camisa para baleros por vibración de 
+motor.",Si,Si,2250.0,,2024-09-11 10:08:50,PSVZ.CTN.BBS.2,,,,2024-09-11 10:08:49,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+89,PDO.AEC.SCF,1.0,2024-06-14 00:00:00,DATOS SEGUN CONTRATO,Si,Si,,,2024-09-12 07:25:26,PDO.AEC.SCF.1,,,,2024-09-12 07:25:24,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+90,PDO.AEC.SCF,2.0,2024-06-14 00:00:00,DATOS SEGUN CONTRATO,Si,Si,,,2024-09-12 07:28:25,PDO.AEC.SCF.2,,,,2024-09-12 07:28:25,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+91,PTAR2.DOC.CTR,1.0,2024-06-10 00:00:00,mtto preventivo de acuerdo a contrato ,Si,Si,,,2024-09-12 12:26:05,PTAR2.DOC.CTR.1,,,,2024-09-12 12:25:33,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+92,PTAR2.DOC.SCF,1.0,2024-09-12 00:00:00,mtto segun contrato ,Si,Si,,,2024-09-12 12:28:49,PTAR2.DOC.SCF.1,,,,2024-09-12 12:28:49,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+93,PTAR2.RL.RASP,1.0,2023-09-27 00:00:00,"Mantenimiento de bomba RAS(30HP)
+-Cambio de baleros 
+-Rectificado de tapaderas de motor
+-lavado con solvente y pintura dieléctrica de bobina
+-Pintura general catalizada",Si,Si,,,2024-09-12 13:00:40,PTAR2.RL.RASP.1,,,,2024-09-12 13:00:40,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+94,PTAR2.RL.RASP,2.0,2023-09-27 00:00:00,"Mantenimiento de bomba RAS(30HP)
+-Cambio de baleros 
+-Rectificado de tapaderas de motor
+-lavado con solvente y pintura dieléctrica de bobina
+-Pintura general catalizada",Si,Si,,,2024-09-12 13:01:06,PTAR2.RL.RASP.2,,,,2024-09-12 13:01:06,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+95,PTAR2.DOC.MTL,1.0,2024-09-12 00:00:00,"Mantenimiento mixer de tanque de lodos
+-Cambio de baleros y empaques
+-Lavado con solvente dieléctrico
+-Pintura catalizada
+-Montaje y desmontaje",Si,Si,1400.0,,2024-09-12 13:03:58,PTAR2.DOC.MTL.1,,,,2024-09-12 13:03:57,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+96,PCLD.GDV.TCDL,1.0,2023-12-18 00:00:00,"Mantenimiento general de Caldera Dual de 500 BHP. #1.
+NRMT: 0512.
+Modelo: CB-600-500-150.
+Serial. L-89643.
+
+Limpieza de lado de fuego
+Limpieza de lado de agua 
+Cambio de empaquetadura lado fuego
+Cambio de empaquetadura lado de aguas.
+Prueba hidrostaticas a 150 psi.
+Revicion de sistema de combustible F.O.
+Revición de ckt y elemetos electricos.
+
+Costo por Servicio bajo convenio con proveedor.",Si,Si,,,2024-09-13 10:23:07,PCLD.GDV.TCDL.1,,,,2024-09-13 10:23:05,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+97,PCLD.GDV.TCDL,2.0,2023-12-18 00:00:00,"Mantenimiento general de Caldera Dual de 600 BHP. #2.
+NRMT: 0513.
+Modelo: WB-A2-3P
+Serial. 17900P-WB00-01
+
+Limpieza de lado de fuego
+Limpieza de lado de agua 
+Cambio de empaquetadura lado fuego
+Cambio de empaquetadura lado de aguas.
+Prueba hidrostaticas a 150 psi.
+Revicion de sistema de combustible F.O.
+Revición de ckt y elemetos electricos.
+
+Costo por Servicio bajo convenio con proveedor.",Si,Si,,,2024-09-13 12:02:26,PCLD.GDV.TCDL.2,,,,2024-09-13 12:02:25,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+98,PCLD.GDV.TCDL,3.0,2023-12-18 00:00:00,"Mantenimiento general de Caldera Dual de 800 BHP. #3.
+NRMT: 0702.
+Modelo: CB-600-800-150.
+Serial. OL-104266
+
+Limpieza de lado de fuego
+Limpieza de lado de agua 
+Cambio de empaquetadura lado fuego
+Cambio de empaquetadura lado de aguas.
+Prueba hidrostaticas a 150 psi.
+Revicion de sistema de combustible F.O.
+Revición de ckt y elemetos electricos.
+
+Costo por Servicio bajo convenio con proveedor.
+",Si,Si,,,2024-09-13 14:50:52,PCLD.GDV.TCDL.3,,,,2024-09-13 14:37:23,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+99,PCLD.GDV.TCDL,4.0,2023-12-18 00:00:00,"Mantenimiento general de Caldera de 800 BHP. #4
+NRMT: 0729.
+Modelo: CB-600-800-150.
+Serial. OL-104265.
+
+Limpieza de lado de fuego
+Limpieza de lado de agua 
+Cambio de empaquetadura lado fuego
+Cambio de empaquetadura lado de aguas.
+Prueba hidrostaticas a 150 psi.
+Revicion de sistema de combustible F.O.
+Revición de ckt y elemetos electricos.
+
+Costo por Servicio bajo convenio con proveedor.
+",Si,Si,,,2024-09-13 16:16:56,PCLD.GDV.TCDL.4,,,,2024-09-13 14:42:51,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+100,PCLD.GDV.TCDL,5.0,2023-12-18 00:00:00,"Mantenimiento general de Caldera de 800 BHP. #5.
+NRMT: 0728.
+Modelo: CB-600-800-150.
+Serial. L-104480.
+
+Limpieza de lado de fuego
+Limpieza de lado de agua 
+Cambio de empaquetadura lado fuego
+Cambio de empaquetadura lado de aguas.
+Prueba hidrostática a 150 psi.
+Revision de sistema de combustible F.O.
+Revición de ckt y elemetos electricos.
+
+Costo por Servicio bajo convenio con proveedor.
+",Si,Si,,,2024-09-13 16:15:40,PCLD.GDV.TCDL.5,,,,2024-09-13 14:48:04,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+101,PCLD.GDV.TCDL,1.0,2024-01-08 00:00:00,"Peritaje en Frio de Caldera Dual de 500 BHP. #1.
+NRMT: 0512.
+Modelo: CB-600-500-150.
+Serial. L-89643.
+
+Prueba hidrostatica 150 psi.
+Pruebas de valvulas de seguridad .
+Incrustacion, Corrosionen el cuerpo.
+Revicion de columna de agua.
+Condicion de reguistros (Tortugas etc.).
+Esatado de tubo de calefaccion.
+Estado placa cuerpo.
+Estado de Compuertas.
+Estados de Refactarios.
+Estado de limpieza de caldera.
+Estado de soporteria y Base.
+
+Costo por Servicio bajo convenio con proveedor.
+",Si,Si,,,2024-09-13 16:09:27,PCLD.GDV.TCDL.1,,,,2024-09-13 16:09:25,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+102,PCLD.GDV.TCDL,2.0,2024-01-08 00:00:00,"Peritaje en Frio de Caldera Dual de 600 BHP. #2.
+NRMT: 0513.
+Modelo: WB-A2-3P.
+Serial. 17900P-WB00-01
+
+Prueba hidrostatica 150 psi.
+Pruebas de valvulas de seguridad .
+Incrustacion, Corrosionen el cuerpo.
+Revicion de columna de agua.
+Condicion de reguistros (Tortugas etc.).
+Esatado de tubo de calefaccion.
+Estado placa cuerpo.
+Estado de Compuertas.
+Estados de Refactarios.
+Estado de limpieza de caldera.
+Estado de soporteria y Base.
+
+Costo por Servicio bajo convenio con proveedor.
+",Si,Si,,,2024-09-13 16:12:28,PCLD.GDV.TCDL.2,,,,2024-09-13 16:12:26,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+103,PCLD.GDV.TCDL,3.0,2024-01-08 00:00:00,"Peritaje en Frio de Caldera Dual de 800 BHP. #3.
+NRMT: 0702.
+Modelo: CB-600-800-150.
+Serial. OL-104266
+
+Prueba hidrostatica 150 psi.
+Pruebas de valvulas de seguridad .
+Incrustacion, Corrosionen el cuerpo.
+Revicion de columna de agua.
+Condicion de reguistros (Tortugas etc.).
+Esatado de tubo de calefaccion.
+Estado placa cuerpo.
+Estado de Compuertas.
+Estados de Refactarios.
+Estado de limpieza de caldera.
+Estado de soporteria y Base.
+
+Costo por Servicio bajo convenio con proveedor.
+",Si,Si,,,2024-09-13 16:14:18,PCLD.GDV.TCDL.3,,,,2024-09-13 16:14:18,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+104,PCLD.GDV.TCDL,4.0,2024-01-08 00:00:00,"Peritaje en Frio de Caldera de 800 BHP. #4.
+NRMT: 0729
+Modelo: CB-600-800-150.
+Serial. L-104265
+
+Prueba hidrostatica 150 psi.
+Pruebas de valvulas de seguridad .
+Incrustacion, Corrosionen el cuerpo.
+Revicion de columna de agua.
+Condicion de reguistros (Tortugas etc.).
+Esatado de tubo de calefaccion.
+Estado placa cuerpo.
+Estado de Compuertas.
+Estados de Refactarios.
+Estado de limpieza de caldera.
+Estado de soporteria y Base.
+
+Costo por Servicio bajo convenio con proveedor.
+",Si,Si,,,2024-09-13 16:22:21,PCLD.GDV.TCDL.4,,,,2024-09-13 16:20:47,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+105,PCLD.GDV.TCDL,5.0,2024-01-08 00:00:00,"Peritaje en Frio de Caldera de 800 BHP. #5.
+NRMT: 0728.
+Modelo: CB-600-500-150.
+Serial. L-104480.
+
+Prueba hidrostática 150 psi.
+Pruebas de válvulas de seguridad .
+Incrustación, Corrosion el cuerpo.
+Revision de columna de agua.
+Condicion de reguistros (Tortugas etc.).
+Esatado de tubo de calefaccion.
+Estado placa cuerpo.
+Estado de Compuertas.
+Estados de Refactarios.
+Estado de limpieza de caldera.
+Estado de soportaría y Base.
+
+Costo por Servicio bajo convenio con proveedor.
+",Si,Si,,,2024-09-13 16:23:15,PCLD.GDV.TCDL.5,,,,2024-09-13 16:21:53,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+106,SCI.CBCI.BCI,1.0,2024-09-19 00:00:00,Mtto preventivo de motor 1 sistema contra incendios. costo segun cotizacion. ,Si,Si,1300.0,,2024-09-19 12:24:24,SCI.CBCI.BCI.1,,,,2024-09-19 12:24:23,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+107,PTAR1.AA.AE,11.0,2024-09-30 00:00:00,Aerador 11 regreso de mtto y se monto 24 de septiembre de 2024. el mtto fue unicamente preventivo y esta ubicado en posicion numero 3 fase de aereacion 1 planta 1.  SE DEJO TRABAJANDO CON APROBACIO DE PROVEEDOR YA QUE SE IDENTIFICARON PROBLEMAS EN  EL MOVIMIENTO DE CAJA REDUCTORA. EL PROVEEDOR SE HARA RESPONSABLE POR DAÑOS EN OPERACION ,Si,Si,,,2024-09-30 12:42:55,PTAR1.AA.AE.11,,,,2024-09-30 12:42:55,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+108,PTAR1.AA.AE,6.0,2024-09-30 00:00:00,"AERADOR 6 SE MONTO EL 24 DE SEPTIEMBRE DE 2024. ADEMAS DEL MTTO PREVENTIVO, TAMBIEN SE FABRICO PIÑON DE CAJA REDUCTORA. EQUIPO #6 ESTA MONTADO EN POSICION #6 FASE 2 PLANTA 1",Si,Si,,,2024-09-30 13:17:30,PTAR1.AA.AE.6,,,,2024-09-30 13:17:30,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+109,PTAR2.AA.MI,3.0,2022-12-27 00:00:00,"Mtto preventivo de motor  7hp, incluye combio de rodamientos y revision de parametros electricos de motor.",Si,Si,,,2024-10-03 15:01:57,PTAR2.AA.MI.3,,,,2024-10-03 15:01:20,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+110,PTAR2.AA.MI,3.0,2024-10-03 00:00:00,Con personal de planta de tratamiento se le cambio cable alimentador de energia a mixer 3. ,Si,No,,,2024-10-03 15:03:05,PTAR2.AA.MI.3,,,,2024-10-03 15:03:05,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+111,PDO.ADO.BBI,1.0,2024-10-15 00:00:00,"Mantenimiento preventivo y correctivo de,Motor y bomba 25 HP de área de ozono
+Motor de 25 HP
+Desmontaje y montaje de equipo
+Cambio de baleros
+Revisión de ajuste de baleros y rectificado
+si se necesita
+Limpieza y pintura catalizada
+Bomba Gorman Rupp Pumps Serie U
+Desmontaje y montaje de equipo
+Cambio de baleros y retenedores
+Revisión de ajuste de baleros y retenedor
+y rectificado si se necesita
+Cambio de aceite en la bomba
+Revisión de pista de sello mecánico
+Limpieza y pintura catalizada",Si,Si,1325.0,,2024-10-15 07:05:35,PDO.ADO.BBI.1,,,,2024-10-15 07:05:34,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+112,PDO.ADO.BBI,2.0,2024-10-15 00:00:00,"Mantenimiento preventivo y correctivo de,Motor y bomba 25 HP de área de ozono
+Motor de 25 HP
+Desmontaje y montaje de equipo
+Cambio de baleros
+Revisión de ajuste de baleros y rectificado
+si se necesita
+Limpieza y pintura catalizada
+Bomba Gorman Rupp Pumps Serie U
+Desmontaje y montaje de equipo
+Cambio de baleros y retenedores
+Revisión de ajuste de baleros y retenedor
+y rectificado si se necesita
+Cambio de aceite en la bomba
+Revisión de pista de sello mecánico
+Limpieza y pintura catalizada",Si,Si,1325.0,,2024-10-15 07:06:02,PDO.ADO.BBI.2,,,,2024-10-15 07:06:02,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+113,PDO.ADO.BBI,3.0,2024-10-15 00:00:00,"Mantenimiento preventivo y correctivo de,Motor y bomba 25 HP de área de ozono
+Motor de 25 HP
+Desmontaje y montaje de equipo
+Cambio de baleros
+Revisión de ajuste de baleros y rectificado
+si se necesita
+Limpieza y pintura catalizada
+Bomba Gorman Rupp Pumps Serie U
+Desmontaje y montaje de equipo
+Cambio de baleros y retenedores
+Revisión de ajuste de baleros y retenedor
+y rectificado si se necesita
+Cambio de aceite en la bomba
+Revisión de pista de sello mecánico
+Limpieza y pintura catalizada",Si,Si,1325.0,,2024-10-15 07:06:24,PDO.ADO.BBI.3,,,,2024-10-15 07:06:23,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+114,PDO.ADO.BBI,1.0,2024-09-13 00:00:00,"Se realizo mtto segun cotizado, se monto y la bomba trabajo sin problemas. aclarar que no se cambio sello. ",Si,Si,1325.0,,2024-10-15 07:12:54,PDO.ADO.BBI.1,,,,2024-10-15 07:12:11,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+115,PDO.ADO.BBI,2.0,2024-09-06 00:00:00,Se realizo mtto preventivo de  acuerdo a lo cotizado.,Si,Si,1325.0,,2024-10-15 07:18:20,PDO.ADO.BBI.2,,,,2024-10-15 07:18:20,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+116,PDO.ADO.BBI,2.0,2024-10-01 00:00:00,"se desmonto bobma por fuga de aceite, se hizo la ejecucion de la garantia ya que habia sido recibida de mtto ",No,Si,0.0,,2024-10-15 07:19:26,PDO.ADO.BBI.2,,,,2024-10-15 07:19:26,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+117,PTAR2.DOC.ESL,1.0,2023-12-27 00:00:00,"Mantenimiento caja reductora, motor, ademas de mantenimiento de piñon o corona de transmision, cambio de rodamiento(tipo esferas) dañados. limpieza  restauracion de puente removedor. ",Si,Si,,,2024-11-05 05:01:12,PTAR2.DOC.ESL.1,,,,2024-11-05 05:01:12,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+118,PTAR1.AA.AE,11.0,2024-10-01 00:00:00,Se desmoto aerador el 1 de octubre de 2024 para corregir falla en alineamiento de caja y motor. producido por lo el desajusto en el aprete del flange de punta grande. ,No,Si,0.0,,2024-11-05 05:59:00,PTAR1.AA.AE.11,,,,2024-11-05 05:59:00,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+119,PTAR1.AA.AE,14.0,2024-08-07 00:00:00,Se monto AE 14 en posicion 1 se monto el 7 de agosto de 2024. ,Si,Si,0.0,,2024-11-05 06:27:47,PTAR1.AA.AE.14,,,,2024-11-05 06:27:47,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+120,SCI.CBCI.BCI,2.0,2024-12-03 00:00:00,"Mantenimiento preventivo motor 2, incluye inspeccion de parametros electricos. ",Si,Si,1300.0,,2024-12-06 10:44:51,SCI.CBCI.BCI.2,,,,2024-12-06 10:44:51,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+121,PTAR1.AA.AE,6.0,2025-01-09 00:00:00,Equipo 6 posicion 6 se realizo reclamo por garantia al proveedor debido a fuga de aceite en eje de punta grande. al montento de la inspeccion se destapo la caja reductora y se encontro piñon dañado. este piñon fue el fabricado en el mtto anterior. la fecha anterior de montaje fue el 24 de septiembre. por lo que se hizo el reclamo por garantia. ,No,SIMD,10705.0,,2025-06-04 15:41:44,PTAR1.AA.AE.6,,,,2025-01-09 06:42:46,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+122,PTAR1.AA.AE,14.0,2025-01-09 00:00:00,El dia 6 de enero de 2025 en la inspeccion rutinaria de equipos de planta de tratamiento. se encontro que el buje de bronce se habia aflojado  provcando que la punta grande se saliera de su eje. el proveedor se hara responble por garantia de la reparacion.  el proveedor es taller solme. ,No,Si,0.0,,2025-06-04 08:16:28,PTAR1.AA.AE.14,,,,2025-01-09 07:12:37,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+123,PTAR1.AA.AE,1.0,2025-01-09 00:00:00,EDITequipo habia sido montado en diciembre de 2023. se  saco en octubre 2024.  por quebradura de flange de punta grande. el equipo en su momento fue trabajado por simd. se esta a la espera de cotizacion para la reparacion. ,Si,Si,,,2025-02-27 12:39:16,PTAR1.AA.AE.1,,,,2025-01-09 07:24:36,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+124,PTAR1.AA.AE,9.0,2025-01-09 00:00:00,equipo se saco noviembre por fallos en buje de bronce desacoplado. sin embargo al momento de sacarlo se encontro flange quebrado. ademas el proveedor se lo llevo para revision en taller. ,No,SIMD,6995.0,,2025-06-04 08:23:46,PTAR1.AA.AE.9,,,,2025-01-09 08:05:45,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+125,PCLD.GDV.TCDL,1.0,2024-12-17 00:00:00,"Mantenimiento General.
+Caldera Dual de 500 BHP. #1.
+NRMT: 0512.
+Modelo: CB-600-500-150.
+Serial. L-89643.
+
+Mantenimiento anual de caldera:
+Lavado de lado de fuego.
+lavado de lado de agua.
+Cambio de fibre ceramica de compuerta intermedia.
+Resane de refrectario de compuerta de trasera.
+Resane de Horno.
+Limpieza de Caja de viscosidad.
+Cambio de empaquetadura lado de fuego.
+Cambio de empaquetadura lado de agua.
+Limpieza de Calentador combustible lado de Vapor.
+Limpieza de Calentador combustible lado de Electrico.
+Limpieza de sensor de nivel de operacion de la caldera.
+Limpieza de electrodo de nivel bajo.
+Limpieza de quemador de combustible
+limpieza de paneles electricos.
+Prueba hidrostatica 150 PSI.
+Cierra y puesta en marcha de caldera
+
+",Si,Si,,,2025-02-10 11:24:56,PCLD.GDV.TCDL.1,,,,2025-01-22 07:12:06,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+126,PCLD.GDV.TCDL,2.0,2024-12-17 00:00:00,"Mantenimiento General
+Caldera Dual de 600 BHP. #2.
+NRMT: 0513.
+Modelo: WB-A2-3P.
+Serial. 17900P-WB00-01
+
+Mantenimiento anual de caldera:
+Lavado de lado de fuego.
+lavado de lado de agua.
+Resane de Horno.
+Cambio de empaquetadura lado de fuego.
+Cambio de empaquetadura lado de agua.
+Limpieza de Calentador combustible lado de Vapor.
+Limpieza de Calentador combustible lado de Electrico.
+Limpieza de sensor de nivel de operacion de la caldera.
+Limpieza de electrodo de nivel bajo.
+Limpieza de quemador de combustible
+limpieza de paneles electricos.
+Prueba hidrostatica 150 PSI.
+Cierra y puesta en marcha de caldera
+",Si,Si,,,2025-02-10 11:26:03,PCLD.GDV.TCDL.2,,,,2025-01-22 07:17:59,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+127,PCLD.GDV.TCDL,3.0,2024-12-17 00:00:00,"Mantenimiento General.
+Caldera Dual de 800 BHP. #3.
+NRMT: 0702.
+Modelo: CB-600-800-150.
+Serial. OL-104266
+
+Mantenimiento anual de caldera:
+Lavado de lado de fuego.
+lavado de lado de agua.
+Cambio de fibre ceramica de compuerta intermedia.
+Resane de refrectario de compuerta de trasera.
+Resane de Horno.
+Limpieza de Caja de viscosidad.
+Cambio de empaquetadura lado de fuego.
+Cambio de empaquetadura lado de agua.
+Limpieza de Calentador combustible lado de Vapor.
+Limpieza de Calentador combustible lado de Electrico.
+Limpieza de sensor de nivel de operacion de la caldera.
+Limpieza de electrodo de nivel bajo.
+Limpieza de quemador de combustible
+limpieza de paneles electricos.
+Prueba hidrostatica 150 PSI.
+Cierra y puesta en marcha de caldera
+",Si,Si,,,2025-02-10 11:27:29,PCLD.GDV.TCDL.3,,,,2025-01-22 07:19:19,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+128,PCLD.GDV.TCDL,4.0,2024-12-17 00:00:00,"Mantenimiento General.
+Caldera de 800 BHP. #4.
+NRMT: 0729
+Modelo: CB-600-800-150.
+Serial. L-104265
+
+Mantenimiento anual de caldera:
+Lavado de lado de fuego.
+lavado de lado de agua.
+Cambio de fibre ceramica de compuerta intermedia.
+Resane de refrectario de compuerta de trasera.
+Resane de Horno.
+Limpieza de Caja de viscosidad.
+Cambio de empaquetadura lado de fuego.
+Cambio de empaquetadura lado de agua.
+Limpieza de Calentador combustible lado de Vapor.
+Limpieza de Calentador combustible lado de Electrico.
+Limpieza de sensor de nivel de operacion de la caldera.
+Limpieza de electrodo de nivel bajo.
+Limpieza de quemador de combustible
+limpieza de paneles electricos.
+Prueba hidrostatica 150 PSI.
+Cierra y puesta en marcha de caldera
+",Si,Si,,,2025-02-10 11:28:15,PCLD.GDV.TCDL.4,,,,2025-01-22 07:20:54,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+129,PCLD.GDV.TCDL,5.0,2024-12-17 00:00:00,"Mantenimiento General.
+Caldera de 800 BHP. #5.
+NRMT: 0728.
+Modelo: CB-600-500-150.
+Serial. L-104480.
+
+Mantenimiento anual de caldera:
+Lavado de lado de fuego.
+lavado de lado de agua.
+Cambio de fibra cerámica de compuerta intermedia.
+Resane de refractario de compuerta de trasera.
+Resane de Horno.
+Limpieza de Caja de viscosidad.
+Cambio de empaquetadura lado de fuego.
+Cambio de empaquetadura lado de agua.
+Limpieza de Calentador combustible lado de Vapor.
+Limpieza de Calentador combustible lado de eléctrico.
+Limpieza de sensor de nivel de operación de la caldera.
+Limpieza de electrodo de nivel bajo.
+Limpieza de quemador de combustible
+limpieza de paneles eléctricos.
+Prueba hidrostática 150 PSI.
+Cierra y puesta en marcha de caldera
+",Si,Si,,,2025-02-10 11:44:15,PCLD.GDV.TCDL.5,,,,2025-01-22 07:24:14,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+130,PCLD.GLP.VAP,1.0,2024-12-23 00:00:00,"Mantenimiento de Unidades de vaporización de GLP, perteneciente a Tropigas de El Salvador.",Si,Si,,,2025-01-22 07:34:37,PCLD.GLP.VAP.1,,,,2025-01-22 07:26:44,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+131,PCLD.GLP.VAP,1.0,2025-01-06 00:00:00,"Corrección de fallas de unidades vaporizadores de GLP, el cual por mala manipulación en el momento de realizar el cambio de uso de tanque LP, se cerró válvula de flujo, el cual produjo que la tubería se congelara así como las unidades vaporadoras.",No,Si,,,2025-01-22 07:33:49,PCLD.GLP.VAP.1,,,,2025-01-22 07:33:48,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+132,PCLD.GLP.TAN,1.0,2024-12-23 00:00:00,"Mantenimiento e inspección de tanque de LP perteneciente de Tropigas de El Salvador.
+",Si,Si,,,2025-01-22 07:36:29,PCLD.GLP.TAN.1,,,,2025-01-22 07:36:07,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+133,PCLD.GDV.TCDL,1.0,2025-01-10 00:00:00,"Reporte gases ambientales de caldera 1
+Caldera Dual de 500 BHP. #1.
+NRMT: 0512.
+Modelo: CB-600-500-150.
+Serial. L-89643.
+
+",Si,Si,,,2025-01-22 13:44:43,PCLD.GDV.TCDL.1,,,,2025-01-22 13:44:42,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+134,PCLD.GDV.TCDL,3.0,2025-01-10 00:00:00,"Reporte de Gases Ambientales de #3
+Caldera Dual de 800 BHP. #3.
+NRMT: 0702.
+Modelo: CB-600-800-150.
+Serial. OL-104266",Si,Si,,,2025-01-22 13:50:10,PCLD.GDV.TCDL.3,,,,2025-01-22 13:50:09,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+135,PCLD.GDV.TCDL,4.0,2025-01-10 00:00:00,"Reporte de Gases ambientales 
+Caldera de 800 BHP. #4.
+NRMT: 0729
+Modelo: CB-600-800-150.
+Serial. L-104265
+
+",Si,Si,,,2025-01-22 13:51:46,PCLD.GDV.TCDL.4,,,,2025-01-22 13:51:43,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+136,PCLD.GDV.TCDL,1.0,2025-01-10 00:00:00,"Reporte de Particulas Totales Suspendica (PTS) de caldera 1, 3, 4 . 
+Enero 2025.
+
+Caldera Dual de 500 BHP. #1.
+NRMT: 0512.
+Modelo: CB-600-500-150.
+Serial. L-89643.
+
+Caldera Dual de 800 BHP. #3.
+NRMT: 0702.
+Modelo: CB-600-800-150.
+Serial. OL-104266
+
+Caldera de 800 BHP. #4.
+NRMT: 0729
+Modelo: CB-600-800-150.
+Serial. L-104265
+
+
+",Si,Si,,,2025-11-01 13:43:39,PCLD.GDV.TCDL.1,,,,2025-01-22 13:57:10,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+137,PCLD.GLP.TAN,1.0,2025-01-29 00:00:00,"Tropiga de El Salvador llevo a cabo la instalación de una barda para delimitacion de taque trampa de liquido, asi como la rotulacion de Valvulas de entrada y salida de tanque de LP 10,500 Galones, 14,000 Galones.",No,Si,,,2025-01-30 06:37:33,PCLD.GLP.TAN.1,,,,2025-01-30 06:37:30,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+138,PTAR1.DOC.CLR,1.0,2024-12-30 00:00:00,"Mantenimiento preventivo y correctivo de clarificador  1, inlcuye cambio de rodamientos y sellos de caja reductora . ademas de baleros de puente. Tambien se cambiaron las esferas de la caja reductora central. Ademas se realizo la limpieza interior y sustitucion de rodos de puente. ",Si,SIMD,17790.0,,2025-06-04 15:52:34,PTAR1.DOC.CLR.1,,,,2025-02-03 11:24:24,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+141,PCLD.GDV.TCDL,1.0,2025-01-07 00:00:00,"Peritaje en Frio de Caldera Dual de 500 BHP. #1.
+NRMT: 0512.
+Modelo: CB-600-500-150.
+Serial. L-89643.
+
+Prueba hidrostatica 150 psi.
+Pruebas de valvulas de seguridad .
+Incrustacion, Corrosionen el cuerpo.
+Revicion de columna de agua.
+Condicion de reguistros (Tortugas etc.).
+Esatado de tubo de calefaccion.
+Estado placa cuerpo.
+Estado de Compuertas.
+Estados de Refactarios.
+Estado de limpieza de caldera.
+Estado de soporteria y Base.
+
+Costo por Servicio bajo convenio con proveedor.",Si,Si,,,2025-02-10 11:16:08,PCLD.GDV.TCDL.1,,,,2025-02-10 11:16:07,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+142,PCLD.GDV.TCDL,2.0,2025-01-07 00:00:00,"Peritaje en Frio de Caldera Dual de 600 BHP. #2.
+NRMT: 0513.
+Modelo: WB-A2-3P.
+Serial. 17900P-WB00-01
+
+Prueba hidrostatica 150 psi.
+Pruebas de valvulas de seguridad .
+Incrustacion, Corrosionen el cuerpo.
+Revicion de columna de agua.
+Condicion de reguistros (Tortugas etc.).
+Esatado de tubo de calefaccion.
+Estado placa cuerpo.
+Estado de Compuertas.
+Estados de Refactarios.
+Estado de limpieza de caldera.
+Estado de soporteria y Base.
+
+Costo por Servicio bajo convenio con proveedor.
+",Si,Si,,,2025-02-10 11:17:13,PCLD.GDV.TCDL.2,,,,2025-02-10 11:17:11,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+143,PCLD.GDV.TCDL,3.0,2025-02-10 00:00:00,"Peritaje en Frio de Caldera Dual de 800 BHP. #3.
+NRMT: 0702.
+Modelo: CB-600-800-150.
+Serial. OL-104266
+
+Prueba hidrostatica 150 psi.
+Pruebas de valvulas de seguridad .
+Incrustacion, Corrosionen el cuerpo.
+Revicion de columna de agua.
+Condicion de reguistros (Tortugas etc.).
+Esatado de tubo de calefaccion.
+Estado placa cuerpo.
+Estado de Compuertas.
+Estados de Refactarios.
+Estado de limpieza de caldera.
+Estado de soporteria y Base.
+
+Costo por Servicio bajo convenio con proveedor.",Si,Si,,,2025-02-10 11:18:16,PCLD.GDV.TCDL.3,,,,2025-02-10 11:18:15,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+144,PCLD.GDV.TCDL,4.0,2025-01-07 00:00:00,"Peritaje en Frio de Caldera de 800 BHP. #4.
+NRMT: 0729
+Modelo: CB-600-800-150.
+Serial. L-104265
+
+Prueba hidrostatica 150 psi.
+Pruebas de valvulas de seguridad .
+Incrustacion, Corrosionen el cuerpo.
+Revicion de columna de agua.
+Condicion de reguistros (Tortugas etc.).
+Esatado de tubo de calefaccion.
+Estado placa cuerpo.
+Estado de Compuertas.
+Estados de Refactarios.
+Estado de limpieza de caldera.
+Estado de soporteria y Base.
+
+Costo por Servicio bajo convenio con proveedor.
+",Si,Si,,,2025-02-10 11:19:06,PCLD.GDV.TCDL.4,,,,2025-02-10 11:19:06,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+145,PCLD.GDV.TCDL,5.0,2025-01-07 00:00:00,"Peritaje en Frio de Caldera de 800 BHP. #5.
+NRMT: 0728.
+Modelo: CB-600-500-150.
+Serial. L-104480.
+
+Prueba hidrostática 150 psi.
+Pruebas de válvulas de seguridad .
+Incrustación, Corrosion el cuerpo.
+Revision de columna de agua.
+Condicion de reguistros (Tortugas etc.).
+Esatado de tubo de calefaccion.
+Estado placa cuerpo.
+Estado de Compuertas.
+Estados de Refactarios.
+Estado de limpieza de caldera.
+Estado de soportaría y Base.
+
+Costo por Servicio bajo convenio con proveedor.
+",Si,Si,,,2025-02-10 11:20:13,PCLD.GDV.TCDL.5,,,,2025-02-10 11:20:12,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+151,SB.46kV.TX,1.0,2024-10-27 00:00:00,"Gases altos pero no peligrosos, desgasificar rotundamente en diciembre de 2025 NOEDIT",Si,Si,1800.0,5.0,2025-02-26 15:50:08,SB.46kV.TX.1,,,,2025-02-25 15:03:22,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+157,INF.CIV.MUR,1.0,2025-02-25 00:00:00,"Mantenimiento de cerca eléctrica de Sitio. Mes de Febrero
+Zonas 1 hasta Zona 8.
+Limpieza de maleza.
+Revisión de chispa.
+Revisión de bateria.
+Revisión de sirena.
+Repáracion de lineas.",Si,JV Sistemas,325.0,,2025-06-11 15:28:40,INF.CIV.MUR.1,,,,2025-03-03 08:23:26,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+158,SB.46kV.LIN,1.0,2025-04-11 00:00:00,"Auditoria Anual SIMEC. 2025
+HanesBrands Etesal Opico.
+INT. 38-4-83.
+Plano esquemático.
+Plano unifilar.
+configuración de medidores.
+Pruebas de los TP.
+Pruebas de los Tc.
+Prueba de potencia.
+Prueba de Comunicacion.",Si,,1300.0,,2025-11-01 13:45:43,SB.46kV.LIN.1,,,,2025-04-28 14:38:04,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+159,SB.46kV.TC,4.0,2025-04-08 00:00:00,"TCs. de San Juan Opico.
+Informe de pruebas electricas a Tranformadores de Corriente.
+Sadtem.
+Serie 678017, Face A.
+Serie 678018, Face B.
+Serie 678019, Face C.
+Costo por prueba y montage.",Si,Energy,2200.0,,2025-05-30 08:02:48,SB.46kV.TC.4,,,,2025-04-28 15:06:16,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+160,,,2025-04-11 00:00:00,"Auditoria Anual SIMEC_11_Abril_2025.
+INT. 38-4-83
+Plano Esquemático.
+Plano Unifilar.
+Configuración de Medidores 450, 454.
+Prueba de TC.
+Prueba de TP.
+Prueba de potencia.
+Prueba de Comunicacion.
+
+",Si,,1300.0,,2025-04-29 16:14:17,.,,,,2025-04-29 16:14:15,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+161,SB.46kV.TC,4.0,2025-04-11 00:00:00,"Auditoria Anual SIMEC_11_ABRIL_2025.
+INT. 38-4-83.
+Plano Esquemático.
+Plano Unifilar.
+Configuración de Medidores.
+Pruebas de TC.
+Pruebas de TP.
+Prueba de potencia.
+Pruebas de comunicaciones.
+",Si,Si,1300.0,,2025-05-30 08:03:02,SB.46kV.TC.4,,,,2025-04-29 16:19:49,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+162,SB.46kV.TX,1.0,2023-12-19 00:00:00,"DIAGNOSTICO Y MONITOREO DE ACEITE DIELÉCTRICO.
+a) Número de neutralización ó acidez ASTM D974b. 
+b) ITF o Tensión Interfacial ASTM D971c. 
+c) Rigidez dieléctrica ASTM D877d. 
+d) Color ASTM D1500e. 
+e) Examen Visual ASTM DT154f. 
+f) Gravedad Específica ASTM D1298h. 
+g) Humedad (KF) ASTM D 1533I. 
+h) DGA Cromatografía Gases Disueltos (ASTM D 3612)j. 
+i) Contenido de furanos (ASTM D5837)k. 
+j) RIGIDEZ DIELECTRICA ASTM D1816
+",Si,Cideca,,,2025-04-29 16:24:48,SB.46kV.TX.1,,,,2025-04-29 16:24:48,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+163,SB.23KV.INT,1.0,2024-10-27 00:00:00,"Mantenimiento de Celdas MT, ABB, con interruptor en vacío Extraíbles
+Prueba de resistencia de aislamiento.
+prueba de resistencia de Óhmica de Bobinas.
+Pruebas de apertura y Cierre.
+Limpieza lubricación y apreté conexiones",Si,,1800.0,,2025-11-01 13:46:24,SB.23KV.INT.1,,,,2025-04-30 09:58:08,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+164,,2.0,2024-10-27 00:00:00,"Servicio de mantenimiento preventive a Celdas MT 
+Mca. ABB contenido interruptores al vació tipo 
+extraíble, Incluye, pero no se limita a:
+Celdas
+* Pruebas de resistencia de aislamiento
+* Pruebas de Resistencia Óhmico de contactos
+* Pruebas de Apertura y cierre
+* Limpieza y lubricación",Si,,1800.0,,2025-04-30 10:08:04,.2,,,,2025-04-30 10:08:02,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+165,,2.0,2024-10-27 00:00:00,"Servicio de mantenimiento preventive a Celdas MT 
+Mca. ABB conteniedo interruptorers al vacio tipo 
+extraible, Incluye, pero no se limita a:
+Celdas
+* Pruebas de resistencia de aislamiento
+* Pruebas de Resistencia Óhmico de contactos
+* Pruebas de Apertura y cierre
+* Limpieza y lubricación",Si,Si,1800.0,,2025-04-30 10:12:30,.2,,,,2025-04-30 10:12:24,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+166,,2.0,2024-10-27 00:00:00,"Servicio de Mantenimiento preventivo a celda de media tención.
+Marca ABB.
+Pruebas de resistencia de aislamiento
+Pruebas de Resistencia Óhmica de contactos
+Pruebas de Apertura y cierre
+Limpieza y lubricación",Si,Si,1800.0,,2025-05-02 07:15:18,.2,,,,2025-05-02 07:15:16,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+167,,1.0,2024-10-27 00:00:00,"Servicio de Mantenimiento preventivo a celda de media tención.
+Marca ABB.
+Pruebas de resistencia de aislamiento
+Pruebas de Resistencia Óhmica de contactos
+Pruebas de Apertura y cierre
+Limpieza y lubricación",Si,Si,1800.0,,2025-05-02 07:19:38,.1,,,,2025-05-02 07:19:37,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+168,,,2024-10-27 00:00:00,"Servicio de Mantenimiento preventivo a celda de media tención.
+Marca ABB.
+Pruebas de resistencia de aislamiento
+Pruebas de Resistencia Óhmica de contactos
+Pruebas de Apertura y cierre
+Limpieza y lubricación",Si,Si,1800.0,,2025-05-02 07:21:05,.,,,,2025-05-02 07:21:03,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+169,SB.46kV.TX,1.0,2024-10-27 00:00:00,"Servicio de Mantenimiento preventivo a celda de media tención.
+Marca ABB.
+Pruebas de resistencia de aislamiento
+Pruebas de Resistencia Óhmica de contactos
+Pruebas de Apertura y cierre
+Limpieza y lubricación",Si,Si,,,2025-05-02 07:25:45,SB.46kV.TX.1,,,,2025-05-02 07:25:44,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+170,SB.46kV.INT,1.0,2024-10-27 00:00:00,"Recarga de gas SF6 a Interruptor de potencia. Subestación principal.
+Detención de fuga de gas SF6.",Si,Si,1275.0,,2025-05-30 07:58:50,SB.46kV.INT.1,,,,2025-05-02 07:40:45,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+171,PTAR2.AA.AE,1.0,2025-03-21 00:00:00,Mantenimiento preventivo aereador 1 planta 1.  inlcuye mantenminento de caja reductora y motor .  agergar caja reductora presento problemas -. ,Si,Taller Hernandez,,,2025-05-02 08:48:43,PTAR2.AA.AE.1,,,,2025-05-02 08:48:42,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+172,PTAR1.AA.AE,1.0,2025-03-25 00:00:00,"Mantemiento correctivo inlcuye soldadora de punta de eje, motor, cambio de chumaceras y piñon de caja . ",No,Taller Hernandez,7000.0,,2025-06-04 08:17:30,PTAR1.AA.AE.1,,,,2025-05-12 12:29:03,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+174,PDO.ADO.BBI,3.0,2025-05-09 00:00:00,"Se hizo reclamo por fuga de aciete debido a falla de retenedor. se solvento , bomba actualmente trabajando con normalidad.",Si,Si,,,2025-05-13 06:47:13,PDO.ADO.BBI.3,,,,2025-05-13 06:47:13,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+175,PDO.AEC.CTR,1.0,2025-05-23 00:00:00,Se realizo mtto preventivo programado para  compresores de area de ozono,Si,Kaeser,,,2025-05-26 12:43:22,PDO.AEC.CTR.1,,,,2025-05-26 12:43:22,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+176,PDO.AEC.CTR,2.0,2025-05-23 00:00:00,Mtto preventivo programado ,Si,Kaeser,,,2025-05-26 12:44:18,PDO.AEC.CTR.2,,,,2025-05-26 12:44:18,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+177,PSVZ.EXT.POZ,1.0,2022-12-19 00:00:00,"mantenimiento preventivo pozo 1, se econtro roturas  en columna de succion , se trabaja en menos revoluciones. ",Si,MAPOSA,3700.0,,2025-06-09 08:53:58,PSVZ.EXT.POZ.1,,,,2025-06-04 08:51:29,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+178,PSVZ.EXT.POZ,2.0,2023-03-14 00:00:00,"se cambio a bomba de 50 hp con la empresa hidrotec por un monto de 1500, un año antes se le dio mtto preventivo completo con maposa. ",Si,MAPOSA,4900.0,,2025-06-09 09:23:02,PSVZ.EXT.POZ.2,,,,2025-06-04 08:51:45,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+179,PSVZ.EXT.POZ,3.0,2024-12-23 00:00:00,mtto preventivo pozo 3,Si,MAPOSA,3000.0,,2025-06-09 10:17:11,PSVZ.EXT.POZ.3,,,,2025-06-04 08:51:53,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+180,PSVZ.EXT.POZ,4.0,2024-12-19 00:00:00,Se dio mtto  preventivo a pozo 4,Si,MAPOSA,4800.0,,2025-06-09 10:29:16,PSVZ.EXT.POZ.4,,,,2025-06-04 08:52:13,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+181,PSVZ.EXT.POZ,5.0,2025-06-03 00:00:00,Mantenimiento preventivo de pozo ,Si,MAPOSA,3700.0,,2025-06-09 10:38:23,PSVZ.EXT.POZ.5,,,,2025-06-04 08:52:35,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+182,PTAR1.AA.MI,2.0,2024-12-20 00:00:00,Rebobinado de mixer 20  hp. ,No,Taller Hernandez,1080.0,,2025-06-05 13:57:25,PTAR1.AA.MI.2,,,,2025-06-05 13:57:24,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+183,,,2024-09-20 00:00:00,"Se le dio Mtto preventivo, que incluyo cambio de baleros, ademas se sustituyo el plato- ",No,Taller Hernandez,1600.0,,2025-06-06 14:22:20,.,,,,2025-06-06 14:22:19,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+184,,8.0,2024-09-27 00:00:00,"Se dio mtto preventivo, sin embargo se reparo y fabrio plato de base de mixer.  el costo por el prevemtovp es 13325 ",No,Taller Hernandez,395.0,,2025-06-06 14:26:26,.8,,,,2025-06-06 14:26:25,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+185,PSVZ.EXT.POZ,1.0,2022-12-16 00:00:00,"Mantenimiento preventivo pozos de explotacion,",Si,MAPOSA,3700.0,,2025-06-09 08:16:41,PSVZ.EXT.POZ.1,,,,2025-06-06 14:46:28,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+186,PTAR1.AA.MI,8.0,2024-09-27 00:00:00,Se dio mtto preventivo ademas se cambio plato fijador. ,Si,Taller Hernandez,1695.0,,2025-06-06 14:58:55,PTAR1.AA.MI.8,,,,2025-06-06 14:58:54,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+187,PTAR1.AA.MI,9.0,2024-12-12 00:00:00,"Se dio mantenimiento preventivo que incluye cambio de rodamientos y reparación de cuerpo de flotador, además se rebobino ",No,Taller Hernandez,2425.0,,2025-06-07 07:03:14,PTAR1.AA.MI.9,,,,2025-06-07 07:03:12,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+188,PSVZ.EXT.POZ,3.0,2025-02-17 00:00:00,Sustitucion de cable de alimentacion electrica y cambio de bomba.,Si,MAPOSA,1500.0,,2025-06-09 10:23:56,PSVZ.EXT.POZ.3,,,,2025-06-09 10:23:11,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+189,,1.0,2023-11-13 00:00:00,"se cambio selllo, ademas se le dio matto preventivo que incluure cambio de rodamientos . ",No,Taller Hernandez,5500.0,,2025-06-09 10:49:53,.1,,,,2025-06-09 10:49:52,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+190,,1.0,2025-03-17 00:00:00,Fabricacion de masas y cambio de acople para transmision motor y bomba 1 de 125hp,Si,Taller Hernandez,1405.0,,2025-06-09 10:54:06,.1,,,,2025-06-09 10:54:06,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+191,PSVZ.CTN.BBS,1.0,2025-03-17 00:00:00,Fabriacacion de masas y cambio de acople de bomba 1. ,Si,Taller Hernandez,1405.0,,2025-06-09 10:55:20,PSVZ.CTN.BBS.1,,,,2025-06-09 10:55:19,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+192,PSVZ.CTN.BBS,2.0,2025-03-18 00:00:00,Fabriacion y cambio de acople bomba 125 #2,Si,Taller Hernandez,1405.0,,2025-06-09 10:59:24,PSVZ.CTN.BBS.2,,,,2025-06-09 10:59:23,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+193,PSVZ.SVDR.BTS,3.0,2025-01-13 00:00:00,se dio mtto preventivo motor y bomba    3,Si,Taller Hernandez,2250.0,,2025-11-01 13:51:55,PSVZ.SVDR.BTS.3,,,,2025-06-09 11:03:32,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+194,,,2025-06-03 00:00:00,,Si,Taller Hernandez,,,2025-06-09 11:04:00,.,,,,2025-06-09 11:04:00,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+195,PSVZ.CTN.BBS,3.0,2025-06-10 00:00:00,MTTO PREVENTIVO BOMBA 3 ,Si,Taller Hernandez,2250.0,,2025-06-09 11:06:44,PSVZ.CTN.BBS.3,,,,2025-06-09 11:04:32,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+196,PTAR2.DOC.CLR,1.0,2025-01-30 00:00:00,Rebobinado y cambio de baleros de emergencia.,No,Taller Hernandez,825.0,,2025-06-09 12:07:23,PTAR2.DOC.CLR.1,,,,2025-06-09 12:05:42,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+197,SB.23KV.INT,1.0,2024-10-27 00:00:00,"Mantenimiento de Celdas V/P 24.12.20
+Marca ABB.
+• Prueba de resistencia de aislamiento
+• Prueba de resistencia óhmica de contactos principales
+• Pruebas de apertura y cierre de los equipos
+• Limpieza lubricación y apreté conexiones",Si,Si,1800.0,,2025-06-09 12:12:04,SB.23KV.INT.1,,,,2025-06-09 12:12:03,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+198,SCI.CBCI.BCI,1.0,2025-03-15 00:00:00,Se cambiaron baleros de driver  motor contra incendios 1. ,Si,Taller Hernandez,2225.0,,2025-06-09 12:35:03,SCI.CBCI.BCI.1,,,,2025-06-09 12:35:02,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+199,PTAR2.AA.AE,8.0,2025-03-03 00:00:00,"mtto preventivo que incluye cambio de rodamientos, pintura, y medicion de parametros electricos. ",Si,Taller Hernandez,1406.0,,2025-06-09 13:33:45,PTAR2.AA.AE.8,,,,2025-06-09 12:58:34,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+200,PTAR2.AA.AE,9.0,2025-03-05 00:00:00,"mtto preventivo que incluye cambio de rodamientos, pintura, y medicion de parametros electricos. ",Si,Taller Hernandez,1408.0,,2025-06-09 13:33:19,PTAR2.AA.AE.9,,,,2025-06-09 12:59:19,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+201,SB.23KV.LIN,1.0,2025-05-16 00:00:00,"Reporte de actividades CIDECA 01 al 15 de Mayo
+-Inspección y poda de línea de distribución de 23 kV
+-Actividades de mantenimiento en acometidas primarias de 23 kV",,,,,2025-11-12 12:28:51,SB.23KV.LIN.1,,,,2025-06-09 13:18:13,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+202,SB.23KV.LIN,1.0,2025-05-01 00:00:00,"Reporte de actividades CIDECA 16 al 31 de Abril
+-Inspección y poda de línea de distribución de 23 kV
+-Actividades de mantenimiento en acometidas primarias de 23 kV",Si,Cideca,,,2025-06-09 13:20:00,SB.23KV.LIN.1,,,,2025-06-09 13:20:00,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+203,SB.23KV.LIN,1.0,2025-06-01 00:00:00,"Reporte de actividades CIDECA 16 al 31 de Mayo
+-Inspección y poda de línea de distribución de 23 kV
+-Actividades de mantenimiento en acometidas primarias de 23 kV",Si,Cideca,,,2025-06-09 14:44:58,SB.23KV.LIN.1,,,,2025-06-09 13:47:48,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+204,SB.23KV.LIN,1.0,2025-04-16 00:00:00,"Reporte de actividades CIDECA 01 al 15 de Abril
+-Inspección y poda de línea de distribución de 23 kV
+-Actividades de mantenimiento en acometidas primarias de 23 kV",Si,Cideca,,,2025-06-09 13:50:19,SB.23KV.LIN.1,,,,2025-06-09 13:50:19,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+205,SB.23KV.LIN,1.0,2025-04-01 00:00:00,"Reporte de actividades CIDECA 16 al 31 de Marzo
+-Inspección y poda de línea de distribución de 23 kV
+-Actividades de mantenimiento en acometidas primarias de 23 kV",Si,Cideca,,,2025-11-01 13:47:13,SB.23KV.LIN.1,,,,2025-06-09 13:56:06,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+206,SB.23KV.LIN,1.0,2025-04-01 00:00:00,"Reporte de actividades CIDECA 16 al 31 de Marzo
+-Inspección y poda de línea de distribución de 23 kV
+-Actividades de mantenimiento en acometidas primarias de 23 kV",Si,Cideca,,,2025-06-09 13:58:17,SB.23KV.LIN.1,,,,2025-06-09 13:58:16,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+207,SB.23KV.LIN,1.0,2025-03-16 00:00:00,"Reporte de actividades CIDECA 01 al 15 de Marzo
+-Inspección y poda de línea de distribución de 23 kV
+-Actividades de mantenimiento en acometidas primarias de 23 kV",Si,Cideca,,,2025-06-09 13:59:47,SB.23KV.LIN.1,,,,2025-06-09 13:59:46,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+208,SB.23KV.LIN,1.0,2025-03-01 00:00:00,"Reporte de actividades CIDECA 16 al 28 de Febrero
+-Inspección y poda de línea de distribución de 23 kV
+-Actividades de mantenimiento en acometidas primarias de 23 kV",Si,Cideca,,,2025-06-09 14:37:28,SB.23KV.LIN.1,,,,2025-06-09 14:37:27,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+209,SB.23KV.LIN,1.0,2025-02-16 00:00:00,"Reporte de actividades CIDECA 01 al 15 de Febrero
+-Inspección y poda de línea de distribución de 23 kV
+-Actividades de mantenimiento en acometidas primarias de 23 kV",Si,Cideca,,,2025-06-09 14:38:24,SB.23KV.LIN.1,,,,2025-06-09 14:38:24,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+210,SB.23KV.LIN,1.0,2025-02-01 00:00:00,"Reporte de actividades CIDECA 16 al 31 de Enero
+-Inspección y poda de línea de distribución de 23 kV
+-Actividades de mantenimiento en acometidas primarias de 23 kV",Si,Cideca,,,2025-06-09 14:39:44,SB.23KV.LIN.1,,,,2025-06-09 14:39:44,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+211,SB.23KV.LIN,1.0,2025-01-16 00:00:00,"Reporte de actividades CIDECA 01 al 15 de Enero
+-Inspección y poda de línea de distribución de 23 kV
+-Actividades de mantenimiento en acometidas primarias de 23 kV",Si,Cideca,,,2025-06-09 14:40:58,SB.23KV.LIN.1,,,,2025-06-09 14:40:57,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+212,SB.23KV.LIN,1.0,2025-01-01 00:00:00,"Reporte de actividades CIDECA 16 al 31 de Diciembre
+-Mantenimiento programado de Linea
+Sustitución de elementos 
+Limpieza de Elementos.
+-Inspección y poda de línea de distribución de 23 kV
+-Actividades de mantenimiento en acometidas primarias de 23 kV",Si,Cideca,,,2025-06-09 14:43:53,SB.23KV.LIN.1,,,,2025-06-09 14:43:52,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+213,SB.46kV.TC,1.0,2024-12-18 00:00:00,"Pruebas de TCs san Juan Opico
+Relacion de espira de polaridad
+Resistencia de devanado
+Curva de Saturación.
+Determinación de Error: Magnitud y Fase – Método Indirecto.",Si,Si,,,2025-06-10 14:54:49,SB.46kV.TC.1,,,,2025-06-10 14:54:46,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+214,SB.46kV.TC,4.0,2024-12-18 00:00:00,"Pruebas Ejecutadas.
+-Relación de espiras y polaridad.
+-Resistencia de Devanados.
+-Curva de saturación.
+-Determinación de Error: Magnitud y Fase – Método Indirecto.
+
+",Si,Si,,,2025-06-10 14:59:13,SB.46kV.TC.4,,,,2025-06-10 14:59:09,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+215,SB.46kV.LIN,1.0,2025-06-01 00:00:00,"Informe de actividades del 16 al 31 de mayo 2025.
+-inspección de línea.
+-poda de ramas de arboles.
+",Si,Cideca,,,2025-06-10 15:04:46,SB.46kV.LIN.1,,,,2025-06-10 15:04:44,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+216,INF.CIV.MUR,1.0,2025-03-31 00:00:00,"Mantenimiento de cerca eléctrica de Sitio. Mes de Marzo
+Zonas 1 hasta Zona 8.
+Limpieza de maleza.
+Revisión de chispa.
+Revisión de batería.
+Revisión de sirena.
+Repáracion de lineas.",Si,JV Sistemas,325.0,,2025-06-11 15:28:51,INF.CIV.MUR.1,,,,2025-06-11 15:04:00,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+217,INF.CIV.MUR,1.0,2025-04-30 00:00:00,"Mantenimiento de cerca eléctrica de Sitio. Mes de Abril
+Zonas 1 hasta Zona 8.
+Limpieza de maleza.
+Revisión de chispa.
+Revisión de bateria.
+Revisión de sirena.
+Repáracion de lineas.",Si,JV Sistemas,325.0,,2025-06-11 15:29:03,INF.CIV.MUR.1,,,,2025-06-11 15:07:41,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+218,INF.CIV.MUR,1.0,2025-05-31 00:00:00,"Mantenimiento de cerca eléctrica de Sitio. Mes de Mayo
+Zonas 1 hasta Zona 8.
+Limpieza de maleza.
+Revisión de chispa.
+Revisión de batería.
+Revisión de sirena.
+Reparación de lineas.",Si,JV Sistemas,325.0,,2025-06-11 15:29:14,INF.CIV.MUR.1,,,,2025-06-11 15:10:23,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+219,SCI.CBCI.BCI,1.0,2025-06-10 00:00:00,Mtto preventivo de sistema contra incendios.,Si,Si,1300.0,,2025-11-01 13:44:37,SCI.CBCI.BCI.1,,,,2025-07-28 12:21:34,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+220,PSVZ.EXT.POZ,4.0,2025-08-09 00:00:00,"Se realizo la sustitución de bomba y motor de 100hp en pozo 4. agregar que se colocó motor de 100hp que estaba de media vida.  además, se hizo cambio de variador por un arrancador suave. se está cotizando la reposición de variador .",No,MAPOSA,1500.0,,2025-08-22 07:48:59,PSVZ.EXT.POZ.4,,,,2025-08-22 07:48:59,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+221,PSVZ.EXT.POZ,2.0,2025-08-11 00:00:00,"Mantenimiento preventivo de pozo 2.
+se identifico que motor de 50 hp esta quemado. ",Si,MAPOSA,2950.0,,2025-08-22 08:10:56,PSVZ.EXT.POZ.2,,,,2025-08-22 08:10:56,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+222,PSVZ.SVDR.BTS,4.0,2025-01-13 00:00:00,Matenimiento preventivo bombas de suavizador5 4 y 5.,Si,Taller Hernandez,2250.0,,2025-11-01 13:49:05,PSVZ.SVDR.BTS.4,,,,2025-08-25 10:06:22,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+223,PTAR2 ,1.0,2025-07-24 00:00:00,"Mantenimiento correctivo , de motor criba ",No,Taller Hernandez,1275.0,,2025-08-28 12:23:27,PTAR2 .1,,,,2025-08-28 12:23:26,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+224,SB.46kV.TX,1.0,2025-08-06 00:00:00,"Informe de servicio de termovacío - Trafo 20MVA SE HBI
+El documento incluye la siguiente información:
+•	Descripción detallada del servicio ejecutado
+•	Protocolo de intervención
+•	Registro fotográfico del proceso y resultados
+•	Conclusiones técnicas
+•	Recomendaciones operativas y de mantenimiento
+",Si,Cideca,,,2025-09-08 13:21:59,SB.46kV.TX.1,,,,2025-09-08 13:21:57,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+225,SB.23KV.LIN,1.0,2025-09-01 00:00:00,"Reporte de actividades CIDECA 01 al 15 de Septiembre
+-Inspección y poda de línea de distribución de 23 kV
+-Actividades de mantenimiento en acometidas primarias de 23 kV",Si,Cideca,,,2025-09-17 06:22:28,SB.23KV.LIN.1,,,,2025-09-17 06:22:25,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+226,SB.46kV.LIN,1.0,2025-09-01 00:00:00,"Informe de actividades del 01 al 15 de Septiembre 2025.
+-inspección de línea.
+-poda de ramas de arboles.",Si,Cideca,,,2025-09-17 06:23:46,SB.46kV.LIN.1,,,,2025-09-17 06:23:43,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+227,PSVZ.EXT.POZ,4.0,2025-09-26 00:00:00,"Se hizo cambio de motor de bomba. el motor es completamente nuevo, marca franklin electric de 100hp, además se cambió cable de alimentación eléctrica. ",No,MAPOSA,1500.0,,2025-09-29 12:56:49,PSVZ.EXT.POZ.4,,,,2025-09-29 12:56:49,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+228,PCLD.GDV.TCDL,3.0,2025-09-05 00:00:00,"Caldera #3
+Reparación de tubo central
+Cambio de 1 tubo de fuego pulmón derecho
+prueba hidrostáticas 150 PSI.",No,IMR,900.0,,2025-10-01 07:48:50,PCLD.GDV.TCDL.3,,,,2025-10-01 07:48:44,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+229,SB.46kV.LIN,1.0,2025-09-16 00:00:00,"Informe de actividades del 16 al 30 de Septiembre 2025.
+-inspección de línea.
+-poda de ramas de arboles.",Si,Cideca,,,2025-10-02 06:33:28,SB.46kV.LIN.1,,,,2025-10-02 06:33:26,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+230,SB.23KV.LIN,1.0,2025-09-16 00:00:00,"Informe de actividades del 16 al 30 de Septiembre 2025.
+-inspección de línea.
+-poda de ramas de arboles.",,,,,2025-10-23 12:44:44,SB.23KV.LIN.1,,,,2025-10-02 06:34:31,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+231,INF.CIV.MUR,1.0,2025-06-30 00:00:00,"Mantenimiento de cerca eléctrica de Sitio. Mes de Mayo
+Zonas 1 hasta Zona 8.
+Limpieza de maleza.
+Revisión de chispa.
+Revisión de batería.
+Revisión de sirena.
+Reparación de lineas.",Si,JV Sistemas,325.0,,2025-11-01 13:48:04,INF.CIV.MUR.1,,,,2025-10-02 06:39:01,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+232,INF.CIV.MUR,1.0,2025-06-30 00:00:00,"Mantenimiento de cerca eléctrica de Sitio. Mes de Junio
+Zonas 1 hasta Zona 8.
+Limpieza de maleza.
+Revisión de chispa.
+Revisión de bateria.
+Revisión de sirena.
+Repáracion de lineas.",Si,JV Sistemas,325.0,,2025-10-02 07:00:35,INF.CIV.MUR.1,,,,2025-10-02 07:00:35,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+233,INF.CIV.MUR,1.0,2025-07-31 00:00:00,"Mantenimiento de cerca eléctrica de Sitio. Mes de Julio
+Zonas 1 hasta Zona 8.
+Limpieza de maleza.
+Revisión de chispa.
+Revisión de bateria.
+Revisión de sirena.
+Repáracion de lineas.",Si,JV Sistemas,325.0,,2025-10-02 07:03:04,INF.CIV.MUR.1,,,,2025-10-02 07:03:04,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+234,INF.CIV.MUR,1.0,2025-08-29 00:00:00,"Mantenimiento de cerca eléctrica de Sitio. Mes de Agosto
+Zonas 1 hasta Zona 8.
+Limpieza de maleza.
+Revisión de chispa.
+Revisión de bateria.
+Revisión de sirena.
+Repáracion de lineas.",Si,JV Sistemas,325.0,,2025-10-02 07:04:01,INF.CIV.MUR.1,,,,2025-10-02 07:04:01,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+242,PTAR2.DOC.CLR,1.0,,,,,,161.0,2026-03-10 16:33:09,PTAR2.DOC.CLR.1,2026-12-16,No,"Mantenimiento clarificador frencuencia 2 años, Cambiar corona de bronce",2025-10-09 13:43:47,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+243,INF.CIV.MUR,1.0,2025-09-29 23:00:00,"Mantenimiento de cerca eléctrica de Sitio. Mes de Septiembre
+Zonas 1 hasta Zona 8.
+Limpieza de maleza.
+Revisión de chispa.
+Revisión de bateria.
+Revisión de sirena.
+Repáracion de lineas.",Si,JV Sistemas,325.0,,2025-10-23 12:35:05,INF.CIV.MUR.1,,,,2025-10-23 12:35:03,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+244,SB.23KV.LIN,1.0,2025-08-30 23:00:00,"Informe termográfico
+Linea de distribución de 23 KV
+Agosto 2025.
+Elementos a inspeccionar 
+Estudio termográfico.",Si,Cideca,,,2025-10-23 12:44:40,SB.23KV.LIN.1,,,,2025-10-23 12:44:38,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+245,SB.46kV.INT,1.0,,,,,,162.0,2026-03-10 16:33:47,SB.46kV.INT.1,2026-04-10,No,Pruebas de pureza de Gas,2025-10-31 14:34:53,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+246,PTAR1.AA.AE,14.0,,,,,,163.0,2025-10-31 14:46:10,PTAR1.AA.AE.14,2026-03-18,No,Enviar a reparacion de caja (Programar hasta indicacion gerencial),2025-10-31 14:46:10,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+247,PTAR1.AA.AE,2.0,,,,,,164.0,2026-03-10 16:37:02,PTAR1.AA.AE.2,2025-03-27,No,Programar hasta indicacion gerencial el reemplazo de sellos y sacado de planta,2025-10-31 14:48:57,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+248,PTAR1.AA.AE,10.0,,,,,,165.0,2026-03-10 16:34:04,PTAR1.AA.AE.10,2026-02-26,No,enviar a fabricacion o rectificado de aspas (Hasta recibir indicacion gerencial),2025-10-31 14:52:23,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+249,PSVZ.EXT.POZ,1.0,,,,,,170.0,2026-03-10 16:34:30,PSVZ.EXT.POZ.1,2026-07-15,No,"Extracción de pozo y revision de motor,floculacion y soplado de pozo y video de estado, reemplazar Cable",2025-11-01 15:19:58,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+250,PSVZ.EXT.POZ,3.0,,,,,,171.0,2026-03-10 16:35:11,PSVZ.EXT.POZ.3,2026-05-19,No,Mantenimiento Anual de pozo,2025-11-01 15:20:40,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+251,SB.46kV.TP,1.0,,,,,,172.0,2026-03-10 16:36:48,SB.46kV.TP.1,2026-08-05,No,Pruebas Anuales segun plan,2025-11-01 16:39:13,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+252,PCLD.GDV.TCDL,1.0,,,,,,173.0,2026-03-10 16:36:38,PCLD.GDV.TCDL.1,2026-12-10,No,Programar 5 calderas para peritajes en frio,2025-11-01 16:41:44,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+253,SCI.CBCI.BCI,2.0,,,,,,174.0,2026-03-10 16:36:19,SCI.CBCI.BCI.2,2026-03-13,No,"Mantenimiento anual segun programa, cambio de aceite, filtros, verificacion de caudal etc.",2025-11-01 16:43:56,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+254,PDO.GDO.CHR,1.0,2025-10-14 23:00:00,"Mantenimiento preventivo chiller,  inlcuye cambio de aceite , cambio de filtros y cambio de refrigerante. además se hizo el cambio de rubatex.",Si,Si,1425.0,,2025-11-03 05:26:53,PDO.GDO.CHR.1,,,,2025-11-03 05:26:53,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+255,PDO.GDO.GOZ,19.0,2024-08-13 23:00:00,Se repararon por falla eléctrica. ,No,Si,3800.0,,2025-11-03 05:59:06,PDO.GDO.GOZ.19,,,,2025-11-03 05:53:15,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+256,PDO.GDO.GOZ,20.0,2024-08-14 23:00:00,Reparación por falla eléctrica ,Si,Si,3800.0,,2025-11-03 05:58:07,PDO.GDO.GOZ.20,,,,2025-11-03 05:58:07,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+257,PDO.GDO.GOZ,34.0,2024-08-13 23:00:00,Reparación por falla electrica,Si,Si,3800.0,,2025-11-03 06:06:03,PDO.GDO.GOZ.34,,,,2025-11-03 06:06:03,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+258,PDO.GDO.GOZ,1.0,2025-07-14 23:00:00,En el archivo de Excel se muestra toda la información del estado actual de los generadores de ozono. ,Si,No,,,2025-11-03 06:33:25,PDO.GDO.GOZ.1,,,,2025-11-03 06:33:23,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+259,SB.23KV.LIN,1.0,2025-10-30 23:00:00,"Informe de termografía en línea de distribución de 23 Kv
+Se reporta punto de monitores en poste N° 25
+Se intervendrá en paro de planta de Diciembre.",Si,Cideca,,,2025-11-12 12:28:49,SB.23KV.LIN.1,,,,2025-11-12 12:28:47,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+260,SB.46kV.INT,1.0,2025-11-04 22:00:00,"Cambio de gas SF6, Interruptor en San Juan Opico.
+se realizo cambio de gas por alta contaminación de SO2.
+ ",No,,,,2025-11-12 14:39:55,SB.46kV.INT.1,,,,2025-11-12 14:39:50,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+261,PTAR1.AA.AE,6.0,2025-12-02 22:00:00,Se rehubico aerador 6 montado en fase 2 u se coloco en posicion 2 fase 1 planta 1. aclarar que son equipos que ya han estado trabajando.,Si,,,,2025-12-04 05:34:40,PTAR1.AA.AE.6,,,,2025-12-04 05:34:39,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+262,PTAR1.AA.AE,7.0,2025-12-02 22:00:00,"Se reubico aerador 7 posicion 7 fase 2, en posicion 1 fase 1 . aclarar que son aeradores que han estado trabajando. el costo fue unicamente de servicio de grua. ",Si,,,,2025-12-04 05:41:44,PTAR1.AA.AE.7,,,,2025-12-04 05:41:44,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+263,PTAR1.AA.AE,2.0,2025-12-02 22:00:00,Aerador 2 se saco para mtto preventivo y reparacion de caja reductorar por desacople de eje.,Si,Taller Hernandez,,,2025-12-05 05:38:51,PTAR1.AA.AE.2,,,,2025-12-05 05:38:51,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+264,PTAR1.AA.AE,14.0,2025-12-02 22:00:00,Aerador 14 se saco para el mantenimiento preventivo.,Si,Taller Hernandez,,,2025-12-05 05:45:03,PTAR1.AA.AE.14,,,,2025-12-05 05:45:03,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+265,PTAR2.DOC.CLR,1.0,2026-01-05 22:00:00,"Pulido y limpieza de estructura
+Mtto de caja reductora 
+Inspeccion de corona y tornillo
+Medicion de motores 
+
+",Si,SIMD,19500.0,,2026-03-10 14:57:46,PTAR2.DOC.CLR.1,,,,2026-03-10 14:57:45,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+266,PTAR2.DOC.MTL,1.0,2026-01-06 22:00:00,"Remosion de pintura 
+Sustitucion de laminas oxidadas 
+Remosion de oxido 
+Pintura general 
+Cambio de baleros, retenedores y aceite de caja",Si,Taller Hernandez,4200.0,,2026-03-10 15:01:17,PTAR2.DOC.MTL.1,,,,2026-03-10 15:00:54,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+267,PCLD.GDV.TCDL,1.0,2025-12-28 22:00:00,"Reporte de Gases 
+Peritaje 
+Mantenimiento anual. 
+Limpieza lado fuego lado agua
+Cambio de empaques lado fuego y lado agua
+Resane de refractarios
+Cambio de fibra ceramica 
+Revision electrica 
+Comprobacion de paros por falla o seguridad",Si,IMR,5280.0,,2026-03-10 15:17:32,PCLD.GDV.TCDL.1,,,,2026-03-10 15:17:28,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+268,PCLD.GDV.TCDL,2.0,2025-12-28 22:00:00,"Reporte de Gases 
+Peritaje 
+Mantenimiento anual. 
+Limpieza lado fuego lado agua
+Cambio de empaques lado fuego y lado agua
+Resane de refractarios
+Cambio de fibra ceramica 
+Revision electrica 
+Comprobacion de paros por falla o seguridad",Si,IMR,5280.0,,2026-03-10 15:18:50,PCLD.GDV.TCDL.2,,,,2026-03-10 15:18:48,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+269,PCLD.GDV.TCDL,3.0,2025-12-28 22:00:00,"Reporte de Gases 
+Peritaje 
+Mantenimiento anual. 
+Limpieza lado fuego lado agua
+Cambio de empaques lado fuego y lado agua
+Resane de refractarios
+Cambio de fibra ceramica 
+Revision electrica 
+Comprobacion de paros por falla o seguridad",Si,IMR,5280.0,,2026-03-10 15:20:13,PCLD.GDV.TCDL.3,,,,2026-03-10 15:20:11,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+270,PCLD.GDV.TCDL,4.0,2025-12-28 22:00:00,"Reporte de Gases 
+Peritaje 
+Mantenimiento anual. 
+Limpieza lado fuego lado agua
+Cambio de empaques lado fuego y lado agua
+Resane de refractarios
+Cambio de fibra ceramica 
+Revision electrica 
+Comprobacion de paros por falla o seguridad",Si,IMR,5280.0,,2026-03-10 15:23:28,PCLD.GDV.TCDL.4,,,,2026-03-10 15:23:24,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+271,PCLD.GDV.TCDL,5.0,2026-01-06 22:00:00,"Reporte de Gases 
+Peritaje 
+Mantenimiento anual. 
+Limpieza lado fuego lado agua
+Cambio de empaques lado fuego y lado agua
+Resane de refractarios
+Cambio de fibra ceramica 
+Revision electrica 
+Comprobacion de paros por falla o seguridad",Si,IMR,5280.0,,2026-03-10 15:24:26,PCLD.GDV.TCDL.5,,,,2026-03-10 15:24:23,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+272,PCLD.GLP.VAP,1.0,2025-12-29 22:00:00,"Mantenimiento de Unidades de vaporización de GLP, perteneciente a Tropigas de El Salvador.",Si,,0.0,,2026-03-10 15:26:31,PCLD.GLP.VAP.1,,,,2026-03-10 15:26:13,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+273,PCLD.GLP.VAP,1.0,2026-01-22 22:00:00,Prueba de elementos de seguridad Anual,Si,,0.0,,2026-03-10 15:29:36,PCLD.GLP.VAP.1,,,,2026-03-10 15:29:36,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+274,PCLD.GLP.TAN,1.0,2026-02-22 22:00:00,Prueba de fugas de tanques y revision general de tanques de GLP de tropigas,Si,,0.0,,2026-03-10 15:31:16,PCLD.GLP.TAN.1,,,,2026-03-10 15:31:14,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+275,PSVZ.EXT.POZ,1.0,2025-11-09 22:00:00,"Mantenimiento correctivo de pozo por bomba y motor fallados debido a oxido/corrocion. 
+Se reemplazo bomba y motor, se hizo empalme de cable",No,MAPOSA,5000.0,,2026-03-10 15:33:23,PSVZ.EXT.POZ.1,,,,2026-03-10 15:33:22,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+276,SB.46kV.TX,1.0,2026-01-01 22:00:00,Informe de pruebas electricas y Gases Anual (Luego de termovacio),Si,Energetica,2800.0,,2026-03-10 15:50:36,SB.46kV.TX.1,,,,2026-03-10 15:50:36,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+277,SB.46kV.LIN,1.0,2026-02-17 22:00:00,Termografia de Rutina Febrero 2026 Bahias 46kV,Si,Energetica,0.0,,2026-03-10 15:55:18,SB.46kV.LIN.1,,,,2026-03-10 15:55:16,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+278,PTAR2.DOC.CTR,1.0,2025-04-21 23:00:00,"Por falla electrica en contactor, se cambio contactor y se verifico circuito de control ",No,Kaeser,,,2026-03-10 16:24:40,PTAR2.DOC.CTR.1,,,,2026-03-10 16:24:39,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+279,PTAR2.DOC.CTR,1.0,2025-10-17 23:00:00,Mantenimiento regular ASD40,Si,Kaeser,,,2026-03-10 16:26:22,PTAR2.DOC.CTR.1,,,,2026-03-10 16:26:22,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+280,PTAR1.AA.MI,1.0,,,,,,168.0,2026-03-10 19:26:49,PTAR1.AA.MI.1,2026-03-24,No,Necesita embobinado y cambio de rodamientos,2026-03-10 19:26:49,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+281,PTAR2.AA.AE,11.0,,,,,,176.0,2026-03-10 19:30:52,PTAR2.AA.AE.11,2026-04-23,No,Mantenimiento de 2 años ultima fecha 2022,2026-03-10 19:30:52,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+282,PTAR2.RL.RASP,2.0,,,,,,177.0,2026-03-10 19:36:53,PTAR2.RL.RASP.2,2026-04-09,No,Se necesita embobinar y sustitucion de sello.,2026-03-10 19:36:53,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento
+283,PTAR2.RL.TSP,1.0,,,,,,178.0,2026-03-10 19:38:26,PTAR2.RL.TSP.1,2026-03-31,No,"Disponible pero con fuga de aceite, enviar a mtto regular y rebobinado de motor",2026-03-10 19:38:26,,Elemento,sites/FacilitiesLists/Lists/List Historicos de mantenimiento

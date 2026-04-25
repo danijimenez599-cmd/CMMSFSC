@@ -1,0 +1,13 @@
+﻿0,1,2,3,4,5
+,,,,,
+,,ANUAL,,,
+,,,,,
+,,Especificaciones Tecninas,,,Ilustración de equipo 
+,,"Interruptor Aislado en Gas SF6 @ 72.5kV con poder de corte de 3s @25kA, revisar pruebas según norma IEC 62271-100",,,
+,,Partes,Intervalo,Labor de mantenimiento  ,Materiales y Herramientas
+,,Polos,2 años,"Verificacion de resistencia de contacto en los polos, desarmado y limpieza de carbon o demas residuos ",Servicio especializado se debe subcontratar 
+,,Mecanismo,2 años,"Verificacion de tiempo de apertura y cierre, revision de mecanismo de carga de resorte ",Servicio especializado se debe subcontratar 
+,,Camara de Gas,2 años,"Medicion de parametros a gas SF6: Pureza, humedad, contenido de SO2 ",Servicio especializado se debe subcontratar 
+,,Camara de Gas,Según resultados de analisis,"Reemplazo de gas SF6, limpieza de particulado.",Servicio especializado se debe subcontratar 
+,,Bushings ,2 años,Medicion de parametros electricos,Servicio especializado se debe subcontratar 
+,,Control,1 año,"Pruebas de disparo locales, remotas y por protecciones relé de linea y relé patron ",Servicio especializado se debe subcontratar 

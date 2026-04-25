@@ -1,0 +1,72 @@
+﻿0,1,2,3,4,5,6,7,8,9
+,,,,,,,,,
+,,Plan de mantenimiento SCF,,,,,,Servicio de Mantenimiento por parte de KAESER,
+,,,,,,,,,
+,,Especificaciones Tecnicas,,,Ilustración de equipo,,,Intervalo,Labor de mantenimiento  
+,,"Capacidad volumétrica: 200 SCFM
+Temperatura de punto de rocío: 3°C
+Caída de presión: 1.5 PSIG
+Presión de operación máxima: 230 PSIG
+Refrigerante: R 134a
+Voltaje: 230-460V/3 Fases/60Hz
+Conexión de aire comprimido: 1 ½” NPT
+Conexión de condensados: 3/8” NPT
+Control de ahorro de energía: Masa Térmica
+Material sistema separador Acero Inoxidable
+Dren de condensados Eco Drain",,,,,,Anualmente,Hacer que un representante autorizado del servicio KAESER revise y documente el circuito de refrigerante
+,,,,,,,,Anualmente,Hacer una revisión del monitor de presión por un representante autorizado del servicio KAESER.
+,,Partes,Intervalo,Labor de mantenimiento  ,Materiales y Herramientas,,,,
+,,Purgador de condensados ECO-DRAIN 30,Semanal ,Comprobar el correcto funcionamiento del purgador de condensados. ,"•	Equipo de protección 
+•	Cámara acústica o Manómetro 
+•	Abrazaderas y Selladores
+•	Llaves y llaves de tubo
+•	Kit de Destornilladores",,,,
+,,Purgador de condensados ECO-DRAIN 30,Cada 2 años,Cambiar la unidad de mantenimiento del purgador de condensados.,"•	Equipo de protección 
+•	Cinta selladora 
+•	Repuestos originales KAESER (O-ring 16x2 (5.1519.0), Racor de la manguera de drenaje de condensado, Tuerca de unión con orificios de ventilación, Aislamiento)
+•	Kit de Destornilladores
+•	Multímetro",,,,
+,,Tanque ,Anualmente,"Comprobar el estado del tanque, si encuentra fugas soldar","•	Equipo de protección 
+•	Inspección visual en busca de daños  
+•	Kit de limpieza
+•	Llaves de boca y llaves de cubo
+•	Máquina de Soldar
+•	Electrodos o Alambres de Soldadura",,,,
+,,Purgador de condensados ECO-DRAIN 12,Semanal ,Comprobar el correcto funcionamiento del purgador de condensados. ,"•	Equipo de protección 
+•	Cámara acústica o Manómetro 
+•	Abrazaderas y Selladores
+•	Llaves y llaves de tubo
+•	Kit de Destornilladores",,,,
+,,Purgador de condensados ECO-DRAIN 12,Cada 2 años,Cambiar la unidad de mantenimiento del purgador de condensados.,"•	Equipo de protección 
+•	Cinta selladora 
+•	Repuestos originales KAESER (O-ring 16x2 (5.1519.0), Racor de la manguera de drenaje de condensado, Tuerca de unión con orificios de ventilación, Aislamiento)
+•	Kit de Destornilladores
+•	Multímetro",,,,
+,,Sistema  Eléctrico,Anualmente,"Comprobar el estado y la seguridad del cableado y de las conexiones eléctricas en el hardware(Medir tensión, corriente y medir aislamiento)","•	Equipo de protección 
+•	Cámara termográfica
+•	Equipo de calibración
+•	Selladores dieléctricos
+•	Kit de Destornilladores
+•	Pinzas, Alicates y Tenazas
+•	Megóhmetro
+•	Multimetro
+•	Llaves de cubo",,,,
+,,Sistema de tuberias,Anualmente,"Comprobar el estado y la seguridad de las conexiones de las tuberías, mangueras y accesorios.","•	Equipo de protección 
+•	Cámara acústica o Manómetro 
+•	Abrazaderas y Selladores
+•	Llaves y llaves de tubo
+•	Kit de Destornilladores",,,,
+,,Refrigerante,Semestral,Limpiar el condensador del refrigerante.,"•	Equipo de protección 
+•	Aspiradora
+•	Aire comprimido
+•	Kit de limpieza
+•	Repuestos originales de KAESER (Condensador)",,,,
+,,Filtro F83KE,Semanal ,Comprobación de funcionamiento condensados en el filtro de aire comprimido,"•	Equipo de protección 
+•	Cámara acústica o Manómetro 
+•	Piezas de repuesto originales de KAESER (acoplamiento de manguera macho)
+•	Kit de limpieza 
+•	Kit de Destornilladores",,,,
+,,Filtro F83KE,Semestral,Cambiar filtros de aire comprimido,"•	Equipo de protección 
+•	Cámara acústica o Manómetro 
+•	Kit de Destornilladores 
+•	Piezas de repuesto originales de KAESER (Filtro F110KE con grasa selladora sin silicona, O-ring y Válvula de cierre)",,,,

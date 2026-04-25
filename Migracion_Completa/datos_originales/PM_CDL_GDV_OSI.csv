@@ -1,0 +1,60 @@
+﻿0,1,2,3,4,5
+,,,,,
+,,Plan de mantenimiento de OSI,,,
+,,,,,
+,,Especificaciones,,,Ilustración del equipo 
+,,"•	FILTRO MARCA SHELCO MODELO SFOS4-ML TYPE MS40
+•	BASEL PRO 8-300 MARCA PROTEC PRESION 300 PSI",,,
+,,Partes,Intervalo,Labor de Mantenimiento,Materiales y Herramientas
+,,Basel,Semanal,Inspecciones del Basel (Verificar niveles de quimicos),"•	Equipo de protección 
+•	Condutivimetro
+•	PH-metro
+•	Equipo de calibración
+•	Inspección visual en busca de daños 
+"
+,,Basel,Semestral,Lavado de Basel,"•	Equipo de protección 
+•	Alcalino y Acido Ro 505 y Ro 50 para limpieza
+•	Kit de limpieza
+"
+,,Basel,Al Fallo,Cambio de membrana,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Kit de cambio de Membrana
+•	Kit de limpieza
+•	Selladores
+•	Kit de Destornilladores
+•	Llaves de boca y llaves de cubo"
+,,FILTRO MS40,Semestral,Cambio de filtros,"•	Equipo de protección 
+•	Kit de limppieza
+•	Piezas de repuesto originales de SHELCO (Filtros para modelo 5FOS4-ML)"
+,,"Sistema de tuberias, válvulas y actuadores neumaticos",Anualmente,Comprobar el estado y la seguridad de las tuberías.,"•	Equipo de protección 
+•	Cámara acústica o Manómetro 
+•	Abrazaderas y Selladores
+•	Llaves y llaves de tubo
+•	Mazo"
+,,"Sistema de tuberias, válvulas y actuadores neumaticos",Anualmente,Comprobar el estado y la seguridad de las conexiones de las válvulas,"•	Equipo de protección 
+•	Cámara acústica o Manómetro 
+•	Selladores
+•	Llaves y llaves de tubo"
+,,"Sistema de tuberias, válvulas y actuadores neumaticos",Anualmente,Comprobar el estado y funcionamiento de los actuadores automáticos.,"•	Equipo de protección 
+•	Manómetro 
+•	Cámara termográfica
+•	Equipo de calibración
+•	Selladores
+•	Llaves de tubo
+•	Llaves de boca
+•	Repuestos actuadores automáticos, EMERSON, FLOWTEK"
+,,Panel de control,Semestral,Inspección visual y limpieza a los ventiladores de refrigeración y a los componentes eléctricos,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Aire comprimido
+•	Alicates y tenazas
+•	Kit de limpieza
+•	Kit de Destornilladores"
+,,Panel de control,Anualmente,"Comprobar el estado y la seguridad del cableado y de las conexiones eléctricas en el hardware(Medir tensión, corriente y medir aislamiento)","•	Equipo de protección 
+•	Cámara termográfica
+•	Equipo de calibración
+•	Selladores dieléctricos
+•	Kit de Destornilladores
+•	Pinzas, Alicates y Tenazas
+•	Megóhmetro
+•	Multimetro
+•	Llaves de cubo"

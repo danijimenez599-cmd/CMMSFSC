@@ -1,0 +1,142 @@
+﻿0,1,2,3,4,5
+,,,,,
+,,Plan de mantenimiento de BBS,,,
+,,,,,
+,,Especificaciones,,,Ilustración del equipo 
+,,"•	Motor marca Marathon 125 HP 60HZ 444T 460V TEFC 93 KW 1780 RPM 
+•	Variador de Frecuencia marca ABB modelos ACS850 y ACS550
+•	Bomba marca GOULDS PUMPS XLT-X modelo 3196",,,
+,,Partes,Intervalo,Labor de Mantenimiento,Materiales y Herramientas
+,,MOTOR  444TTFS6536EV,Semestral,Inspecciones generales del Motor (Verificar temperatura y parámetros eléctricos),"•	Equipo de protección 
+•	Osciloscopio
+•	Megóhmetro
+•	Multímetro
+•	Cámara térmica
+•	Equipo de calibración
+•	Vibrómetro
+•	Llaves y llaves de tubo
+•	Mazo
+•	Alicates y tenazas
+•	Extractores de rodamientos
+•	Juntas y selladores
+•	Repuestos originales con Marathon"
+,,MOTOR  444TTFS6536EV,Semestral,Revisar acople y Alineamiento,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Llaves y llaves de tubo
+•	Mazo
+•	Equipo de calibración"
+,,MOTOR  444TTFS6536EV,Semestral,"Mantenimiento de los rodamientos y sellos del motor (Verificar temperatura, Lubricación y si es necesario cambio de rodamientos, sellos, retenedores, O-rings)","•	Equipo de protección 
+•	Grasa para rodamientos Chevron® SRI NLGI grado 2, o sus equivalentes
+•	Kit de limpieza
+•	Llaves y llaves de tubo
+•	Cámara termográfica
+•	Equipo de calibración
+•	Extractores de rodamientos
+•	En caso de cambio de rodamientos usar en DE 6318-2Z/C3 y ODE 6316-2Z/C3
+•	En caso de cambio de Selladores mecanicos usar Sellos Tipo 1"
+,,MOTOR  444TTFS6536EV,Anualmente,Limpiar el motor y mantener las aberturas de ventilación despejadas,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Kit de Destornilladores
+•	Kit de limpieza
+•	Llaves de boca y llaves de cubo"
+,,BOMBA 3196,Semestral,"Mantenimiento de los Rodamientos de la bomba (Lubricación y si es necesario cambio de rodamientos, retenedores, O-rings)","•	Equipo de protección 
+•	Grasa para sellos y rodamientos Chevron® SRI NLGI grado 2, o sus equivalentes
+•	Kit de limpieza
+•	Llaves y llaves de tubo
+•	Cámara termográfica
+•	Equipo de calibración
+•	Extractores de rodamientos
+•	En caso de cambio de rodamientos usar en Interno 6313 y Externo Doble Fila 3313 o Dúplex 7313"
+,,BOMBA 3197,Semestral,Drenar y sustituir el aceite,"•	Equipo de protección 
+•	Aceite ISO grado 68 (Chevron GST Oil 68)
+•	Recolector de aceite
+•	Kit de limpieza
+•	Sellador
+•	Llaves de boca y llaves de cubo
+•	Racores de latón
+•	Roscas del racor de latón"
+,,BOMBA 3196,Anualmente,"Inspecciones generales de la Bomba (Verificar temperatura y verficiar desgaste en Sello dinámico, Sello mecanicos, Sello de laberinto de aceite y caja de empaquetadura)","•	Equipo de protección 
+•	Grasa para sellos y rodamientos Chevron® SRI NLGI grado 2. o sus equivalentes
+•	Cámara térmica
+•	Equipo de calibración
+•	Vibrómetro
+•	Mazo
+•	Alicates y tenazas
+•	Llaves y llaves de tubo
+•	Extractores de rodamientos
+•	En caso de cambio de sellos mecanicos y dinámico usar sellos mecánicos de cartucho y empaque de grafito respectivamente
+•	Repuestos originales con GOULDS PUMPS XLT-X modelo 3196"
+,,BOMBA 3196,Anualmente,Verificar funcionamiento y limpiar impulsor de la bomba y cambiar si es necesario ,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Kit de limpieza
+•	Kit de Destornilladores 
+•	Llaves y llaves de tubo
+•	Cámara termica
+•	Equipo de calibración
+•	Juntas, Selladores y retenedores"
+,,Variador de Frecuencia,Anualmente,Inspección visual y limpieza del ventilador de refrigeración,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Aire comprimido
+•	Alicates y tenazas
+•	Kit de limpieza
+•	Kit de Destornilladores"
+,,Variador de Frecuencia,Semestral,"Inspecciones generales del Variador de Frecuencia (Verificar temperatura que estas no sean mayores a 50°C, limpieza total en disipador y circuitos internos, quitar polvo y corrosión en las mallas de entrada y salida)","•	Equipo de protección 
+•	Aire Comprimido
+•	Kit de limpieza
+•	Kit de Destornilladores
+•	Cámara termográfica
+•	Equipo de calibración"
+,,Variador de Frecuencia,Semestral,"Comprobar el estado y la seguridad del cableado y de las conexiones eléctricas (Medir tensión, corriente y medir aislamiento), y circuitos internos del módulo (ZINT, ZGAB, ZGAD, ZCON, ZMU y Unidad de control ZCU)","•	Equipo de protección 
+•	Cámara termica
+•	Equipo de calibración
+•	Selladores dieléctricos
+•	Kit de Destornilladores
+•	Pinzas, Tenazas y Alicates
+•	Multímetro
+•	Megóhmetro
+•	Osciloscopio
+•	Llaves dinamométricas"
+,,Variador de Frecuencia,Anualmente,"Comprobar el funcionamiento de los IGBT y Capacitores en el Bus de CC (Realizar pruebas de medición, verificar temperaturas y cambiar si es necesario)","•	Equipo de protección 
+•	Cámara termica
+•	Equipo de calibración
+•	Selladores dieléctricos
+•	Kit de Destornilladores
+•	Pinzas, Tenazas y Alicates
+•	Multímetro
+•	Llaves dinamométricas
+•	Kit de cambio IGBT
+•	Kit de Capacitadores"
+,,Variador de Frecuencia,Cada 9 años,"Sustitución de los circuitos internos del módulo (ZINT, ZGAB, ZGAD, ZCON, ZMU y Unidad de control ZCU)","•	Equipo de protección 
+•	Cámara termica
+•	Equipo de calibración
+•	Selladores dieléctricos
+•	Kit de Destornilladores
+•	Pinzas, Tenazas y Alicates
+•	Multímetro
+•	Llaves dinamométricas
+•	Kit de cambio de los módulos (ZINT, ZPOW, ZINP, ZCON y Unidad de control ZCU)"
+,,Variador de Frecuencia,Cada 9 años,Sustitución del ventilador de refrigeración,"•	Equipo de protección 
+•	Kit de repuesto del Ventilador R6
+•	Alicates y tenazas
+•	Kit de limpieza
+•	Kit de Destornilladores"
+,,Estructura,Anualmente,"Comprobar la integridad de todos los pernos, y alineamiento entre Bomba y motor","•	Equipo de protección 
+•	Inspección visual en busca de daños  
+•	Kit de limpieza
+•	Llaves de boca y llaves de cubo
+•	Equipo de calibración 
+•	Medidor de torque de tuercas"
+,,Sistema de tuberias y válvulas,Anualmente,Comprobar el estado y la seguridad de las conexiones de las tuberías.,"•	Equipo de protección 
+•	Cámara acústica o Manómetro 
+•	Abrazaderas y Selladores
+•	Llaves y llaves de tubo
+•	Mazo"
+,,Sistema de tuberias y válvulas,Anualmente,Comprobar el estado y la seguridad de las conexiones de las válvulas,"•	Equipo de protección 
+•	Cámara acústica o Manómetro 
+•	Selladores
+•	Llaves y llaves de tubo"
+,,Sistema de tuberias y válvulas,Anualmente,Comprobar  funcionamiento de la válvula de Pie,"•	Equipo de protección 
+•	Inspección visual en busca de daños 
+•	Kit de limpieza
+•	Kit de Destornilladores 
+•	Llaves y llaves de tubo"

@@ -1,0 +1,57 @@
+﻿Planta,Descripcion Planta,Codigo Proceso,Codigo Nombre,Descripcion Proceso,Descripcion Nombre,Codigo Equipo,Cantidad de equipos ,Compliance Asset Id,ID
+PTAR1,PTAR1,RL,RASP,Retorno de lodo,Bombas sumergible para retorno de lodo,PTAR1.RL.RASP,3.0,,1
+PTAR1,PTAR1,RL,WASP,Retorno de lodo,Bombas sumergible para residuo de lodo,PTAR1.RL.WASP,1.0,,2
+PTAR1,PTAR1,RL,MIL,Retorno de lodo,Mixer de lodo de 3 HP,PTAR1.RL.MIL,1.0,,3
+PTAR1,PTAR1,AA,AE,Aireación y anoxico ,Aireador de 20 HP,PTAR1.AA.AE,14.0,,4
+PTAR1,PTAR1,AA,MI,Aireación y anoxico ,Mixer Dirrecional,PTAR1.AA.MI,12.0,,5
+PTAR1,PTAR1,DOC,CLR,Dosificación y control,Clarificador Tratamiento 1,PTAR1.DOC.CLR,1.0,,6
+PTAR2,PTAR2,RL,TSP,Retorno de lodo,Bomba de envio de lodo ,PTAR2.RL.TSP,1.0,,7
+PTAR2,PTAR2,RL,RASP,Retorno de lodo,Bomba centrifuga retorno de lodo RAS ,PTAR2.RL.RASP,2.0,,8
+PTAR2,PTAR2,RL,FP,Retorno de lodo,Filtro Prensa,PTAR2.RL.FP,2.0,,9
+PTAR2,PTAR2,AA,CMQ,Aireación y anoxico ,Combinador de quimicos,PTAR2.AA.CMQ,1.0,,10
+PTAR2,PTAR2,AA,MI,Aireación y anoxico ,Mixer,PTAR2.AA.MI,4.0,,11
+PTAR2,PTAR2,AA,AE,Aireación y anoxico ,Aireador de 50 HP,PTAR2.AA.AE,14.0,,12
+PTAR2,PTAR2,DOC,SCF,Dosificación y control,Secador frigorífico ,PTAR2.DOC.SCF,1.0,,13
+PTAR2,PTAR2,DOC,CTR,Dosificación y control,Compresor de tornillo,PTAR2.DOC.CTR,1.0,,14
+PTAR2,PTAR2,DOC,BDT,Dosificación y control,Bomba Dosificadoras Tratamiento de quimicos,PTAR2.DOC.BDT,6.0,,15
+PTAR2,PTAR2,DOC,CLR,Dosificación y control,Clarificador Tratamiento,PTAR2.DOC.CLR,1.0,,16
+PTAR2,PTAR2,DOC,ESL,Dosificación y control,Espesador de lodo,PTAR2.DOC.ESL,1.0,,17
+PTAR2,PTAR2,DOC,MTL,Dosificación y control,Mixer tanque de lodo,PTAR2.DOC.MTL,1.0,,18
+PTAR2,PTAR2,DOC,BBD,Dosificación y control,Bomba Dosificadora,PTAR2.DOC.BBD,2.0,,19
+PDO,Planta Ozono,AEC,CTR,Generación de Aire Comprimido,Compresor de tornillo,PDO.AEC.CTR,2.0,,20
+PDO,Planta Ozono,AEC,SCF,Generación de Aire Comprimido,Secador frigorífico ,PDO.AEC.SCF,2.0,,21
+PDO,Planta Ozono,GDO,GO2,Generación de Oxigeno,Generador de Oxigeno,PDO.GDO.GO2,2.0,,22
+PDO,Planta Ozono,GDO,GOZ,Generación de Oxigeno,Generador de OZONO,PDO.GDO.GOZ,1.0,,23
+PDO,Planta Ozono,GDO,CHR,Generación de Oxigeno,CHILLER ,PDO.GDO.CHR,1.0,,24
+PDO,Planta Ozono,ADO,MC,Área de dosificación de Ozono,Monitoreo y control de fluido de ozono,PDO.ADO.MC,1.0,,25
+PDO,Planta Ozono,ADO,BBI,Área de dosificación de Ozono,Bombas de inyeccion de ozono,PDO.ADO.BBI,3.0,,26
+PDO,Planta Ozono,ADO,DT,Área de dosificación de Ozono,Destructor de Ozono ,PDO.ADO.DT,1.0,,27
+PDO,Planta Ozono,ADO,MDE,Área de dosificación de Ozono,Muestreador de efluentes,PDO.ADO.MDE,2.0,,28
+PSVZ,Suavizadores Y Pozos,CTN,BBS,Cisternas,Bomba Suavizados de 125 HP,PSVZ.CTN.BBS,3.0,,29
+PSVZ,Suavizadores Y Pozos,SVDR,BTS,Suavidadores,Bomba Tanques de Suavizadores,PSVZ.SVDR.BTS,9.0,,30
+PSVZ,Suavizadores Y Pozos,SVDR,TSVD,Suavidadores,Suavizadores ,PSVZ.SVDR.TSVD,5.0,,31
+PSVZ,Suavizadores Y Pozos,MZS,BCS,Mezcladores de sal,Bomba Concentrador de sal,PSVZ.MZS.BCS,5.0,,32
+PSVZ,Suavizadores Y Pozos,MZS,MIS,Mezcladores de sal,Mixer de sal ,PSVZ.MZS.MIS,2.0,,33
+PCLD,Calderas,GDV,OSI,Generador de Vapor,Osmosis inversa,PCLD.GDV.OSI,1.0,,34
+PCLD,Calderas,GDV,BEA,Generador de Vapor,Bomba para envio de agua,PCLD.GDV.BEA,12.0,,35
+PCLD,Calderas,GDV,TCDL,Generador de Vapor,Calderas,PCLD.GDV.TCDL,4.0,,36
+SCI,Sistema Contraincendios,CBCI,BCI,Control de Bombas Contra Incendio,Bombas contra incendio de 200 HP,SCI.CBCI.BCI,2.0,,37
+SB,Subestaciones,46kV,TX,Sistemas de 46kV ,Transformador 46/23KV ,SB.46kV.TX,2.0,,38
+SB,Subestaciones,46kV,INT,Sistemas de 46kV,Interruptor de potencia 46kV,SB.46kV.INT,2.0,,39
+SB,Subestaciones,46kV,TC,Sistemas de 46kV,Transformador de corriente,SB.46kV.TC,6.0,,40
+PCLD,Calderas,GLP,VAP,Distribucion de GLP,Vaporizadores,PCLD.GLP.VAP,10.0,,41
+PCLD,Calderas,GLP,TAN,Distribucion de GLP,Tanques de GLP,PCLD.GLP.TAN,2.0,,42
+SCI,Sistema Contraincendios,CBCI,AE,Aireacion Laguna,Aireadores de 10 HP,SCI.CBCI.AE,4.0,,43
+INF,Infraestructura,JAR,BRS,Riego,Bombas de riego de 20 HP socks,INF.JAR.BRS,2.0,,44
+INF,Infraestructura,JAR,BRT,Riego,Bombas de riego de 30 HP Textiles,INF.JAR.BRT,2.0,,45
+PTAR2,PTAR2,RL,DP,Retorno de lodo,Bombas DP,PTAR2.RL.DP,2.0,,46
+PTAR2,PTAR2,AA,MIXS,Aireacion y anoxico,Mixers de agua sanitaria,PTAR2.AA.MIXS,3.0,,47
+SB,Subestaciones,23KV,INT,Sistemas de 23kV,Interruptor de Potencia 23KV,SB.23KV.INT,2.0,,48
+INF,Infraestructura,CIV,MUR,Obra civil,Muro perimetral,INF.CIV.MUR,1.0,,49
+SB,Subestaciones,46kV,LIN,Sistemas de 46kV,Linea de 46kV (Tendido),SB.46kV.LIN,1.0,,50
+SB,Subestaciones,23KV,LIN,Sistemas de 23kV,Linea de 23kV (Tendido),SB.23KV.LIN,1.0,,52
+PSVZ,Suavizadores Y Pozos,EXT,POZ,Extraccion de agua,Pozo,PSVZ.EXT.POZ,5.0,,56
+PSVZ,Suavizadores Y Pozos,EXT,BOM,Extraccion de agua,Motor,PSVZ.EXT.BOM,,,57
+SB,Subestaciones,23KV,TP,Sistemas de 23kV,Transformador de potencial 23kV,SB.23KV.TP,3.0,,58
+SB,Subestaciones,46kV,TP,Sistemas de 46kV,Transformador de potencial 46kV,SB.46kV.TP,3.0,,59
+PTAR2,PTAR2,ENT,CRI,Entrada de proceso,Cribas,PTAR2.ENT.CRI,2.0,,63
