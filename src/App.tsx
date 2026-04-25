@@ -45,11 +45,20 @@ export default function App() {
   const [isHovered, setIsHovered] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showAlerts, setShowAlerts] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
+
+  useEffect(() => {
+    const handler = () => setIsDesktop(window.innerWidth >= 1024);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
 
   useEffect(() => { initializeAuth(); }, []);
 
   // Compute effective sidebar state
-  const isExpanded = sidebarOpen || isHovered;
+  const isExpanded = sidebarOpen || (isHovered && isDesktop) || isMobileMenuOpen;
 
   // Count open WOs for badge
   const openWoCount = (workOrders || []).filter((w: any) =>
@@ -86,7 +95,7 @@ export default function App() {
   if (!currentUser) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-[#f9fafb] p-4 font-sans">
-        <div className="w-full max-w-sm">
+        <div className="w-full max-w-sm px-4 sm:px-0">
           {/* Logo */}
           <div className="text-center mb-10">
             <div className="w-20 h-20 rounded-[24px] bg-white flex items-center justify-center mx-auto mb-6 shadow-floating border border-slate-100 relative overflow-hidden group">
@@ -190,13 +199,13 @@ export default function App() {
     <div className="flex h-[100dvh] bg-[#f9fafb] overflow-hidden font-sans">
       {/* ── MOBILE BACKDROP ── */}
       <AnimatePresence>
-        {sidebarOpen && (
+        {isMobileMenuOpen && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 lg:hidden"
-            onClick={toggleSidebar}
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 md:hidden"
+            onClick={() => setIsMobileMenuOpen(false)}
           />
         )}
       </AnimatePresence>
@@ -208,9 +217,9 @@ export default function App() {
         animate={{ width: isExpanded ? 256 : 80 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
         className={cn(
-          'fixed inset-y-0 left-0 z-50 flex flex-col bg-white border-r border-slate-200 shadow-xl lg:shadow-none overflow-hidden',
+          'fixed inset-y-0 left-0 z-50 flex flex-col bg-white border-r border-slate-200 shadow-xl lg:shadow-none overflow-hidden transition-transform duration-300',
           'lg:static lg:translate-x-0',
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+          isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         )}
       >
         {/* Brand Logo */}
@@ -249,7 +258,7 @@ export default function App() {
             return (
               <button
                 key={mod.id}
-                onClick={() => { setModule(mod.id); if (window.innerWidth < 1024) toggleSidebar(); }}
+                onClick={() => { setModule(mod.id); setIsMobileMenuOpen(false); }}
                 className={cn(
                   'w-full flex items-center rounded-xl transition-all duration-200 relative group',
                   isExpanded ? 'px-4 py-3 gap-4' : 'justify-center h-12 w-12 mx-auto',
@@ -346,9 +355,18 @@ export default function App() {
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
         {/* Header */}
         <header className="h-16 flex items-center px-6 gap-4 bg-white/80 backdrop-blur-md border-b border-slate-100 shrink-0 z-40">
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setIsMobileMenuOpen(true)}
+            className="lg:hidden w-10 h-10 flex items-center justify-center rounded-xl text-slate-400 hover:bg-slate-50 hover:text-slate-900 transition-all border border-slate-100 shrink-0"
+          >
+            <Menu size={20} />
+          </button>
+
+          {/* Desktop Toggle Button */}
           <button
             onClick={toggleSidebar}
-            className="w-10 h-10 flex items-center justify-center rounded-xl text-slate-400 hover:bg-slate-50 hover:text-slate-900 transition-all border border-slate-100"
+            className="hidden lg:flex w-10 h-10 items-center justify-center rounded-xl text-slate-400 hover:bg-slate-50 hover:text-slate-900 transition-all border border-slate-100 shrink-0"
           >
             {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
           </button>

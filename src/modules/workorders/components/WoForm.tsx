@@ -178,7 +178,7 @@ export default function WoForm({ isOpen, onClose, defaultAssetId }: WoFormProps)
           </div>
 
           {/* Dates */}
-          <div className="bg-slate-900/5 p-5 rounded-[20px] border border-slate-900/10 grid grid-cols-2 gap-4 sm:col-span-2">
+          <div className="bg-slate-900/5 p-5 rounded-[20px] border border-slate-900/10 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:col-span-2">
             <FormField label={<span className="font-bold uppercase tracking-widest text-[9px] text-slate-500">Fecha Programada</span>}>
               <Input type="date" name="scheduledDate" value={form.scheduledDate || ''} onChange={handleChange} className="bg-white font-bold text-xs h-10 border-transparent shadow-sm" />
             </FormField>

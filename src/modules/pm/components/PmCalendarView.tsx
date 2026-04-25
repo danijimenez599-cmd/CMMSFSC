@@ -165,8 +165,8 @@ export default function PmCalendarView() {
   const projectionEvents = events.filter(e => e.type === 'projection' && isSameMonth(e.date, currentDate));
 
   return (
-    <div className="flex h-full bg-slate-50 overflow-hidden relative">
-      <div className="flex-1 flex flex-col min-w-0 bg-white">
+    <div className="flex flex-col lg:flex-row h-full bg-slate-50 overflow-hidden relative">
+      <div className="flex-1 flex flex-col min-w-0 bg-white overflow-x-auto">
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-white shrink-0">
           <div className="flex items-center gap-4">
             <h2 className="text-xl font-black text-slate-900 capitalize tracking-tighter">{format(currentDate, 'MMMM yyyy', { locale: safeLocale })}</h2>
@@ -182,43 +182,47 @@ export default function PmCalendarView() {
           </div>
         </div>
 
-        <div className="grid grid-cols-7 bg-slate-50 border-b border-slate-100 shrink-0">
-          {['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'].map(d => (<div key={d} className="py-2 text-center text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">{d}</div>))}
-        </div>
+        <div className="flex-1 flex flex-col min-w-0 overflow-x-auto overflow-y-hidden pb-2">
+          <div className="min-w-[800px] flex-1 flex flex-col">
+            <div className="grid grid-cols-7 bg-slate-50 border-b border-slate-100 shrink-0">
+              {['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'].map(d => (<div key={d} className="py-2 text-center text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">{d}</div>))}
+            </div>
 
-        <div className="flex-1 overflow-y-auto scrollbar-none bg-slate-50/20">
-          <div className="grid grid-cols-7 h-full">
-            {calendarDays.map((day) => {
-              const dayEvents = events.filter(e => isSameDay(e.date, day));
-              return (
-                <div key={day.toString()} className={cn("min-h-[110px] p-2 border-b border-r border-slate-100 transition-all", !isSameMonth(day, monthStart) ? "bg-slate-50/30 opacity-30" : "bg-white", isToday(day) && "bg-brand/[0.02]")}>
-                  <span className={cn("text-[11px] font-black w-6 h-6 flex items-center justify-center rounded-lg mb-2", isToday(day) ? "bg-slate-900 text-white shadow-lg" : "text-slate-400")}>{format(day, 'd')}</span>
-                  <div className="space-y-1">
-                    {dayEvents.slice(0, 3).map(e => (
-                      <button
-                        key={e.id}
-                        onClick={() => setSelectedEvent(e)}
-                        className={cn(
-                          "w-full text-left px-2 py-1.5 rounded-lg text-[9px] font-black truncate transition-all",
-                          e.type === 'projection'
-                            // MODULE 3.6: Ghost style for projections — clearly "planned, not real"
-                            ? "bg-blue-500/10 text-blue-700 border border-blue-300/50 hover:bg-blue-500/20 shadow-none"
-                            : "bg-slate-900 text-white shadow-sm hover:bg-brand"
-                        )}
-                      >
-                        {e.title}
-                      </button>
-                    ))}
-                    {dayEvents.length > 3 && <div className="text-[8px] font-black text-slate-300 text-center uppercase tracking-widest pt-1">+ {dayEvents.length - 3} más</div>}
-                  </div>
-                </div>
-              );
-            })}
+            <div className="flex-1 overflow-y-auto scrollbar-none bg-slate-50/20">
+              <div className="grid grid-cols-7 h-full">
+                {calendarDays.map((day) => {
+                  const dayEvents = events.filter(e => isSameDay(e.date, day));
+                  return (
+                    <div key={day.toString()} className={cn("min-h-[110px] p-2 border-b border-r border-slate-100 transition-all", !isSameMonth(day, monthStart) ? "bg-slate-50/30 opacity-30" : "bg-white", isToday(day) && "bg-brand/[0.02]")}>
+                      <span className={cn("text-[11px] font-black w-6 h-6 flex items-center justify-center rounded-lg mb-2", isToday(day) ? "bg-slate-900 text-white shadow-lg" : "text-slate-400")}>{format(day, 'd')}</span>
+                      <div className="space-y-1">
+                        {dayEvents.slice(0, 3).map(e => (
+                          <button
+                            key={e.id}
+                            onClick={() => setSelectedEvent(e)}
+                            className={cn(
+                              "w-full text-left px-2 py-1.5 rounded-lg text-[9px] font-black truncate transition-all",
+                              e.type === 'projection'
+                                // MODULE 3.6: Ghost style for projections — clearly "planned, not real"
+                                ? "bg-blue-500/10 text-blue-700 border border-blue-300/50 hover:bg-blue-500/20 shadow-none"
+                                : "bg-slate-900 text-white shadow-sm hover:bg-brand"
+                            )}
+                          >
+                            {e.title}
+                          </button>
+                        ))}
+                        {dayEvents.length > 3 && <div className="text-[8px] font-black text-slate-300 text-center uppercase tracking-widest pt-1">+ {dayEvents.length - 3} más</div>}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <aside className="w-80 border-l border-slate-200 bg-white flex flex-col shrink-0">
+      <aside className="w-full lg:w-80 border-t lg:border-t-0 lg:border-l border-slate-200 bg-white flex flex-col shrink-0 max-h-[50vh] lg:max-h-none overflow-y-auto">
         <div className="p-6 border-b border-slate-100 bg-slate-50/50"><h3 className="font-display font-black text-slate-900 text-sm uppercase tracking-widest">Dashboard Mensual</h3></div>
         <div className="flex-1 overflow-y-auto p-5 space-y-8 scrollbar-none">
           <section>

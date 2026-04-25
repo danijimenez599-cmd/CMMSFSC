@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useStore } from '../../../store';
 import { PmPlan, PmTask } from '../types';
 import PmPlanForm from './PmPlanForm';
 import { Button, Badge, EmptyState, cn, AlertBanner } from '../../../shared/components';
-import { Plus, Search, Calendar, Activity, Zap, Trash2, Edit2, ChevronRight, Clock, Shield, Target, CalendarClock } from 'lucide-react';
+import { Plus, Search, Calendar, Activity, Zap, Trash2, Edit2, ChevronRight, Clock, Shield, Target, CalendarClock, ChevronLeft } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -18,6 +18,7 @@ export default function PlansView() {
     deletePlan, 
     showToast 
   } = useStore() as any;
+  const [mobileView, setMobileView] = useState<'list' | 'detail'>('list');
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -73,7 +74,12 @@ export default function PlansView() {
   return (
     <div className="flex h-full overflow-hidden bg-slate-50/50">
       {/* ── Left: Plan list ── */}
-      <div className="w-full sm:w-80 lg:w-96 bg-white border-r border-slate-200 flex flex-col shrink-0 shadow-sm relative z-10">
+      <div className={cn(
+        'bg-white border-r border-slate-200 flex-col shrink-0 shadow-sm relative z-10',
+        'w-full sm:w-80 lg:w-96',
+        mobileView === 'list' ? 'flex' : 'hidden',
+        'lg:flex'
+      )}>
         <div className="p-6 border-b border-slate-100 space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="font-display font-bold text-slate-900 tracking-tight">Planes Maestros</h2>
@@ -83,7 +89,7 @@ export default function PlansView() {
             variant="primary" 
             className="w-full h-11 shadow-lg shadow-brand/10" 
             icon={<Plus size={16} />} 
-            onClick={() => { setSelectedPlanId(null); setIsEditing(true); }}
+            onClick={() => { setSelectedPlanId(null); setIsEditing(true); setMobileView('detail'); }}
           >
             Nuevo Protocolo PM
           </Button>
@@ -106,7 +112,7 @@ export default function PlansView() {
               <motion.button
                 key={plan.id}
                 whileHover={{ x: 4 }}
-                onClick={() => { setSelectedPlanId(plan.id); setIsEditing(false); }}
+                onClick={() => { setSelectedPlanId(plan.id); setIsEditing(false); setMobileView('detail'); }}
                 className={cn(
                   'w-full text-left p-4 rounded-[14px] transition-all relative overflow-hidden group',
                   isSelected
@@ -152,7 +158,20 @@ export default function PlansView() {
       </div>
 
       {/* ── Center: Detail / Form ── */}
-      <div className="flex-1 overflow-y-auto bg-slate-50/50">
+      <div className={cn(
+        'overflow-y-auto bg-slate-50/50',
+        mobileView === 'detail' ? 'flex-1' : 'hidden',
+        'lg:flex lg:flex-1'
+      )}>
+        {/* Botón volver — solo visible en móvil */}
+        <div className="lg:hidden flex items-center px-6 py-3 bg-white border-b border-slate-100 shrink-0">
+          <button
+            onClick={() => setMobileView('list')}
+            className="flex items-center gap-1 text-sm font-bold text-brand"
+          >
+            <ChevronLeft size={18} /> Planes PM
+          </button>
+        </div>
         <AnimatePresence mode="wait">
           {isEditing ? (
             <motion.div 

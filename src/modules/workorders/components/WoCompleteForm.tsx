@@ -94,11 +94,11 @@ export default function WoCompleteForm({ wo, onClose }: WoCompleteFormProps) {
       }
       onClose={onClose}
       footer={
-        <div className="flex gap-3 w-full sm:w-auto">
-          <Button variant="ghost" className="flex-1 sm:flex-none font-bold uppercase tracking-widest text-[11px]" onClick={onClose} disabled={loading}>
+        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 w-full sm:w-auto">
+          <Button variant="ghost" className="w-full sm:w-auto font-bold uppercase tracking-widest text-[11px]" onClick={onClose} disabled={loading}>
             Cancelar
           </Button>
-          <Button variant="success" className="flex-1 sm:flex-none font-bold uppercase tracking-widest text-[11px] shadow-lg shadow-emerald-500/20" onClick={handleSubmit} loading={loading}>
+          <Button variant="success" className="w-full sm:w-auto font-bold uppercase tracking-widest text-[11px] shadow-lg shadow-emerald-500/20" onClick={handleSubmit} loading={loading}>
             Certificar y Cerrar OT
           </Button>
         </div>
@@ -108,7 +108,7 @@ export default function WoCompleteForm({ wo, onClose }: WoCompleteFormProps) {
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-slate-50 border border-slate-100 p-4 rounded-2xl flex items-center justify-between"
+          className="bg-slate-50 border border-slate-100 p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3"
         >
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400">
@@ -209,7 +209,7 @@ export default function WoCompleteForm({ wo, onClose }: WoCompleteFormProps) {
               </Select>
             </FormField>
 
-            <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField label={<span className="font-bold uppercase tracking-widest text-[10px] text-slate-400">Costo Facturado</span>}>
                 <Input
                   type="number"

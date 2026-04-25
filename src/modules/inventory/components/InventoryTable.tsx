@@ -164,104 +164,106 @@ export default function InventoryTable({ onNew, onEdit, onAdjust }: InventoryTab
       </div>
 
       {/* Table */}
-      <div className="flex-1 overflow-auto">
-        <table className="w-full text-left border-collapse text-sm">
-          <thead className="bg-bg-3 text-[10px] text-tx-4 uppercase font-bold tracking-wider sticky top-0 z-10">
-            <tr>
-              <th className="px-4 py-3 cursor-pointer hover:text-tx select-none whitespace-nowrap" onClick={() => handleSort('partNumber')}>
-                N/P {sortCol === 'partNumber' && <ArrowUpDown size={10} className="inline ml-0.5" />}
-              </th>
-              <th className="px-4 py-3 cursor-pointer hover:text-tx select-none" onClick={() => handleSort('name')}>
-                Nombre {sortCol === 'name' && <ArrowUpDown size={10} className="inline ml-0.5" />}
-              </th>
-              <th className="px-4 py-3 cursor-pointer hover:text-tx select-none hidden md:table-cell" onClick={() => handleSort('category')}>
-                Categoría
-              </th>
-              <th className="px-4 py-3 cursor-pointer hover:text-tx select-none" onClick={() => handleSort('stockCurrent')}>
-                Stock {sortCol === 'stockCurrent' && <ArrowUpDown size={10} className="inline ml-0.5" />}
-              </th>
-              <th className="px-4 py-3 hidden lg:table-cell">Ubicación</th>
-              <th className="px-4 py-3 cursor-pointer hover:text-tx select-none hidden sm:table-cell" onClick={() => handleSort('unitCost')}>
-                Costo
-              </th>
-              <th className="px-4 py-3 text-right">Acciones</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border">
-            {paginatedData.map((item: any) => (
-              <tr
-                key={item.id}
-                onClick={() => selectItem(item.id)}
-                className={cn(
-                  'hover:bg-bg-3/40 cursor-pointer transition-colors group',
-                  selectedItemId === item.id ? 'bg-brand/5 border-l-2 border-l-brand' : ''
-                )}
-              >
-                <td className="px-4 py-3 font-mono text-[10px] uppercase font-bold text-tx-4">
-                  {item.partNumber || '—'}
-                </td>
-                <td className="px-4 py-3 font-medium text-tx max-w-[160px] truncate">
-                  {item.name}
-                </td>
-                <td className="px-4 py-3 text-tx-3 hidden md:table-cell">
-                  {item.category || '—'}
-                </td>
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-2">
-                    {getStockBadge(item.stockCurrent, item.stockMin)}
-                    <span className="text-[10px] text-tx-4 hidden sm:inline whitespace-nowrap">
-                      / {item.stockMin} mín
-                    </span>
-                  </div>
-                </td>
-                <td className="px-4 py-3 text-tx-3 hidden lg:table-cell truncate max-w-[100px]">
-                  {item.locationBin || '—'}
-                </td>
-                <td className="px-4 py-3 font-mono text-xs text-tx-3 hidden sm:table-cell whitespace-nowrap">
-                  {item.unitCost ? formatCurrency(item.unitCost) : '—'}
-                </td>
-                <td className="px-4 py-3">
-                  <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button variant="ghost" size="xs" onClick={e => { e.stopPropagation(); onAdjust(item.id); }}>
-                      Ajustar
-                    </Button>
-                    <Button variant="ghost" size="xs" onClick={e => { e.stopPropagation(); onEdit(item.id); }}>
-                      Editar
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="xs"
-                      className="text-danger hover:bg-danger-bg"
-                      onClick={e => { e.stopPropagation(); setDeletingId(item.id); }}
-                    >
-                      Borrar
-                    </Button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-
-            {paginatedData.length === 0 && (
+      <div className="flex-1 overflow-x-auto w-full pb-2">
+        <div className="min-w-[800px]">
+          <table className="w-full text-left border-collapse text-sm">
+            <thead className="bg-bg-3 text-[10px] text-tx-4 uppercase font-bold tracking-wider sticky top-0 z-10">
               <tr>
-                <td colSpan={7} className="px-4 py-12 text-center text-tx-4 italic text-sm">
-                  Sin artículos con los filtros actuales.
+                <th className="px-4 py-3 cursor-pointer hover:text-tx select-none whitespace-nowrap" onClick={() => handleSort('partNumber')}>
+                  N/P {sortCol === 'partNumber' && <ArrowUpDown size={10} className="inline ml-0.5" />}
+                </th>
+                <th className="px-4 py-3 cursor-pointer hover:text-tx select-none" onClick={() => handleSort('name')}>
+                  Nombre {sortCol === 'name' && <ArrowUpDown size={10} className="inline ml-0.5" />}
+                </th>
+                <th className="px-4 py-3 cursor-pointer hover:text-tx select-none hidden md:table-cell" onClick={() => handleSort('category')}>
+                  Categoría
+                </th>
+                <th className="px-4 py-3 cursor-pointer hover:text-tx select-none" onClick={() => handleSort('stockCurrent')}>
+                  Stock {sortCol === 'stockCurrent' && <ArrowUpDown size={10} className="inline ml-0.5" />}
+                </th>
+                <th className="px-4 py-3 hidden lg:table-cell">Ubicación</th>
+                <th className="px-4 py-3 cursor-pointer hover:text-tx select-none hidden sm:table-cell" onClick={() => handleSort('unitCost')}>
+                  Costo
+                </th>
+                <th className="px-4 py-3 text-right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {paginatedData.map((item: any) => (
+                <tr
+                  key={item.id}
+                  onClick={() => selectItem(item.id)}
+                  className={cn(
+                    'hover:bg-bg-3/40 cursor-pointer transition-colors group',
+                    selectedItemId === item.id ? 'bg-brand/5 border-l-2 border-l-brand' : ''
+                  )}
+                >
+                  <td className="px-4 py-3 font-mono text-[10px] uppercase font-bold text-tx-4">
+                    {item.partNumber || '—'}
+                  </td>
+                  <td className="px-4 py-3 font-medium text-tx max-w-[160px] truncate">
+                    {item.name}
+                  </td>
+                  <td className="px-4 py-3 text-tx-3 hidden md:table-cell">
+                    {item.category || '—'}
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      {getStockBadge(item.stockCurrent, item.stockMin)}
+                      <span className="text-[10px] text-tx-4 hidden sm:inline whitespace-nowrap">
+                        / {item.stockMin} mín
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-tx-3 hidden lg:table-cell truncate max-w-[100px]">
+                    {item.locationBin || '—'}
+                  </td>
+                  <td className="px-4 py-3 font-mono text-xs text-tx-3 hidden sm:table-cell whitespace-nowrap">
+                    {item.unitCost ? formatCurrency(item.unitCost) : '—'}
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button variant="ghost" size="xs" onClick={e => { e.stopPropagation(); onAdjust(item.id); }}>
+                        Ajustar
+                      </Button>
+                      <Button variant="ghost" size="xs" onClick={e => { e.stopPropagation(); onEdit(item.id); }}>
+                        Editar
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="xs"
+                        className="text-danger hover:bg-danger-bg"
+                        onClick={e => { e.stopPropagation(); setDeletingId(item.id); }}
+                      >
+                        Borrar
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+
+              {paginatedData.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="px-4 py-12 text-center text-tx-4 italic text-sm">
+                    Sin artículos con los filtros actuales.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+
+            {/* Footer totals */}
+            <tfoot className="bg-bg-3 border-t-2 border-border sticky bottom-0 z-10">
+              <tr>
+                <td colSpan={4} className="px-4 py-3 text-right text-[10px] font-bold text-tx-4 uppercase tracking-wider">
+                  Valor total (filtrado):
+                </td>
+                <td colSpan={3} className="px-4 py-3 font-display font-semibold text-brand text-base">
+                  {formatCurrency(totalValue)}
                 </td>
               </tr>
-            )}
-          </tbody>
-
-          {/* Footer totals */}
-          <tfoot className="bg-bg-3 border-t-2 border-border sticky bottom-0 z-10">
-            <tr>
-              <td colSpan={4} className="px-4 py-3 text-right text-[10px] font-bold text-tx-4 uppercase tracking-wider">
-                Valor total (filtrado):
-              </td>
-              <td colSpan={3} className="px-4 py-3 font-display font-semibold text-brand text-base">
-                {formatCurrency(totalValue)}
-              </td>
-            </tr>
-          </tfoot>
-        </table>
+            </tfoot>
+          </table>
+        </div>
       </div>
 
       {/* Pagination */}

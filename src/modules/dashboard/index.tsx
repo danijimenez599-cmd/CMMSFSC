@@ -135,7 +135,7 @@ export default function DashboardView() {
 
         {/* KPI Row 2: Performance */}
         <motion.div variants={item} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white rounded-[14px] border border-slate-100 shadow-card p-6 flex items-center justify-between gap-4">
+          <div className="bg-white rounded-[14px] border border-slate-100 shadow-card p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div>
               <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">PM Compliance</p>
               <div className="flex items-baseline gap-1">
@@ -205,7 +205,7 @@ export default function DashboardView() {
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6">Proporción de carga laboral</p>
             
             {pieData.length > 0 ? (
-              <div className="flex-1 min-h-[240px]">
+              <div className="flex-1 min-h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie

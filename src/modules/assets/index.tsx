@@ -7,12 +7,19 @@ import AssetDetailPanel from './components/AssetDetailPanel';
 import AssetSidePanel from './components/AssetSidePanel';
 import AssetForm from './components/AssetForm';
 import { checkAssetDeletability } from './utils/assetHelpers';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { cn } from '../../shared/components';
 
 export default function AssetRegistryView() {
   const { fetchAssets, assets, selectedAssetId, deleteAsset, decommissionAsset, showToast, currentUser, assetPlans, workOrders, measurementPoints } = useStore() as any;
   const [formOpen, setFormOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [defaultParentId, setDefaultParentId] = useState<string | null>(null);
+  const [mobileView, setMobileView] = useState<'tree' | 'detail' | 'side'>('tree');
+
+  useEffect(() => {
+    if (selectedAssetId) setMobileView('detail');
+  }, [selectedAssetId]);
   const [confirmConfig, setConfirmConfig] = useState<{
     isOpen: boolean;
     title: string;
@@ -85,30 +92,62 @@ export default function AssetRegistryView() {
       exit={{ opacity: 0, x: -20 }}
       className="flex h-full overflow-hidden bg-white"
     >
-      <AssetTreePanel
-        onNewAsset={handleNewAsset}
-        onEditAsset={(id) => { setEditingId(id); setFormOpen(true); }}
-        onDeleteAsset={handleDelete}
-      />
-
-      <div className="flex-1 min-w-0 flex flex-col relative">
-        <AssetDetailPanel
-          onEdit={(id) => { setEditingId(id); setFormOpen(true); }}
+      {/* Panel árbol — visible en móvil solo cuando mobileView es tree */}
+      <div className={cn(
+        'flex-col h-full',
+        mobileView === 'tree' ? 'flex w-full' : 'hidden',
+        'lg:flex lg:w-72 xl:w-80'
+      )}>
+        <AssetTreePanel
+          onNewAsset={handleNewAsset}
+          onEditAsset={(id) => { setEditingId(id); setFormOpen(true); }}
+          onDeleteAsset={handleDelete}
         />
       </div>
 
-      <AnimatePresence>
-        {selectedAssetId && (
-          <motion.div
-            initial={{ opacity: 0, x: 300 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 300 }}
-            className="w-[400px] border-l border-slate-200 bg-white z-10 hidden xl:block"
+      {/* Panel detalle — visible en móvil solo cuando mobileView es detail */}
+      <div className={cn(
+        'flex-col h-full flex-1 min-w-0',
+        mobileView === 'detail' ? 'flex' : 'hidden',
+        'lg:flex'
+      )}>
+        {/* Barra de navegación móvil */}
+        <div className="lg:hidden flex items-center justify-between px-4 py-2 bg-white border-b border-slate-200 shrink-0">
+          <button
+            onClick={() => setMobileView('tree')}
+            className="flex items-center gap-1 text-sm font-bold text-brand"
           >
-            <AssetSidePanel />
-          </motion.div>
-        )}
-      </AnimatePresence>
+            <ChevronLeft size={18} /> Activos
+          </button>
+          {selectedAssetId && (
+            <button
+              onClick={() => setMobileView('side')}
+              className="flex items-center gap-1 text-sm font-bold text-slate-600"
+            >
+              Planes PM <ChevronRight size={18} />
+            </button>
+          )}
+        </div>
+        <AssetDetailPanel onEdit={(id) => { setEditingId(id); setFormOpen(true); }} />
+      </div>
+
+      {/* Panel lateral Planes PM — visible en móvil solo cuando mobileView es side */}
+      <div className={cn(
+        'flex-col h-full',
+        mobileView === 'side' && selectedAssetId ? 'flex w-full' : 'hidden',
+        'xl:flex xl:w-[400px] xl:border-l xl:border-slate-200'
+      )}>
+        {/* Botón volver — solo visible en móvil */}
+        <div className="xl:hidden flex items-center px-4 py-2 bg-white border-b border-slate-200 shrink-0">
+          <button
+            onClick={() => setMobileView('detail')}
+            className="flex items-center gap-1 text-sm font-bold text-brand"
+          >
+            <ChevronLeft size={18} /> Detalle del Activo
+          </button>
+        </div>
+        {selectedAssetId && <AssetSidePanel />}
+      </div>
 
       <AssetForm
         isOpen={formOpen}

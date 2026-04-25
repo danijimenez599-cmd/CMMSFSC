@@ -85,7 +85,7 @@ export default function PmPlanForm({ initialPlan, initialTasks = [], onSave, onC
   return (
     <div className="bg-white rounded-[28px] border border-slate-100 shadow-floating overflow-hidden">
       {/* Form header */}
-      <div className="px-8 py-5 border-b border-slate-50 bg-slate-50/50 flex items-center justify-between">
+      <div className="px-8 py-5 border-b border-slate-50 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Protocolo de Ingeniería</p>
         <Badge variant="neutral" className="text-[9px] font-black">{plan.id.substring(0, 8)}</Badge>
       </div>
@@ -353,7 +353,7 @@ export default function PmPlanForm({ initialPlan, initialTasks = [], onSave, onC
             )}
           </div>
 
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             <Input
               value={newTaskText}
               onChange={e => setNewTaskText(e.target.value)}
@@ -364,7 +364,7 @@ export default function PmPlanForm({ initialPlan, initialTasks = [], onSave, onC
             <Button
               type="button"
               variant="outline"
-              className="h-11 border-slate-200 font-bold px-6"
+              className="h-11 border-slate-200 font-bold px-6 sm:w-auto w-full"
               icon={<Plus size={14} />}
               onClick={addTask}
               disabled={!newTaskText.trim()}
@@ -375,7 +375,7 @@ export default function PmPlanForm({ initialPlan, initialTasks = [], onSave, onC
         </section>
 
         {/* Actions */}
-        <div className="flex justify-end gap-3 pt-8 border-t border-slate-100">
+        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-8 border-t border-slate-100">
           <Button variant="ghost" onClick={onCancel} className="h-12 px-8 font-bold text-slate-400">Descartar</Button>
           <Button variant="primary" onClick={handleSubmit} className="h-12 px-10 font-bold shadow-lg shadow-brand/20">
             {initialPlan ? 'Actualizar Protocolo' : 'Publicar Plan Maestro'}

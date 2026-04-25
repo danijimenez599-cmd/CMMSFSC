@@ -119,10 +119,10 @@ export const Modal = ({ isOpen, onClose, title, children, footer, size = 'md' }:
   }, [isOpen, onClose]);
 
   const sizeMap: Record<string, string> = {
-    sm: 'max-w-sm',
-    md: 'max-w-lg',
-    lg: 'max-w-2xl',
-    xl: 'max-w-4xl',
+    sm: 'max-w-[95vw] sm:max-w-sm',
+    md: 'max-w-[95vw] sm:max-w-lg',
+    lg: 'max-w-[95vw] sm:max-w-2xl',
+    xl: 'max-w-[95vw] sm:max-w-4xl',
   };
 
   return createPortal(
@@ -144,7 +144,7 @@ export const Modal = ({ isOpen, onClose, title, children, footer, size = 'md' }:
             className={cn(
               'bg-white w-full flex flex-col relative z-10',
               'rounded-[14px] shadow-floating border border-slate-100',
-              'max-h-[90vh]',
+              'max-h-[90dvh]',
               sizeMap[size]
             )}
             role="dialog"

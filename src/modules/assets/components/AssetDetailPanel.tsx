@@ -285,7 +285,7 @@ export default function AssetDetailPanel({ onEdit }: AssetDetailPanelProps) {
             {tab === 'specs' && (
               <div className="max-w-3xl">
                 {specsEntries.length > 0 ? (
-                  <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+                  <div className="w-full overflow-x-auto overflow-y-hidden whitespace-nowrap pb-2 border border-slate-200 rounded-2xl shadow-sm">
                     <div className="bg-slate-50 px-6 py-4 border-b border-slate-200">
                       <p className="text-[10px] font-bold text-slate-900 uppercase tracking-widest">Ficha Técnica de Ingeniería</p>
                     </div>

@@ -164,8 +164,9 @@ export default function PmSettingsView() {
           )}
 
           <div className="bg-white border border-border rounded-2xl shadow-card overflow-hidden">
+            <div className="overflow-x-auto">
             {measurementConfigs.length > 0 ? (
-              <table className="w-full text-sm">
+              <table className="w-full text-sm min-w-[400px]">
                 <thead className="bg-bg-3 border-b border-border">
                   <tr>
                     <th className="text-left px-5 py-3 text-[10px] font-bold text-tx-4 uppercase tracking-wider">Nombre</th>
@@ -210,12 +211,9 @@ export default function PmSettingsView() {
                   ))}
                 </tbody>
               </table>
-            ) : (
-              <div className="py-12 text-center text-tx-4 text-sm">
-                <Gauge size={32} className="mx-auto mb-3 opacity-20" />
-                Sin magnitudes definidas.
               </div>
             )}
+            </div>
           </div>
         </div>
       ) : activeTab === 'vendors' ? (

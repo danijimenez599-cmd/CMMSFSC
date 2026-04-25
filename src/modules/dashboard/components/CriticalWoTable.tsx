@@ -33,7 +33,8 @@ export default function CriticalWoTable() {
   }
 
   return (
-    <div className="overflow-x-auto -mx-1">
+    <div className="w-full overflow-x-auto overflow-y-hidden whitespace-nowrap pb-2 border border-slate-100 rounded-lg">
+      <div className="min-w-[500px]">
       <table className="w-full text-sm">
         <thead>
           <tr className="text-[10px] text-tx-4 uppercase font-bold tracking-wider">
@@ -95,6 +96,7 @@ export default function CriticalWoTable() {
           })}
         </tbody>
       </table>
+      </div>
     </div>
   );
 }
