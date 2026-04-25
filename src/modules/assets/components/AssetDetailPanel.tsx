@@ -25,19 +25,6 @@ export default function AssetDetailPanel({ onEdit }: AssetDetailPanelProps) {
   const { assets, selectedAssetId, workOrders, setModule } = useStore() as any;
   const [tab, setTab] = useState<TabId>('info');
 
-  const [expandedAssets] = useState(() => {
-    try {
-      const stored = sessionStorage.getItem('apex-asset-expanded');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) return new Set(parsed);
-      }
-    } catch (err) {
-      console.warn('Error reading asset expansion state:', err);
-    }
-    return new Set();
-  });
-
   if (!selectedAssetId) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center h-full bg-slate-50/30 p-10">

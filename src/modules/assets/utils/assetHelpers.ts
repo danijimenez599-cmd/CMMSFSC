@@ -23,6 +23,29 @@ export function canDeleteAsset(id: string, assets: Asset[]): boolean {
   return assets.filter(a => a.parentId === id).length === 0;
 }
 
+export interface DeleteAssetCheck {
+  canDelete: boolean;
+  linkedPlans: number;
+  linkedWorkOrders: number;
+  linkedPoints: number;
+}
+
+export function checkAssetDeletability(
+  id: string,
+  assets: Asset[],
+  assetPlans: any[],
+  workOrders: any[],
+  measurementPoints: any[]
+): DeleteAssetCheck {
+  const hasChildren = assets.some(a => a.parentId === id);
+  return {
+    canDelete: !hasChildren,
+    linkedPlans: (assetPlans || []).filter((ap: any) => ap.assetId === id).length,
+    linkedWorkOrders: (workOrders || []).filter((wo: any) => wo.assetId === id).length,
+    linkedPoints: (measurementPoints || []).filter((mp: any) => mp.assetId === id).length,
+  };
+}
+
 export function getDescendantIds(id: string, assets: Asset[]): string[] {
   const descendants: string[] = [];
   assets.filter(a => a.parentId === id).forEach(child => {

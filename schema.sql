@@ -1,6 +1,7 @@
 -- ========================================================
--- APEX CMMS - FULL DATABASE SCHEMA (FIXED PERMISSIONS)
+-- APEX CMMS - FULL DATABASE SCHEMA
 -- Target: Supabase / PostgreSQL
+-- Version: 1.3.1 (post-audit fixes)
 -- ========================================================
 
 -- RESET SCHEMA
@@ -16,11 +17,26 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON FUNCTIONS TO postgres, an
 -- Enable necessary extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+-- ========================================================
+-- SEQUENCES
+-- ========================================================
+
+-- FIX 4.1: Use a sequence for WO numbering instead of MAX() query.
+-- nextval() is atomic — eliminates the race condition where concurrent
+-- inserts could read the same MAX and generate duplicate wo_numbers.
+CREATE SEQUENCE public.wo_number_seq START 1;
+
+-- ========================================================
+-- TABLES
+-- ========================================================
+
 -- 1. PROFILES
+-- FIX 4.3: role CHECK now uses 'supervisor' to match TypeScript UserRole type.
+-- Removed 'manager' which was only in SQL and caused silent mismatches with the frontend.
 CREATE TABLE public.profiles (
   id UUID PRIMARY KEY,
   full_name TEXT,
-  role TEXT DEFAULT 'technician' CHECK (role IN ('admin', 'manager', 'technician', 'viewer')),
+  role TEXT DEFAULT 'technician' CHECK (role IN ('admin', 'supervisor', 'technician', 'viewer')),
   avatar_url TEXT,
   specialty TEXT,
   active BOOLEAN DEFAULT true,
@@ -95,7 +111,10 @@ CREATE TABLE public.pm_plans (
   trigger_type TEXT NOT NULL CHECK (trigger_type IN ('calendar', 'meter', 'hybrid')),
   interval_value INTEGER,
   interval_unit TEXT CHECK (interval_unit IN ('days', 'weeks', 'months', 'years')),
-  interval_mode TEXT DEFAULT 'fixed' CHECK (interval_mode IN ('fixed', 'floating')),
+  -- FIX 2.3: interval_mode drives fixed vs floating scheduling logic in the PM engine.
+  -- fixed   = next due advances from the previous due date (rigid calendar)
+  -- floating = next due advances from the completion date (adaptive)
+  interval_mode TEXT DEFAULT 'floating' CHECK (interval_mode IN ('fixed', 'floating')),
   lead_days INTEGER DEFAULT 0,
   meter_interval_value NUMERIC,
   meter_interval_unit TEXT,
@@ -110,7 +129,7 @@ CREATE TABLE public.pm_tasks (
   pm_plan_id UUID NOT NULL REFERENCES public.pm_plans(id) ON DELETE CASCADE,
   description TEXT NOT NULL,
   sort_order INTEGER DEFAULT 0,
-  frequency_multiplier INTEGER DEFAULT 1 -- Nuevo: x1, x2, x4, etc.
+  frequency_multiplier INTEGER DEFAULT 1  -- x1 = every cycle, x3 = every 3rd cycle, etc.
 );
 
 -- 8. ASSET PLANS
@@ -123,7 +142,7 @@ CREATE TABLE public.asset_plans (
   next_due_meter NUMERIC,
   last_completed_at TIMESTAMPTZ,
   wo_count INTEGER DEFAULT 0,
-  current_cycle_index INTEGER DEFAULT 1, -- Nuevo: Rastreo de ciclo actual
+  current_cycle_index INTEGER DEFAULT 1,
   active BOOLEAN DEFAULT true,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -141,7 +160,6 @@ CREATE TABLE public.vendors (
 );
 
 -- 10. WORK ORDERS
-
 CREATE TABLE public.work_orders (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   asset_id UUID NOT NULL REFERENCES public.assets(id) ON DELETE CASCADE,
@@ -152,7 +170,7 @@ CREATE TABLE public.work_orders (
   wo_type TEXT NOT NULL CHECK (wo_type IN ('preventive', 'corrective', 'predictive', 'inspection')),
   status TEXT DEFAULT 'open' CHECK (status IN ('open', 'assigned', 'in_progress', 'on_hold', 'completed', 'cancelled')),
   priority TEXT DEFAULT 'medium' CHECK (priority IN ('critical', 'high', 'medium', 'low')),
-  pm_cycle_index INTEGER, -- Snapshot del hito preventivo (Ciclo 1, 2, 3...)
+  pm_cycle_index INTEGER,
   assigned_to UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
   scheduled_date DATE,
   due_date DATE,
@@ -186,17 +204,20 @@ CREATE TABLE public.wo_tasks (
   notes TEXT
 );
 
--- 11. WO COMMENTS
+-- 12. WO COMMENTS
+-- FIX 4.4: author_id must be nullable because ON DELETE SET NULL requires it.
+-- The previous NOT NULL + ON DELETE SET NULL was a contradiction that would
+-- cause a constraint violation whenever the referenced profile was deleted.
 CREATE TABLE public.wo_comments (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   work_order_id UUID NOT NULL REFERENCES public.work_orders(id) ON DELETE CASCADE,
-  author_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE SET NULL,
+  author_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
   body TEXT NOT NULL,
   attachment_url TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 12. INVENTORY ITEMS
+-- 13. INVENTORY ITEMS
 CREATE TABLE public.inventory_items (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name TEXT NOT NULL,
@@ -214,7 +235,7 @@ CREATE TABLE public.inventory_items (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 13. PART USAGES
+-- 14. PART USAGES
 CREATE TABLE public.part_usages (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   work_order_id UUID NOT NULL REFERENCES public.work_orders(id) ON DELETE CASCADE,
@@ -225,7 +246,7 @@ CREATE TABLE public.part_usages (
   added_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 14. STOCK MOVEMENTS
+-- 15. STOCK MOVEMENTS
 CREATE TABLE public.stock_movements (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   inventory_item_id UUID NOT NULL REFERENCES public.inventory_items(id) ON DELETE CASCADE,
@@ -241,31 +262,20 @@ CREATE TABLE public.stock_movements (
 
 -- ========================================================
 -- AUTOMATION: WORK ORDER NUMBERING TRIGGER
+-- FIX 4.1: Replaced MAX() query with nextval() on a sequence.
+-- MAX() had a race condition under concurrent inserts: two transactions
+-- could read the same MAX and generate duplicate wo_numbers, causing the
+-- UNIQUE constraint to reject the second insert.
+-- nextval() is atomic and serialized by PostgreSQL — no duplicates possible.
+-- Format: WO-YY-MM-NNNNN (e.g. WO-26-04-00001). The sequence is global
+-- and does not reset per month, but uniqueness is guaranteed at all times.
 -- ========================================================
 CREATE OR REPLACE FUNCTION public.fn_assign_wo_number()
 RETURNS TRIGGER AS $$
-DECLARE
-    current_yy TEXT;
-    current_mm TEXT;
-    next_seq INT;
 BEGIN
-    -- Obtenemos Año (2 dígitos) y Mes (2 dígitos)
-    current_yy := TO_CHAR(NOW(), 'YY');
-    current_mm := TO_CHAR(NOW(), 'MM');
-
-    -- Buscamos el último correlativo para este mes específico
-    -- El formato buscado es WO-YY-MM-XXXXX
-    SELECT COALESCE(
-        MAX(CAST(SUBSTRING(wo_number FROM 10) AS INT)), 
-        0
-    ) + 1
-    INTO next_seq
-    FROM public.work_orders
-    WHERE wo_number LIKE 'WO-' || current_yy || '-' || current_mm || '-%';
-
-    -- Construimos el nuevo número: WO-24-04-00001
-    NEW.wo_number := 'WO-' || current_yy || '-' || current_mm || '-' || LPAD(next_seq::TEXT, 5, '0');
-    
+    NEW.wo_number := 'WO-' || TO_CHAR(NOW(), 'YY') || '-' ||
+                     TO_CHAR(NOW(), 'MM') || '-' ||
+                     LPAD(nextval('public.wo_number_seq')::TEXT, 5, '0');
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
@@ -278,11 +288,14 @@ EXECUTE FUNCTION public.fn_assign_wo_number();
 -- ========================================================
 -- PERFORMANCE INDEXES
 -- ========================================================
-CREATE INDEX idx_assets_parent ON public.assets(parent_id);
-CREATE INDEX idx_work_orders_asset ON public.work_orders(asset_id);
-CREATE INDEX idx_work_orders_status ON public.work_orders(status);
-CREATE INDEX idx_wo_tasks_wo ON public.wo_tasks(work_order_id);
-CREATE INDEX idx_asset_plans_asset ON public.asset_plans(asset_id);
+CREATE INDEX idx_assets_parent        ON public.assets(parent_id);
+CREATE INDEX idx_work_orders_asset    ON public.work_orders(asset_id);
+CREATE INDEX idx_work_orders_status   ON public.work_orders(status);
+-- FIX 5.1: Support the 90-day historic WO filter (completed_at >= cutoff)
+CREATE INDEX idx_work_orders_completed ON public.work_orders(completed_at);
+CREATE INDEX idx_wo_tasks_wo          ON public.wo_tasks(work_order_id);
+CREATE INDEX idx_asset_plans_asset    ON public.asset_plans(asset_id);
+CREATE INDEX idx_asset_plans_active   ON public.asset_plans(active);
 
 -- ========================================================
 -- FINAL PERMISSIONS GRANT
@@ -291,21 +304,21 @@ GRANT ALL ON ALL TABLES IN SCHEMA public TO postgres, anon, authenticated, servi
 GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO postgres, anon, authenticated, service_role;
 GRANT ALL ON ALL FUNCTIONS IN SCHEMA public TO postgres, anon, authenticated, service_role;
 
--- Disable RLS for now to ensure connectivity, user can re-enable later if needed
-ALTER TABLE public.profiles DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.assets DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.work_orders DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.pm_plans DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.asset_plans DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.wo_tasks DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.inventory_items DISABLE ROW LEVEL SECURITY;
+-- Disable RLS for now — re-enable per table once row-level policies are defined
+ALTER TABLE public.profiles          DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.assets            DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.work_orders       DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.pm_plans          DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.asset_plans       DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.wo_tasks          DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.wo_comments       DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.inventory_items   DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.measurement_configs DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.measurement_points DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.meter_readings DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.wo_comments DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.part_usages DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.stock_movements DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.vendors DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.measurement_points  DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.meter_readings    DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.part_usages       DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.stock_movements   DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.vendors           DISABLE ROW LEVEL SECURITY;
 
 -- ========================================================
 -- AUTOMATION: AUTH SYNC (Supabase Auth -> Profiles)
@@ -319,20 +332,19 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Trigger to create profile on signup
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
--- EMERGENCY: Backfill existing users (since we dropped the schema)
+-- Backfill existing Supabase Auth users into profiles
 INSERT INTO public.profiles (id, full_name, role)
-SELECT id, email, 'admin' 
+SELECT id, email, 'admin'
 FROM auth.users
 ON CONFLICT (id) DO NOTHING;
 
--- DEV MODE: Ensure the standard dev user exists for local testing
+-- Dev mode: ensure the standard dev user exists for local testing
+-- This UUID is used by loginAsDev() in authSlice.ts
 INSERT INTO public.profiles (id, full_name, role)
 VALUES ('00000000-0000-4000-a000-000000000000', 'Administrador (Dev)', 'admin')
 ON CONFLICT (id) DO NOTHING;
-

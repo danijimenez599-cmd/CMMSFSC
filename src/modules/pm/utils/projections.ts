@@ -29,14 +29,33 @@ export function calculateProjections(
       currentSimDate = new Date();
     }
 
-    let currentSimCycle = Number(assetPlan.currentCycleIndex) || 0;
+    // Start at the current cycle (the next real event) without pre-incrementing.
+    // Previous code did currentSimCycle++ before evaluating, skipping the immediate next event.
+    let currentSimCycle = Number(assetPlan.currentCycleIndex) || 1;
 
     let iterations = 0;
     const maxIterations = 100;
+    let isFirstIteration = true;
 
     while (isAfter(horizonDate, currentSimDate) && iterations < maxIterations) {
       iterations++;
-      currentSimCycle++;
+
+      // On subsequent iterations advance both the cycle and the date before evaluating
+      if (!isFirstIteration) {
+        currentSimCycle++;
+
+        const val = Math.max(1, Number(pmPlan.intervalValue) || 1);
+        const unit = pmPlan.intervalUnit;
+
+        if (unit === 'days') currentSimDate = addDays(currentSimDate, val);
+        else if (unit === 'weeks') currentSimDate = addWeeks(currentSimDate, val);
+        else if (unit === 'months') currentSimDate = addMonths(currentSimDate, val);
+        else if (unit === 'years') currentSimDate = addYears(currentSimDate, val);
+        else currentSimDate = addMonths(currentSimDate, 1);
+
+        if (!isValid(currentSimDate)) break;
+      }
+      isFirstIteration = false;
 
       const tasks = Array.isArray(pmPlan.tasks) ? pmPlan.tasks : [];
       const triggeringTasks = tasks.filter((t: any) => {
@@ -60,18 +79,6 @@ export function calculateProjections(
           tasksNames: triggeringTasks.map((t: any) => t.description || 'Tarea sin descripción')
         });
       }
-
-      // Avance de fecha seguro
-      const val = Math.max(1, Number(pmPlan.intervalValue) || 1);
-      const unit = pmPlan.intervalUnit;
-
-      if (unit === 'days') currentSimDate = addDays(currentSimDate, val);
-      else if (unit === 'weeks') currentSimDate = addWeeks(currentSimDate, val);
-      else if (unit === 'months') currentSimDate = addMonths(currentSimDate, val);
-      else if (unit === 'years') currentSimDate = addYears(currentSimDate, val);
-      else currentSimDate = addMonths(currentSimDate, 1);
-
-      if (!isValid(currentSimDate)) break;
     }
 
     return projections;

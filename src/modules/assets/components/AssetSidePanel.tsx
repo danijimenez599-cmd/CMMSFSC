@@ -14,7 +14,8 @@ import {
   ChevronUp,
   Target,
   Wrench,
-  AlertTriangle
+  AlertTriangle,
+  CheckCircle
 } from 'lucide-react';
 import { useStore } from '../../../store';
 import { Badge, Button, cn, Modal, Select, FormField } from '../../../shared/components';
@@ -106,8 +107,11 @@ const ProjectionCard = ({ proj }: { proj: any }) => {
                 </div>
                 
                 <div className="pt-2">
-                  <button className="w-full py-3 bg-slate-900 text-white rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-brand transition-all">
-                    Pre-configurar Orden de Trabajo
+                  <button
+                    disabled
+                    className="w-full py-3 bg-slate-200 text-slate-400 rounded-xl text-[9px] font-black uppercase tracking-widest cursor-not-allowed"
+                  >
+                    Pre-configurar OT (Próximamente)
                   </button>
                 </div>
               </div>
