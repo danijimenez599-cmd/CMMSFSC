@@ -13,7 +13,11 @@ import {
   subMonths,
   isToday,
   parseISO,
-  isValid
+  isValid,
+  addDays,
+  isAfter,
+  isBefore,
+  startOfDay
 } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { 
@@ -31,7 +35,8 @@ import {
   Target,
   History,
   BrainCircuit,
-  ClipboardList
+  ClipboardList,
+  CheckCircle2
 } from 'lucide-react';
 import { useStore } from '../../../store';
 import { cn, Badge } from '../../../shared/components';
@@ -112,6 +117,32 @@ export default function PmCalendarView() {
   } = store;
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState<'upcoming' | 'month'>('upcoming');
+  const [visibleMonth, setVisibleMonth] = useState(new Date());
+  const [selectedDay, setSelectedDay] = useState<Date | null>(null);
+
+  const today = startOfDay(new Date());
+  
+  const isOverdueEvent = (e: any) =>
+    e.type === 'wo' &&
+    !['completed','cancelled'].includes(e.status) &&
+    e.date < today;
+
+  const groupEvents = (events: any[]) => {
+    const overdue = events.filter(isOverdueEvent);
+    const todayEvents = events.filter(e => isSameDay(e.date, today) && !isOverdueEvent(e));
+    const weekEvents = events.filter(e =>
+      isAfter(e.date, today) && isBefore(e.date, addDays(today, 7))
+    );
+    const laterEvents = events.filter(e =>
+      isAfter(e.date, addDays(today, 6)) && isBefore(e.date, addDays(today, 30))
+    );
+    return { overdue, today: todayEvents, week: weekEvents, later: laterEvents };
+  };
+
+  const getDayEvents = (day: Date, allEvents: any[]) => {
+    return allEvents.filter(e => isSameDay(e.date, day));
+  };
 
   // Use primitive deps so memo isn't invalidated on every render (Fix 3.5)
   const currentMonth = currentDate.getMonth();
@@ -164,109 +195,399 @@ export default function PmCalendarView() {
   const completedWOs = events.filter(e => e.type === 'wo' && e.status === 'completed' && isSameMonth(e.date, currentDate));
   const projectionEvents = events.filter(e => e.type === 'projection' && isSameMonth(e.date, currentDate));
 
-  return (
-    <div className="flex flex-col lg:flex-row h-full bg-slate-50 overflow-hidden relative">
-      <div className="flex-1 flex flex-col min-w-0 bg-white overflow-x-auto">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-white shrink-0">
-          <div className="flex items-center gap-4">
-            <h2 className="text-xl font-black text-slate-900 capitalize tracking-tighter">{format(currentDate, 'MMMM yyyy', { locale: safeLocale })}</h2>
-            <div className="flex items-center bg-slate-100 p-1 rounded-xl">
-              <button onClick={() => setCurrentDate(subMonths(currentDate, 1))} className="p-1.5 hover:bg-white rounded-lg transition-all text-slate-400 hover:text-brand"><ChevronLeft size={16} /></button>
-              <button onClick={() => setCurrentDate(new Date())} className="px-3 py-1 text-[9px] font-black uppercase tracking-widest hover:bg-white rounded-lg transition-all text-slate-500">Hoy</button>
-              <button onClick={() => setCurrentDate(addMonths(currentDate, 1))} className="p-1.5 hover:bg-white rounded-lg transition-all text-slate-400 hover:text-brand"><ChevronRight size={16} /></button>
-            </div>
+  const grouped = groupEvents(events);
+  const overdueCount = grouped.overdue.length;
+  const upcomingCount = events.filter(e => e.date >= today && isBefore(e.date, addDays(today, 30))).length;
+
+  const calendarMonthDays = eachDayOfInterval({
+    start: startOfWeek(startOfMonth(visibleMonth), { weekStartsOn: 1 }),
+    end: endOfWeek(endOfMonth(visibleMonth), { weekStartsOn: 1 })
+  });
+
+  const renderEventCard = (event: any, index: number, isStaggered = false) => {
+    const isProjection = event.type === 'projection';
+    const isOverdue = isOverdueEvent(event);
+    const isCompleted = event.status === 'completed';
+    
+    return (
+      <motion.button
+        key={event.id}
+        initial={isStaggered ? { opacity: 0, y: 8 } : { opacity: 1, y: 0 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={isStaggered && index < 10 ? { delay: index * 0.04 } : {}}
+        whileTap={{ scale: 0.97 }}
+        onClick={() => setSelectedEvent(event)}
+        className={cn(
+          "w-full mx-4 mb-2 rounded-2xl border overflow-hidden flex text-left",
+          isProjection ? "bg-blue-50/30 border-blue-200/50" :
+          isOverdue ? "bg-red-50 border-red-200" :
+          isCompleted ? "bg-emerald-50/50 border-emerald-200/50" :
+          "bg-white border-slate-200"
+        )}
+        style={{ width: 'calc(100% - 32px)' }}
+      >
+        <div className={cn(
+          "w-[3px] shrink-0",
+          isProjection ? "bg-blue-400" :
+          isOverdue ? "bg-red-500" :
+          isCompleted ? "bg-emerald-500" :
+          "bg-slate-900"
+        )} />
+        
+        <div className="p-3 flex-1 min-w-0">
+          <div className="flex items-center justify-between gap-2 mb-1">
+            <span className="font-mono text-[10px] font-bold text-slate-400 uppercase tracking-tight">
+              {format(event.date, 'dd MMM', { locale: safeLocale })}
+            </span>
+            <Badge 
+              variant={isProjection ? 'brand' : 'neutral'} 
+              className={cn(
+                "text-[9px] font-black px-1.5 py-0 border-none",
+                !isProjection && "bg-slate-900 text-white"
+              )}
+            >
+              {isProjection ? 'PLAN' : 'OT'}
+            </Badge>
           </div>
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-indigo-500" /><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Ingeniería</span></div>
-            <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-slate-900 shadow-sm" /><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Ejecución</span></div>
+          
+          <h5 className="text-sm font-bold text-slate-900 tracking-tight line-clamp-1">
+            {event.title}
+          </h5>
+          
+          <div className="mt-2 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-1 min-w-0">
+              <Activity size={10} className="text-slate-400 shrink-0" />
+              <span className="text-[10px] text-slate-400 font-bold truncate tracking-tight uppercase">
+                {event.assetName}
+              </span>
+            </div>
+            {event.isMajor && (
+              <Badge variant="brand" className="text-[8px] font-black px-1 py-0 bg-brand text-white border-none">
+                MAYOR
+              </Badge>
+            )}
           </div>
         </div>
+      </motion.button>
+    );
+  };
 
-        <div className="flex-1 flex flex-col min-w-0 overflow-x-auto overflow-y-hidden pb-2">
-          <div className="min-w-[800px] flex-1 flex flex-col">
-            <div className="grid grid-cols-7 bg-slate-50 border-b border-slate-100 shrink-0">
-              {['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'].map(d => (<div key={d} className="py-2 text-center text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">{d}</div>))}
+  return (
+    <div className="flex flex-col h-full bg-slate-50 overflow-hidden relative">
+      {/* ── TIMELINE MÓVIL (ZONA 1 & 2) ── */}
+      <div className="lg:hidden flex flex-col h-full overflow-hidden bg-slate-50">
+        {/* ZONA 1: Header */}
+        <header className="bg-white border-b border-slate-100 shadow-sm sticky top-0 z-40 shrink-0">
+          <div className="px-4 py-4 flex items-center justify-between">
+            <h1 className="font-display font-bold text-xl text-slate-900 tracking-tight">Agenda</h1>
+            <div className="flex items-center gap-2">
+              {overdueCount > 0 && (
+                <motion.div
+                  animate={{ opacity: [1, 0.6, 1], scale: [1, 1.05, 1] }}
+                  transition={{ repeat: Infinity, duration: 2 }}
+                  className="bg-red-100 text-red-800 text-[10px] font-black px-2 py-1 rounded-full uppercase tracking-wider"
+                >
+                  {overdueCount} vencida{overdueCount > 1 ? 's' : ''}
+                </motion.div>
+              )}
+              <div className="bg-slate-100 text-slate-600 text-[10px] font-black px-2 py-1 rounded-full uppercase tracking-wider">
+                {upcomingCount} próximas
+              </div>
             </div>
+          </div>
+          
+          <div className="px-4 pb-4">
+            <div className="bg-slate-100 rounded-xl p-1 flex">
+              <button
+                onClick={() => setActiveTab('upcoming')}
+                className={cn(
+                  "flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all",
+                  activeTab === 'upcoming' ? "bg-white text-slate-900 shadow-sm" : "text-slate-400"
+                )}
+              >
+                Próximas
+              </button>
+              <button
+                onClick={() => setActiveTab('month')}
+                className={cn(
+                  "flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all",
+                  activeTab === 'month' ? "bg-white text-slate-900 shadow-sm" : "text-slate-400"
+                )}
+              >
+                Mes
+              </button>
+            </div>
+          </div>
+        </header>
 
-            <div className="flex-1 overflow-y-auto scrollbar-none bg-slate-50/20">
-              <div className="grid grid-cols-7 h-full">
-                {calendarDays.map((day) => {
-                  const dayEvents = events.filter(e => isSameDay(e.date, day));
-                  return (
-                    <div key={day.toString()} className={cn("min-h-[110px] p-2 border-b border-r border-slate-100 transition-all", !isSameMonth(day, monthStart) ? "bg-slate-50/30 opacity-30" : "bg-white", isToday(day) && "bg-brand/[0.02]")}>
-                      <span className={cn("text-[11px] font-black w-6 h-6 flex items-center justify-center rounded-lg mb-2", isToday(day) ? "bg-slate-900 text-white shadow-lg" : "text-slate-400")}>{format(day, 'd')}</span>
-                      <div className="space-y-1">
-                        {dayEvents.slice(0, 3).map(e => (
+        {/* ZONA 2: Feed Scrolleable */}
+        <main className="flex-1 overflow-y-auto pb-8">
+          <AnimatePresence mode="wait">
+            {activeTab === 'upcoming' ? (
+              <motion.div
+                key="upcoming"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="pt-4"
+              >
+                {grouped.overdue.length > 0 && (
+                  <div className="mb-6">
+                    <div className="px-4 py-2 bg-red-50/50 sticky top-0 z-10 border-y border-red-100/50 flex items-center gap-2 mb-3">
+                      <AlertTriangle size={12} className="text-red-500" />
+                      <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-red-800">Requieren Atención</span>
+                    </div>
+                    {grouped.overdue.map((e, idx) => renderEventCard(e, idx, true))}
+                  </div>
+                )}
+
+                {grouped.today.length > 0 && (
+                  <div className="mb-6">
+                    <div className="px-4 py-2 bg-slate-50 sticky top-0 z-10 border-y border-slate-100 flex items-center gap-2 mb-3">
+                      <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Hoy · {format(today, 'dd MMM', { locale: safeLocale })}</span>
+                    </div>
+                    {grouped.today.map((e, idx) => renderEventCard(e, idx, true))}
+                  </div>
+                )}
+
+                {grouped.week.length > 0 && (
+                  <div className="mb-6">
+                    <div className="px-4 py-2 bg-slate-50 sticky top-0 z-10 border-y border-slate-100 mb-3">
+                      <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Esta Semana</span>
+                    </div>
+                    {grouped.week.map((e, idx) => renderEventCard(e, idx, true))}
+                  </div>
+                )}
+
+                {grouped.later.length > 0 && (
+                  <div className="mb-6">
+                    <div className="px-4 py-2 bg-slate-50 sticky top-0 z-10 border-y border-slate-100 mb-3">
+                      <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Más adelante</span>
+                    </div>
+                    {grouped.later.map((e, idx) => renderEventCard(e, idx, true))}
+                  </div>
+                )}
+
+                {events.length === 0 && (
+                  <div className="flex flex-col items-center justify-center py-20 text-center px-8">
+                    <CalendarClock size={40} className="text-slate-200 mb-4" />
+                    <p className="text-sm font-bold text-slate-400 uppercase tracking-widest leading-relaxed">Sin eventos programados para los próximos 30 días</p>
+                  </div>
+                )}
+              </motion.div>
+            ) : (
+              <motion.div
+                key="month"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="flex flex-col h-full"
+              >
+                {/* Cuadrícula del mes fija en parte superior (~280px con padding) */}
+                <div className="bg-white px-4 pt-4 pb-6 shrink-0 border-b border-slate-100">
+                  <div className="flex items-center justify-between mb-6">
+                    <button onClick={() => setVisibleMonth(subMonths(visibleMonth, 1))} className="p-2 hover:bg-slate-50 rounded-full transition-colors text-slate-400">
+                      <ChevronLeft size={20} />
+                    </button>
+                    <h3 className="font-display font-bold text-slate-900 tracking-tight capitalize">
+                      {format(visibleMonth, 'MMMM yyyy', { locale: safeLocale })}
+                    </h3>
+                    <button onClick={() => setVisibleMonth(addMonths(visibleMonth, 1))} className="p-2 hover:bg-slate-50 rounded-full transition-colors text-slate-400">
+                      <ChevronRight size={20} />
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-7 mb-2">
+                    {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((d, i) => (
+                      <div key={i} className="text-[10px] font-bold text-slate-400 text-center uppercase">{d}</div>
+                    ))}
+                  </div>
+
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={visibleMonth.toString()}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.2 }}
+                      className="grid grid-cols-7 gap-y-1"
+                    >
+                      {calendarMonthDays.map((day, idx) => {
+                        const dayEvents = getDayEvents(day, events);
+                        const isSelected = selectedDay && isSameDay(day, selectedDay);
+                        const isCurrentMonth = isSameMonth(day, visibleMonth);
+                        const isDayToday = isToday(day);
+
+                        const otCount = dayEvents.filter(e => e.type === 'wo').length;
+                        const planCount = dayEvents.filter(e => e.type === 'projection').length;
+                        const hasOverdue = dayEvents.some(isOverdueEvent);
+
+                        return (
                           <button
-                            key={e.id}
-                            onClick={() => setSelectedEvent(e)}
+                            key={idx}
+                            onClick={() => setSelectedDay(day)}
+                            disabled={!isCurrentMonth}
                             className={cn(
-                              "w-full text-left px-2 py-1.5 rounded-lg text-[9px] font-black truncate transition-all",
-                              e.type === 'projection'
-                                // MODULE 3.6: Ghost style for projections — clearly "planned, not real"
-                                ? "bg-blue-500/10 text-blue-700 border border-blue-300/50 hover:bg-blue-500/20 shadow-none"
-                                : "bg-slate-900 text-white shadow-sm hover:bg-brand"
+                              "min-h-[44px] flex flex-col items-center justify-start pt-1 rounded-xl transition-all relative",
+                              !isCurrentMonth && "opacity-0 pointer-events-none"
                             )}
                           >
-                            {e.title}
+                            <span className={cn(
+                              "text-xs font-bold w-7 h-7 flex items-center justify-center rounded-full transition-all",
+                              isDayToday && !isSelected ? "bg-slate-900 text-white" : "",
+                              isSelected ? "bg-brand/10 text-brand ring-1 ring-brand/30" : "text-slate-600"
+                            )}>
+                              {format(day, 'd')}
+                            </span>
+                            
+                            <div className="flex gap-0.5 mt-1">
+                              {hasOverdue && <div className="w-1 h-1 rounded-full bg-red-500" />}
+                              {otCount > 0 && <div className="w-1 h-1 rounded-full bg-slate-900" />}
+                              {planCount > 0 && <div className="w-1 h-1 rounded-full bg-blue-500" />}
+                            </div>
                           </button>
-                        ))}
-                        {dayEvents.length > 3 && <div className="text-[8px] font-black text-slate-300 text-center uppercase tracking-widest pt-1">+ {dayEvents.length - 3} más</div>}
+                        );
+                      })}
+                    </motion.div>
+                  </AnimatePresence>
+                </div>
+
+                {/* Feed del día seleccionado */}
+                <div className="flex-1 bg-slate-50 min-h-[300px]">
+                  {!selectedDay ? (
+                    <div className="h-full flex flex-col items-center justify-center py-20 opacity-40">
+                      <CalendarIcon size={24} className="text-slate-400 mb-2" />
+                      <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Toca un día para ver eventos</p>
+                    </div>
+                  ) : (
+                    <div className="pt-6">
+                      <div className="px-4 mb-4">
+                        <h4 className="font-display font-bold text-slate-900 tracking-tight capitalize">
+                          {format(selectedDay, "EEEE d 'de' MMMM", { locale: safeLocale })}
+                        </h4>
+                      </div>
+                      
+                      <div className="space-y-1">
+                        {getDayEvents(selectedDay, events).length > 0 ? (
+                          getDayEvents(selectedDay, events).map((e, idx) => renderEventCard(e, idx))
+                        ) : (
+                          <div className="flex flex-col items-center justify-center py-12 opacity-30">
+                            <CheckCircle2 size={32} className="text-slate-400 mb-2" />
+                            <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Sin eventos este día</p>
+                          </div>
+                        )}
                       </div>
                     </div>
-                  );
-                })}
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </main>
+      </div>
+
+      {/* ── VISTA DESKTOP (ORIGINAL) ── */}
+      <div className="hidden lg:flex flex-col lg:flex-row h-full bg-slate-50 overflow-hidden relative w-full">
+        <div className="flex-1 flex flex-col min-w-0 bg-white overflow-x-auto">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-white shrink-0">
+            <div className="flex items-center gap-4">
+              <h2 className="text-xl font-black text-slate-900 capitalize tracking-tighter">{format(currentDate, 'MMMM yyyy', { locale: safeLocale })}</h2>
+              <div className="flex items-center bg-slate-100 p-1 rounded-xl">
+                <button onClick={() => setCurrentDate(subMonths(currentDate, 1))} className="p-1.5 hover:bg-white rounded-lg transition-all text-slate-400 hover:text-brand"><ChevronLeft size={16} /></button>
+                <button onClick={() => setCurrentDate(new Date())} className="px-3 py-1 text-[9px] font-black uppercase tracking-widest hover:bg-white rounded-lg transition-all text-slate-500">Hoy</button>
+                <button onClick={() => setCurrentDate(addMonths(currentDate, 1))} className="p-1.5 hover:bg-white rounded-lg transition-all text-slate-400 hover:text-brand"><ChevronRight size={16} /></button>
+              </div>
+            </div>
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-indigo-500" /><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Ingeniería</span></div>
+              <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-slate-900 shadow-sm" /><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Ejecución</span></div>
+            </div>
+          </div>
+
+          <div className="flex-1 flex flex-col min-w-0 overflow-x-auto overflow-y-hidden pb-2">
+            <div className="min-w-[800px] flex-1 flex flex-col">
+              <div className="grid grid-cols-7 bg-slate-50 border-b border-slate-100 shrink-0">
+                {['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'].map(d => (<div key={d} className="py-2 text-center text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">{d}</div>))}
+              </div>
+
+              <div className="flex-1 overflow-y-auto scrollbar-none bg-slate-50/20">
+                <div className="grid grid-cols-7 h-full">
+                  {calendarDays.map((day) => {
+                    const dayEvents = events.filter(e => isSameDay(e.date, day));
+                    return (
+                      <div key={day.toString()} className={cn("min-h-[110px] p-2 border-b border-r border-slate-100 transition-all", !isSameMonth(day, monthStart) ? "bg-slate-50/30 opacity-30" : "bg-white", isToday(day) && "bg-brand/[0.02]")}>
+                        <span className={cn("text-[11px] font-black w-6 h-6 flex items-center justify-center rounded-lg mb-2", isToday(day) ? "bg-slate-900 text-white shadow-lg" : "text-slate-400")}>{format(day, 'd')}</span>
+                        <div className="space-y-1">
+                          {dayEvents.slice(0, 3).map(e => (
+                            <button
+                              key={e.id}
+                              onClick={() => setSelectedEvent(e)}
+                              className={cn(
+                                "w-full text-left px-2 py-1.5 rounded-lg text-[9px] font-black truncate transition-all",
+                                e.type === 'projection'
+                                  ? "bg-blue-500/10 text-blue-700 border border-blue-300/50 hover:bg-blue-500/20 shadow-none"
+                                  : "bg-slate-900 text-white shadow-sm hover:bg-brand"
+                              )}
+                            >
+                              {e.title}
+                            </button>
+                          ))}
+                          {dayEvents.length > 3 && <div className="text-[8px] font-black text-slate-300 text-center uppercase tracking-widest pt-1">+ {dayEvents.length - 3} más</div>}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <aside className="w-full lg:w-80 border-t lg:border-t-0 lg:border-l border-slate-200 bg-white flex flex-col shrink-0 max-h-[40vh] lg:max-h-none overflow-y-auto">
-        <div className="p-6 border-b border-slate-100 bg-slate-50/50"><h3 className="font-display font-black text-slate-900 text-sm uppercase tracking-widest">Dashboard Mensual</h3></div>
-        <div className="flex-1 overflow-y-auto p-5 space-y-8 scrollbar-none">
-          <section>
-            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-2"><ClipboardList size={12} className="text-brand" /> Pendientes ({pendingWOs.length})</h4>
-            <div className="space-y-2">
-              {pendingWOs.slice(0, 5).map(wo => (<div key={wo.id} className="p-3 bg-white border border-slate-100 rounded-xl shadow-sm hover:border-brand/20 cursor-pointer transition-all" onClick={() => setSelectedEvent(wo)}><p className="text-[10px] font-black text-slate-900 truncate">{wo.title}</p><p className="text-[8px] font-mono font-bold text-slate-400 mt-1">[{wo.assetCode}] {wo.assetName}</p></div>))}
-            </div>
-          </section>
-          <section>
-            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-2"><History size={12} className="text-emerald-500" /> Completados ({completedWOs.length})</h4>
-            <div className="space-y-2">
-              {completedWOs.slice(0, 3).map(wo => (<div key={wo.id} className="p-3 bg-emerald-50/50 border border-emerald-100 rounded-xl shadow-sm"><p className="text-[10px] font-black text-emerald-800 truncate">{wo.title}</p><p className="text-[8px] font-bold text-emerald-600/70 mt-1 uppercase tracking-widest">Finalizado {format(wo.date, 'dd MMM')}</p></div>))}
-            </div>
-          </section>
-          <section className="pt-4 border-t border-slate-100">
-            {/* MODULE 3.7: Fix contrast — was dark bg with low-contrast text */}
-            <div className="bg-blue-50 border border-blue-200/60 rounded-[24px] p-5 relative overflow-hidden group">
-              <BrainCircuit className="absolute -bottom-4 -right-4 text-blue-200/40 rotate-12" size={80} />
-              <h4 className="text-[10px] font-black text-blue-700 uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
-                <BrainCircuit size={14} className="text-blue-600" />
-                Ingeniería ({projectionEvents.length})
-              </h4>
-              <div className="space-y-2 relative z-10">
-                {projectionEvents.slice(0, 4).map(proj => (
-                  <div
-                    key={proj.id}
-                    className="p-2.5 bg-white/70 border border-blue-200/50 rounded-xl hover:bg-white transition-all cursor-pointer shadow-sm"
-                    onClick={() => setSelectedEvent(proj)}
-                  >
-                    <p className="text-[9px] font-black text-blue-900 truncate">{proj.title}</p>
-                    <p className="text-[8px] font-bold text-blue-600 mt-1 uppercase tracking-tighter">
-                      Sugerido {format(proj.date, 'dd MMM')}
-                    </p>
-                  </div>
-                ))}
-                {projectionEvents.length === 0 && (
-                  <p className="text-[9px] font-bold text-blue-500/60 uppercase tracking-widest text-center py-3">Sin proyecciones este mes</p>
-                )}
+        <aside className="w-full lg:w-80 border-t lg:border-t-0 lg:border-l border-slate-200 bg-white flex flex-col shrink-0 max-h-[40vh] lg:max-h-none overflow-y-auto">
+          <div className="p-6 border-b border-slate-100 bg-slate-50/50"><h3 className="font-display font-black text-slate-900 text-sm uppercase tracking-widest">Dashboard Mensual</h3></div>
+          <div className="flex-1 overflow-y-auto p-5 space-y-8 scrollbar-none">
+            <section>
+              <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-2"><ClipboardList size={12} className="text-brand" /> Pendientes ({pendingWOs.length})</h4>
+              <div className="space-y-2">
+                {pendingWOs.slice(0, 5).map(wo => (<div key={wo.id} className="p-3 bg-white border border-slate-100 rounded-xl shadow-sm hover:border-brand/20 cursor-pointer transition-all" onClick={() => setSelectedEvent(wo)}><p className="text-[10px] font-black text-slate-900 truncate">{wo.title}</p><p className="text-[8px] font-mono font-bold text-slate-400 mt-1">[{wo.assetCode}] {wo.assetName}</p></div>))}
               </div>
-            </div>
-          </section>
-        </div>
-        <div className="p-4 border-t border-slate-100 bg-slate-50/50"><button onClick={() => setModule('workorders')} className="w-full py-3 bg-slate-900 text-white rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-brand transition-all">Listado Maestro</button></div>
-      </aside>
+            </section>
+            <section>
+              <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-2"><History size={12} className="text-emerald-500" /> Completados ({completedWOs.length})</h4>
+              <div className="space-y-2">
+                {completedWOs.slice(0, 3).map(wo => (<div key={wo.id} className="p-3 bg-emerald-50/50 border border-emerald-100 rounded-xl shadow-sm"><p className="text-[10px] font-black text-emerald-800 truncate">{wo.title}</p><p className="text-[8px] font-bold text-emerald-600/70 mt-1 uppercase tracking-widest">Finalizado {format(wo.date, 'dd MMM')}</p></div>))}
+              </div>
+            </section>
+            <section className="pt-4 border-t border-slate-100">
+              <div className="bg-blue-50 border border-blue-200/60 rounded-[24px] p-5 relative overflow-hidden group">
+                <BrainCircuit className="absolute -bottom-4 -right-4 text-blue-200/40 rotate-12" size={80} />
+                <h4 className="text-[10px] font-black text-blue-700 uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
+                  <BrainCircuit size={14} className="text-blue-600" />
+                  Ingeniería ({projectionEvents.length})
+                </h4>
+                <div className="space-y-2 relative z-10">
+                  {projectionEvents.slice(0, 4).map(proj => (
+                    <div
+                      key={proj.id}
+                      className="p-2.5 bg-white/70 border border-blue-200/50 rounded-xl hover:bg-white transition-all cursor-pointer shadow-sm"
+                      onClick={() => setSelectedEvent(proj)}
+                    >
+                      <p className="text-[9px] font-black text-blue-900 truncate">{proj.title}</p>
+                      <p className="text-[8px] font-bold text-blue-600 mt-1 uppercase tracking-tighter">
+                        Sugerido {format(proj.date, 'dd MMM')}
+                      </p>
+                    </div>
+                  ))}
+                  {projectionEvents.length === 0 && (
+                    <p className="text-[9px] font-bold text-blue-500/60 uppercase tracking-widest text-center py-3">Sin proyecciones este mes</p>
+                  )}
+                </div>
+              </div>
+            </section>
+          </div>
+          <div className="p-4 border-t border-slate-100 bg-slate-50/50"><button onClick={() => setModule('workorders')} className="w-full py-3 bg-slate-900 text-white rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-brand transition-all">Listado Maestro</button></div>
+        </aside>
+      </div>
 
       <EventDetailPanel event={selectedEvent} onClose={() => setSelectedEvent(null)} onAction={(type: any, id: any) => { if (type === 'wo') selectWo(id); setModule(type === 'wo' ? 'workorders' : 'scheduler'); setSelectedEvent(null); }} />
     </div>
