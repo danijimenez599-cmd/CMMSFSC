@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useStore } from '../../../store';
 import { MeasurementPoint } from '../types';
 import { Button, Input, Badge, Select } from '../../../shared/components';
-import { Activity, Plus, History, Info, Gauge, TrendingUp, Bell, AlertTriangle, Settings2, Trash2 } from 'lucide-react';
+import { Activity, Plus, History, Info, Gauge, TrendingUp, Bell, AlertTriangle, Settings2, Trash2, ArrowRight } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { generateId, cn } from '../../../shared/utils/utils';
@@ -28,9 +28,11 @@ export default function MeasurementPointsPanel({ assetId }: MeasurementPointsPan
     deleteMeasurementPoint,
     addMeterReading,
     currentUser,
+    setModule,
   } = useStore() as any;
 
   const [showAddPoint, setShowAddPoint] = useState(false);
+  const [showCatalogEmpty, setShowCatalogEmpty] = useState(false);
   const [editingPointId, setEditingPointId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'cards' | 'trends'>('cards');
   const [selectedTrendPoint, setSelectedTrendPoint] = useState<string | null>(null);
@@ -81,6 +83,7 @@ export default function MeasurementPointsPanel({ assetId }: MeasurementPointsPan
     });
     setEditingPointId(null);
     setShowAddPoint(false);
+    setShowCatalogEmpty(false);
   };
 
   const handleEditPoint = (point: MeasurementPoint) => {
@@ -140,20 +143,69 @@ export default function MeasurementPointsPanel({ assetId }: MeasurementPointsPan
             </button>
           </div>
         </div>
-        {!showAddPoint && (
+        {!showAddPoint && !showCatalogEmpty && (
           <Button
             variant="primary"
             size="sm"
             className="rounded-full font-bold text-[10px] uppercase tracking-widest px-6"
             icon={<Plus size={14} />}
-            onClick={() => setShowAddPoint(true)}
+            onClick={() => {
+              if (measurementConfigs.length === 0) {
+                // MODULE 4.8: Catalog empty — show empty state instead of broken form
+                setShowCatalogEmpty(true);
+              } else {
+                setShowAddPoint(true);
+              }
+            }}
           >
             Nuevo Punto
           </Button>
         )}
       </div>
 
-      {/* Point Form */}
+      {/* MODULE 4.8: Empty State — no catalog entries */}
+      <AnimatePresence>
+        {showCatalogEmpty && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="bg-amber-50 border border-amber-200/60 rounded-[32px] p-10 text-center relative"
+          >
+            <button
+              onClick={() => setShowCatalogEmpty(false)}
+              className="absolute top-4 right-4 text-amber-400 hover:text-amber-700 transition-colors text-sm font-bold"
+            >
+              ✕
+            </button>
+            <div className="w-16 h-16 rounded-3xl bg-amber-100 border border-amber-200 flex items-center justify-center mx-auto mb-5 shadow-sm">
+              <Gauge size={32} className="text-amber-600" />
+            </div>
+            <h4 className="font-display font-black text-slate-900 text-base tracking-tight mb-2">
+              Catálogo de Magnitudes Vacío
+            </h4>
+            <p className="text-sm text-slate-600 leading-relaxed max-w-sm mx-auto mb-6">
+              Debe crear al menos una{' '}
+              <strong className="text-amber-700">variable de medición</strong>{' '}
+              en el catálogo general antes de poder crear un instrumento.
+            </p>
+            <Button
+              variant="primary"
+              icon={<ArrowRight size={16} />}
+              onClick={() => {
+                setShowCatalogEmpty(false);
+                // Navigate to Settings → Magnitudes tab
+                setModule?.('settings');
+              }}
+              className="bg-amber-600 hover:bg-amber-700 shadow-amber-200"
+            >
+              Ir al Catálogo de Magnitudes
+            </Button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Point Form — only rendered when catalog has entries */}
       <AnimatePresence>
         {showAddPoint && (
           <motion.form

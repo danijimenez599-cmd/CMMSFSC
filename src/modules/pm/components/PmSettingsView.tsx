@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { useStore } from '../../../store';
 import { Button, Input, Badge, AlertBanner } from '../../../shared/components';
-import { Gauge, Plus, Trash2, CheckCircle2, AlertCircle, Truck, Settings2 } from 'lucide-react';
+import { Gauge, Plus, Trash2, CheckCircle2, AlertCircle, Truck, Settings2, CalendarClock, Sliders } from 'lucide-react';
 import { generateId } from '../../../shared/utils/utils';
 import VendorsPanel from '../../workorders/components/VendorsPanel';
 import { cn } from '../../../shared/utils/utils';
 
 export default function PmSettingsView() {
-  const [activeTab, setActiveTab] = useState<'magnitudes' | 'vendors'>('magnitudes');
-  const { measurementConfigs, saveMeasurementConfig, deleteMeasurementConfig, showToast } = useStore() as any;
+  const [activeTab, setActiveTab] = useState<'magnitudes' | 'vendors' | 'motor'>('magnitudes');
+  const { measurementConfigs, saveMeasurementConfig, deleteMeasurementConfig, showToast, projectionMonths, setProjectionMonths } = useStore() as any;
   const [showAdd, setShowAdd] = useState(false);
   const [name, setName] = useState('');
   const [unit, setUnit] = useState('');
@@ -62,6 +62,18 @@ export default function PmSettingsView() {
         >
           <Truck size={16} />
           Proveedores
+        </button>
+        <button
+          onClick={() => setActiveTab('motor')}
+          className={cn(
+            "flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all",
+            activeTab === 'motor'
+              ? "bg-white text-brand shadow-sm"
+              : "text-tx-4 hover:text-tx hover:bg-white/50"
+          )}
+        >
+          <Sliders size={16} />
+          Motor PM
         </button>
       </div>
 
@@ -206,9 +218,69 @@ export default function PmSettingsView() {
             )}
           </div>
         </div>
-      ) : (
+      ) : activeTab === 'vendors' ? (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
           <VendorsPanel />
+        </div>
+      ) : (
+        /* ── Motor PM Tab ─────────────────────────────────────────────── */
+        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
+          <div>
+            <h2 className="font-display text-xl font-bold text-tx tracking-tight">Parámetros del Motor PM</h2>
+            <p className="text-sm text-tx-4 mt-0.5">Configura el comportamiento global del motor de programación preventiva.</p>
+          </div>
+
+          <AlertBanner
+            type="info"
+            title="Horizonte de Proyección"
+            message="Este valor controla cuántos meses hacia el futuro se calculan las proyecciones en el Calendario y en la pestaña 'Proyección' de cada activo. Un horizonte mayor muestra más eventos pero puede afectar el rendimiento de renderizado."
+          />
+
+          <div className="bg-white border border-border rounded-2xl shadow-card p-6 space-y-6">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-brand/5 border border-brand/20 flex items-center justify-center">
+                <CalendarClock size={24} className="text-brand" />
+              </div>
+              <div>
+                <p className="font-bold text-tx">Meses de Proyección</p>
+                <p className="text-xs text-tx-4 mt-0.5">Horizonte visual del calendario predictivo</p>
+              </div>
+            </div>
+
+            <div className="flex items-end gap-6">
+              <div className="flex-1 max-w-[220px]">
+                <label className="block text-sm font-medium text-tx-2 mb-1.5">
+                  Meses (1 – 24)
+                </label>
+                <input
+                  type="number"
+                  min={1}
+                  max={24}
+                  value={projectionMonths ?? 12}
+                  onChange={e => setProjectionMonths(Number(e.target.value))}
+                  className="w-full h-11 px-4 text-sm font-bold border border-border rounded-xl focus:outline-none focus:border-brand focus:ring-[3px] focus:ring-brand/10 transition-all"
+                />
+              </div>
+              {/* Visual indicator */}
+              <div className="flex-1">
+                <div className="flex items-center justify-between text-[10px] font-bold text-tx-4 uppercase tracking-widest mb-2">
+                  <span>1 mes</span>
+                  <span className="text-brand">{projectionMonths ?? 12} meses activos</span>
+                  <span>24 meses</span>
+                </div>
+                <div className="h-2 bg-bg-3 rounded-full overflow-hidden border border-border">
+                  <div
+                    className="h-full bg-brand rounded-full transition-all duration-500"
+                    style={{ width: `${((projectionMonths ?? 12) / 24) * 100}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <p className="text-xs text-tx-4 border-t border-border pt-4">
+              <strong className="text-tx">Nota:</strong> El cambio es inmediato — recarga la vista del Calendario para ver los nuevos horizontes aplicados.
+            </p>
+          </div>
         </div>
       )}
     </div>

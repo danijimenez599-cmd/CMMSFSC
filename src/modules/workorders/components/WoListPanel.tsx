@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Plus, X, Filter, ChevronDown, ListChecks, Calendar, User, LayoutGrid } from 'lucide-react';
+import { Search, Plus, X, Filter, ListChecks, Calendar, User, LayoutGrid, Building2 } from 'lucide-react';
 import { useStore } from '../../../store';
 import { Badge, Button, Avatar, EmptyState, cn } from '../../../shared/components';
 import { WO_STATUS_LABELS, WO_STATUS_BADGE, WO_PRIORITY_CONFIG, WO_TYPE_LABELS, isOverdue } from '../utils/statusHelpers';
@@ -17,7 +17,31 @@ export default function WoListPanel({ onNewWo }: WoListPanelProps) {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('active');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
+  const [locationFilter, setLocationFilter] = useState<string>('all');
   const [showFilters, setShowFilters] = useState(false);
+
+  // ── Derive plant/area options from loaded assets ───────────────────────────
+  const locationOptions = useMemo(() => {
+    return assets
+      .filter((a: any) => ['plant', 'area'].includes(a.assetType))
+      .sort((a: any, b: any) => a.name.localeCompare(b.name));
+  }, [assets]);
+
+  // ── Recursive helper: collect all asset IDs under a given root asset ───────
+  const getDescendantIds = useMemo(() => {
+    const childrenMap = new Map<string, string[]>();
+    assets.forEach((a: any) => {
+      if (a.parentId) {
+        if (!childrenMap.has(a.parentId)) childrenMap.set(a.parentId, []);
+        childrenMap.get(a.parentId)!.push(a.id);
+      }
+    });
+    const collect = (id: string): string[] => {
+      const children = childrenMap.get(id) || [];
+      return [id, ...children.flatMap(collect)];
+    };
+    return collect;
+  }, [assets]);
 
   const filteredOrders = useMemo(() => {
     let result = [...workOrders];
@@ -30,6 +54,12 @@ export default function WoListPanel({ onNewWo }: WoListPanelProps) {
 
     if (priorityFilter !== 'all') {
       result = result.filter(wo => wo.priority === priorityFilter);
+    }
+
+    // ── Plant/Area filter ── match WOs whose asset lives under selected node ──
+    if (locationFilter !== 'all') {
+      const subtreeIds = new Set(getDescendantIds(locationFilter));
+      result = result.filter(wo => subtreeIds.has(wo.assetId));
     }
 
     if (search) {
@@ -53,11 +83,12 @@ export default function WoListPanel({ onNewWo }: WoListPanelProps) {
     });
 
     return result;
-  }, [workOrders, statusFilter, priorityFilter, search, assets]);
+  }, [workOrders, statusFilter, priorityFilter, locationFilter, search, assets, getDescendantIds]);
 
   const activeFilterCount =
     (statusFilter !== 'active' ? 1 : 0) +
     (priorityFilter !== 'all' ? 1 : 0) +
+    (locationFilter !== 'all' ? 1 : 0) +
     (search ? 1 : 0);
 
   return (
@@ -148,35 +179,67 @@ export default function WoListPanel({ onNewWo }: WoListPanelProps) {
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              className="grid grid-cols-2 gap-2 overflow-hidden pt-2"
+              className="space-y-2 overflow-hidden pt-2"
             >
-              <div className="space-y-1">
-                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest pl-1">Estado</p>
-                <select
-                  value={statusFilter}
-                  onChange={e => setStatusFilter(e.target.value)}
-                  className="w-full text-[11px] font-bold h-8 border border-slate-200 rounded-lg px-2 bg-white focus:outline-none focus:border-brand transition-all"
-                >
-                  <option value="all">TODOS</option>
-                  <option value="active">SOLO ACTIVAS</option>
-                  {Object.entries(WO_STATUS_LABELS).map(([k, v]) => (
-                    <option key={k} value={k}>{v.toUpperCase()}</option>
-                  ))}
-                </select>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-1">
+                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest pl-1">Estado</p>
+                  <select
+                    value={statusFilter}
+                    onChange={e => setStatusFilter(e.target.value)}
+                    className="w-full text-[11px] font-bold h-8 border border-slate-200 rounded-lg px-2 bg-white focus:outline-none focus:border-brand transition-all"
+                  >
+                    <option value="all">TODOS</option>
+                    <option value="active">SOLO ACTIVAS</option>
+                    {Object.entries(WO_STATUS_LABELS).map(([k, v]) => (
+                      <option key={k} value={k}>{v.toUpperCase()}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest pl-1">Prioridad</p>
+                  <select
+                    value={priorityFilter}
+                    onChange={e => setPriorityFilter(e.target.value)}
+                    className="w-full text-[11px] font-bold h-8 border border-slate-200 rounded-lg px-2 bg-white focus:outline-none focus:border-brand transition-all"
+                  >
+                    <option value="all">TODAS</option>
+                    {Object.entries(WO_PRIORITY_CONFIG).map(([k, v]: any) => (
+                      <option key={k} value={k}>{v.label.toUpperCase()}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
-              <div className="space-y-1">
-                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest pl-1">Prioridad</p>
-                <select
-                  value={priorityFilter}
-                  onChange={e => setPriorityFilter(e.target.value)}
-                  className="w-full text-[11px] font-bold h-8 border border-slate-200 rounded-lg px-2 bg-white focus:outline-none focus:border-brand transition-all"
-                >
-                  <option value="all">TODAS</option>
-                  {Object.entries(WO_PRIORITY_CONFIG).map(([k, v]: any) => (
-                    <option key={k} value={k}>{v.label.toUpperCase()}</option>
-                  ))}
-                </select>
-              </div>
+
+              {/* Plant / Area filter */}
+              {locationOptions.length > 0 && (
+                <div className="space-y-1">
+                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest pl-1 flex items-center gap-1.5">
+                    <Building2 size={10} />
+                    Filtrar por Planta / Área
+                  </p>
+                  <select
+                    value={locationFilter}
+                    onChange={e => setLocationFilter(e.target.value)}
+                    className="w-full text-[11px] font-bold h-8 border border-slate-200 rounded-lg px-2 bg-white focus:outline-none focus:border-brand transition-all"
+                  >
+                    <option value="all">TODAS LAS UBICACIONES</option>
+                    {locationOptions.map((loc: any) => (
+                      <option key={loc.id} value={loc.id}>
+                        {loc.assetType === 'plant' ? '🏭' : '📂'} {loc.name.toUpperCase()}
+                      </option>
+                    ))}
+                  </select>
+                  {locationFilter !== 'all' && (
+                    <button
+                      onClick={() => setLocationFilter('all')}
+                      className="flex items-center gap-1 text-[9px] font-bold text-brand hover:underline pl-1 mt-0.5"
+                    >
+                      <X size={9} /> Limpiar filtro de ubicación
+                    </button>
+                  )}
+                </div>
+              )}
             </motion.div>
           )}
         </AnimatePresence>

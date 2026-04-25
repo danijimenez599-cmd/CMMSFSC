@@ -185,10 +185,13 @@ const AssetTreeItem: React.FC<TreeItemProps> = ({
 
 // ─── MAIN PANEL ───────────────────────────────────────────────────────────────
 export default function AssetTreePanel({ onNewAsset, onEditAsset, onDeleteAsset }: AssetTreePanelProps) {
-  const { assets, assetTree, selectedAssetId, selectAsset, assetsLoading, currentUser } = useStore() as any;
+  const store = useStore() as any;
+  const { assets, assetTree, selectedAssetId, selectAsset, assetsLoading,
+          currentUser, fetchAssets, showDecommissioned } = store;
 
   const [query, setQuery] = useState('');
-  const [showInactive, setShowInactive] = useState(false);
+  // showInactive mirrors the store flag so the component stays in sync
+  const showInactive = showDecommissioned as boolean;
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
   const initDone = useRef(false);
 
@@ -278,7 +281,7 @@ export default function AssetTreePanel({ onNewAsset, onEditAsset, onDeleteAsset 
           </div>
           <div className="flex items-center gap-1.5">
             <button
-              onClick={() => setShowInactive(!showInactive)}
+              onClick={() => fetchAssets(!showInactive)}
               className={cn(
                 "h-9 px-2.5 rounded-lg transition-all shadow-sm group border flex items-center gap-2",
                 showInactive ? "bg-slate-800 text-white border-slate-800" : "bg-white text-slate-400 border-slate-200 hover:text-slate-600"
@@ -354,6 +357,15 @@ export default function AssetTreePanel({ onNewAsset, onEditAsset, onDeleteAsset 
           </div>
         ) : (
           <div className="space-y-0.5">
+            {/* Archive mode banner */}
+            {showInactive && (
+              <div className="mx-3 mb-2 px-3 py-2 rounded-lg bg-amber-50 border border-amber-200/60 flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse shrink-0" />
+                <p className="text-[9px] font-bold text-amber-700 uppercase tracking-widest">
+                  Modo Archivo — Equipos dados de baja visibles
+                </p>
+              </div>
+            )}
             {filteredTree.map(node => (
               <AssetTreeItem
                 key={node.id} node={node}

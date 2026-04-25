@@ -15,7 +15,8 @@ import {
   Target,
   Wrench,
   AlertTriangle,
-  CheckCircle2
+  CheckCircle2,
+  Unlink
 } from 'lucide-react';
 import { useStore } from '../../../store';
 import { Badge, Button, cn, Modal, Select, FormField } from '../../../shared/components';
@@ -85,7 +86,11 @@ const ProjectionCard = ({ proj }: { proj: any }) => {
 
 export default function AssetSidePanel() {
   const store = useStore() as any;
-  const { selectedAssetId, setModule = () => {}, workOrders = [], pmPlans = [], assetPlans = [], measurementPoints = [], pmTasks = [], saveAssetPlan = () => {}, showToast = () => {} } = store;
+  const {
+    selectedAssetId, setModule = () => {}, workOrders = [], pmPlans = [],
+    assetPlans = [], measurementPoints = [], pmTasks = [],
+    saveAssetPlan = () => {}, unlinkAssetPlan, showToast = () => {},
+  } = store;
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [selectedPlanId, setSelectedPlanId] = useState('');
   const [selectedPointId, setSelectedPointId] = useState('');
@@ -158,15 +163,31 @@ export default function AssetSidePanel() {
             </section>
 
             <section>
-              <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-5 flex items-center gap-2"><CalendarClock size={14} className="text-brand" /> Planes de Ingeniería ({activePMs.length})</h4>
+              <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-5 flex items-center gap-2"><CalendarClock size={14} className="text-brand" /> Planes de Mantenimiento Preventivo ({activePMs.length})</h4>
               {activePMs.length > 0 ? (
                 <div className="space-y-4 mb-6">
                   {activePMs.map((pm: any) => (
                     <div key={pm.id} className="bg-white border border-slate-200 rounded-[28px] p-6 shadow-sm relative overflow-hidden group">
-                      <div className="flex items-start justify-between gap-4 mb-5">
+                      <div className="flex items-start justify-between gap-4 mb-4">
                         <div className="flex-1 min-w-0"><p className="text-sm font-black text-slate-900 truncate uppercase tracking-tight">{pm.planName}</p><p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">Disparador: {pm.triggerType}</p></div>
                         <Badge variant={pm.isOverdue ? 'danger' : 'ok'} className="font-black px-3 py-1">{pm.statusLabel}</Badge>
                       </div>
+                      {/* Desvincular Plan — Soft Delete (active = false) */}
+                      <button
+                        onClick={async () => {
+                          if (!window.confirm(`¿Desvincular el plan "${pm.planName}" de este activo?\n\nEl historial de OTs generadas se conservará intacto.`)) return;
+                          try {
+                            await unlinkAssetPlan?.(pm.id);
+                            showToast({ type: 'success', title: 'Plan desvinculado', message: `"${pm.planName}" fue desactivado. El historial permanece intacto.` });
+                          } catch (err: any) {
+                            showToast({ type: 'error', title: 'Error', message: err.message });
+                          }
+                        }}
+                        className="flex items-center gap-1.5 text-[9px] font-bold text-slate-400 hover:text-brand transition-colors uppercase tracking-widest mt-1"
+                      >
+                        <Unlink size={10} />
+                        Desvincular Plan
+                      </button>
                     </div>
                   ))}
                 </div>

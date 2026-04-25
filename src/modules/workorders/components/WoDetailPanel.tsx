@@ -141,21 +141,35 @@ export default function WoDetailPanel() {
                     <span className="text-brand font-black bg-brand/5 px-2 py-0.5 rounded border border-brand/10">
                       CICLO {wo.pmCycleIndex} 
                       {(() => {
-                        const ap = store.assetPlans?.find((p: any) => p.id === wo.assetPlanId);
-                        const plan = store.pmPlans?.find((p: any) => p.id === (ap?.pmPlanId || wo.generatedFromPlanId));
-                        if (!plan) return '';
-                        const val = plan.triggerType === 'meter' 
-                          ? (plan.meterIntervalValue || 0) * wo.pmCycleIndex
-                          : (plan.intervalValue || 0) * wo.pmCycleIndex;
-                        const unitLabel = plan.triggerType === 'meter' 
-                          ? plan.meterIntervalUnit?.toUpperCase() 
-                          : (plan.intervalUnit === 'months' ? 'MESES' : plan.intervalUnit === 'days' ? 'DÍAS' : 'SEMANAS');
-                        return ` (${val.toLocaleString()} ${unitLabel})`;
+                        // For completed WOs, skip the live relation — the plan may have been unlinked.
+                        // We still try the live lookup first for open WOs.
+                        if (!isCompleted) {
+                          const ap = store.assetPlans?.find((p: any) => p.id === wo.assetPlanId);
+                          const plan = store.pmPlans?.find((p: any) => p.id === (ap?.pmPlanId || wo.generatedFromPlanId));
+                          if (plan) {
+                            const val = plan.triggerType === 'meter' 
+                              ? (plan.meterIntervalValue || 0) * wo.pmCycleIndex
+                              : (plan.intervalValue || 0) * wo.pmCycleIndex;
+                            const unitLabel = plan.triggerType === 'meter' 
+                              ? plan.meterIntervalUnit?.toUpperCase() 
+                              : (plan.intervalUnit === 'months' ? 'MESES' : plan.intervalUnit === 'days' ? 'DÍAS' : 'SEMANAS');
+                            return ` (${val.toLocaleString()} ${unitLabel})`;
+                          }
+                        }
+                        return '';
                       })()}
                     </span>
                   </>
                 )}
-                {!wo.pmCycleIndex && wo.assetPlanId && <span className="text-slate-300">• Planificado</span>}
+                {/* MODULE 2: Show PM plan name from snapshot for completed WOs.
+                    This survives even after the plan is unlinked (active=false). */}
+                {isCompleted && wo.pmPlanNameSnapshot && (
+                  <span className="text-emerald-600 font-black bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200/60 flex items-center gap-1">
+                    <History size={9} />
+                    {wo.pmPlanNameSnapshot}
+                  </span>
+                )}
+                {!wo.pmCycleIndex && wo.assetPlanId && !isCompleted && <span className="text-slate-300">• Planificado</span>}
                 {!wo.assetPlanId && <span className="text-slate-300">• Manual</span>}
               </p>
             </div>

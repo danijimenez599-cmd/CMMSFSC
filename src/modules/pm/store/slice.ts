@@ -14,6 +14,9 @@ export interface PmSlice {
   measurementPoints: MeasurementPoint[];
   meterReadings: MeterReading[];
   pmLoading: boolean;
+  /** Global projection horizon in months. Default 12, max 24. */
+  projectionMonths: number;
+  setProjectionMonths: (months: number) => void;
 
   fetchPmData: () => Promise<void>;
   savePlan: (plan: PmPlan, tasks: PmTask[]) => Promise<void>;
@@ -21,6 +24,9 @@ export interface PmSlice {
 
   saveAssetPlan: (assetPlan: AssetPlan) => Promise<void>;
   toggleAssetPlan: (id: string, active: boolean) => Promise<void>;
+  /** Soft-delete: sets active=false. Never physically deletes. */
+  unlinkAssetPlan: (id: string) => Promise<void>;
+  /** @deprecated Use unlinkAssetPlan */
   removeAssetPlan: (id: string) => Promise<void>;
 
   saveMeasurementConfig: (config: MeasurementConfig) => Promise<void>;
@@ -43,6 +49,11 @@ export const createPmSlice: StateCreator<StoreState, [], [], PmSlice> = (set, ge
   measurementPoints: [],
   meterReadings: [],
   pmLoading: false,
+  projectionMonths: 12,
+  setProjectionMonths: (months: number) => {
+    const clamped = Math.min(24, Math.max(1, months));
+    set({ projectionMonths: clamped });
+  },
 
   fetchPmData: async () => {
     set({ pmLoading: true });
@@ -219,10 +230,26 @@ export const createPmSlice: StateCreator<StoreState, [], [], PmSlice> = (set, ge
     await get().fetchPmData();
   },
 
-  removeAssetPlan: async (id) => {
-    const { error } = await supabase.from('asset_plans').delete().eq('id', id);
+  /**
+   * SOFT DELETE — never physically deletes an asset_plan row.
+   * Sets active = false so:
+   *  - The scheduler stops generating WOs for it.
+   *  - Historical WOs keep their pmPlanNameSnapshot intact.
+   *  - The record can be re-activated in the future if needed.
+   */
+  unlinkAssetPlan: async (id: string) => {
+    const { error } = await supabase
+      .from('asset_plans')
+      .update({ active: false })
+      .eq('id', id);
     if (error) throw error;
     await get().fetchPmData();
+  },
+
+  /** @deprecated alias kept for backward compatibility — use unlinkAssetPlan */
+  removeAssetPlan: async (id: string) => {
+    // Redirect to soft delete instead of hard delete
+    await (get() as any).unlinkAssetPlan(id);
   },
 
   saveMeasurementPoint: async (point) => {
@@ -292,6 +319,16 @@ export const createPmSlice: StateCreator<StoreState, [], [], PmSlice> = (set, ge
           // 1. Create Predictive Work Order
           const woId = generateId();
           const timestampStr = new Date().toLocaleString('es-SV', { dateStyle: 'medium', timeStyle: 'short' });
+
+          // MODULE 4.9: Set a due date for CBM-triggered WOs.
+          // Business rule: corrective actions from sensor alerts must be attended
+          // within 3 days by default (prudential response window).
+          const scheduledDate = new Date(now);
+          const dueDate = new Date(now);
+          dueDate.setDate(dueDate.getDate() + 3);
+          const scheduledDateStr = scheduledDate.toISOString().split('T')[0];
+          const dueDateStr = dueDate.toISOString().split('T')[0];
+
           const { error: woError } = await supabase.from('work_orders').insert({
             id: woId,
             asset_id: point.assetId,
@@ -300,6 +337,8 @@ export const createPmSlice: StateCreator<StoreState, [], [], PmSlice> = (set, ge
             wo_type: 'predictive',
             priority: point.triggerPriority || 'high',
             status: 'open',
+            scheduled_date: scheduledDateStr,  // today
+            due_date: dueDateStr,              // today + 3 days (SLA default)
             source_point_id: point.id, // Linking the WO to the sensor
             asset_name_snapshot: asset?.name || 'Activo Desconocido',
             created_by: get().currentUser?.id || null,

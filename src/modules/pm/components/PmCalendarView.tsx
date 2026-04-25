@@ -105,7 +105,11 @@ function EventDetailPanel({ event, onClose, onAction }: any) {
 
 export default function PmCalendarView() {
   const store = useStore() as any;
-  const { workOrders = [], assetPlans = [], assets = [], pmPlans = [], pmTasks = [], selectWo = () => {}, setModule = () => {} } = store;
+  const {
+    workOrders = [], assetPlans = [], assets = [], pmPlans = [], pmTasks = [],
+    selectWo = () => {}, setModule = () => {},
+    projectionMonths = 12,
+  } = store;
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
 
@@ -138,7 +142,8 @@ export default function PmCalendarView() {
         if (!basePlan) return;
         const asset = assets.find((a: any) => a.id === ap.assetId);
         const planWithTasks = { ...basePlan, tasks: (pmTasks || []).filter((t: any) => t.pmPlanId === basePlan.id) };
-        const projections = calculateProjections(ap, planWithTasks, 24);
+        // Read projection horizon from global store setting (default 12 months)
+        const projections = calculateProjections(ap, planWithTasks, projectionMonths);
         (projections || []).forEach(proj => {
           if (!proj.date || !isValid(proj.date)) return;
           const hasWo = (workOrders || []).some((wo: any) => {
@@ -153,7 +158,7 @@ export default function PmCalendarView() {
       });
       return evs.sort((a, b) => a.date.getTime() - b.date.getTime());
     } catch (e) { return []; }
-  }, [workOrders, assetPlans, assets, pmPlans, pmTasks, currentMonth, currentYear]);
+  }, [workOrders, assetPlans, assets, pmPlans, pmTasks, currentMonth, currentYear, projectionMonths]);
 
   const pendingWOs = events.filter(e => e.type === 'wo' && !['completed', 'cancelled'].includes(e.status) && isSameMonth(e.date, currentDate));
   const completedWOs = events.filter(e => e.type === 'wo' && e.status === 'completed' && isSameMonth(e.date, currentDate));
@@ -190,7 +195,19 @@ export default function PmCalendarView() {
                   <span className={cn("text-[11px] font-black w-6 h-6 flex items-center justify-center rounded-lg mb-2", isToday(day) ? "bg-slate-900 text-white shadow-lg" : "text-slate-400")}>{format(day, 'd')}</span>
                   <div className="space-y-1">
                     {dayEvents.slice(0, 3).map(e => (
-                      <button key={e.id} onClick={() => setSelectedEvent(e)} className={cn("w-full text-left px-2 py-1.5 rounded-lg text-[9px] font-black truncate transition-all shadow-sm", e.type === 'projection' ? "bg-indigo-500 text-white shadow-indigo-100 hover:bg-indigo-600" : "bg-slate-900 text-white hover:bg-brand")}>{e.title}</button>
+                      <button
+                        key={e.id}
+                        onClick={() => setSelectedEvent(e)}
+                        className={cn(
+                          "w-full text-left px-2 py-1.5 rounded-lg text-[9px] font-black truncate transition-all",
+                          e.type === 'projection'
+                            // MODULE 3.6: Ghost style for projections — clearly "planned, not real"
+                            ? "bg-blue-500/10 text-blue-700 border border-blue-300/50 hover:bg-blue-500/20 shadow-none"
+                            : "bg-slate-900 text-white shadow-sm hover:bg-brand"
+                        )}
+                      >
+                        {e.title}
+                      </button>
                     ))}
                     {dayEvents.length > 3 && <div className="text-[8px] font-black text-slate-300 text-center uppercase tracking-widest pt-1">+ {dayEvents.length - 3} más</div>}
                   </div>
@@ -217,11 +234,29 @@ export default function PmCalendarView() {
             </div>
           </section>
           <section className="pt-4 border-t border-slate-100">
-            <div className="bg-slate-900 rounded-[24px] p-5 relative overflow-hidden group shadow-2xl shadow-slate-200">
-              <BrainCircuit className="absolute -bottom-4 -right-4 text-white/5 rotate-12" size={80} />
-              <h4 className="text-[10px] font-black text-brand uppercase tracking-[0.2em] mb-3 flex items-center gap-2"><BrainCircuit size={14} /> Ingeniería ({projectionEvents.length})</h4>
+            {/* MODULE 3.7: Fix contrast — was dark bg with low-contrast text */}
+            <div className="bg-blue-50 border border-blue-200/60 rounded-[24px] p-5 relative overflow-hidden group">
+              <BrainCircuit className="absolute -bottom-4 -right-4 text-blue-200/40 rotate-12" size={80} />
+              <h4 className="text-[10px] font-black text-blue-700 uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
+                <BrainCircuit size={14} className="text-blue-600" />
+                Ingeniería ({projectionEvents.length})
+              </h4>
               <div className="space-y-2 relative z-10">
-                {projectionEvents.slice(0, 4).map(proj => (<div key={proj.id} className="p-2.5 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-all cursor-pointer" onClick={() => setSelectedEvent(proj)}><p className="text-[9px] font-black text-white/80 truncate">{proj.title}</p><p className="text-[8px] font-bold text-brand/60 mt-1 uppercase tracking-tighter">Sugerido {format(proj.date, 'dd MMM')}</p></div>))}
+                {projectionEvents.slice(0, 4).map(proj => (
+                  <div
+                    key={proj.id}
+                    className="p-2.5 bg-white/70 border border-blue-200/50 rounded-xl hover:bg-white transition-all cursor-pointer shadow-sm"
+                    onClick={() => setSelectedEvent(proj)}
+                  >
+                    <p className="text-[9px] font-black text-blue-900 truncate">{proj.title}</p>
+                    <p className="text-[8px] font-bold text-blue-600 mt-1 uppercase tracking-tighter">
+                      Sugerido {format(proj.date, 'dd MMM')}
+                    </p>
+                  </div>
+                ))}
+                {projectionEvents.length === 0 && (
+                  <p className="text-[9px] font-bold text-blue-500/60 uppercase tracking-widest text-center py-3">Sin proyecciones este mes</p>
+                )}
               </div>
             </div>
           </section>

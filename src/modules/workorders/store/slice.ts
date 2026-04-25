@@ -305,26 +305,36 @@ export const createWoSlice: StateCreator<WoSlice & { currentUser?: any; inventor
 
     const completedAt = new Date().toISOString();
 
-    // PHASE 3 — History Snapshot: before closing the WO, capture the live
-    // names of the assigned technician and vendor as plain text. If these
-    // users/vendors are later deactivated, the historical record stays intact.
+    // PHASE 3 — History Snapshot: capture the live human-readable names of the
+    // technician, vendor and asset as plain text BEFORE closing the WO.
+    // These text values are frozen permanently in the DB so the historical record
+    // survives even if the related profile, vendor or asset is later deactivated.
+
+    // The form may have changed vendorId at close time, so resolve in priority order:
+    //   payload.vendorId (chosen in form) → wo.vendorId (pre-existing) → null
+    const effectiveVendorId = payload.vendorId || wo.vendorId || null;
+
     const assignedProfile = (get() as any).users?.find((u: any) => u.id === wo.assignedTo);
-    const assignedVendor = (get() as any).vendors?.find((v: any) => v.id === (payload.vendorId || wo.vendorId));
+    const assignedVendor  = (get() as any).vendors?.find((v: any) => v.id === effectiveVendorId);
+    const assignedAsset   = (get() as any).assets?.find((a: any) => a.id === wo.assetId);
 
     const updates: any = {
-      status: 'completed',
-      actual_hours: payload.actualHours,
-      completed_at: completedAt,
-      updated_at: completedAt,
-      failure_code: payload.failureCode || null,
-      root_cause: payload.rootCause || null,
-      resolution: payload.resolution || null,
-      vendor_id: payload.vendorId || null,
-      external_service_cost: payload.externalServiceCost || 0,
-      external_invoice_ref: payload.externalInvoiceRef || null,
-      // Snapshot columns — frozen at time of closure
-      assigned_to_name_snapshot: assignedProfile?.fullName || wo.assignedToNameSnapshot || null,
-      vendor_name_snapshot: assignedVendor?.name || wo.vendorNameSnapshot || null,
+      status:                   'completed',
+      actual_hours:             payload.actualHours,
+      completed_at:             completedAt,
+      updated_at:               completedAt,
+      failure_code:             payload.failureCode    || null,
+      root_cause:               payload.rootCause      || null,
+      resolution:               payload.resolution     || null,
+      vendor_id:                effectiveVendorId,
+      external_service_cost:    payload.externalServiceCost  || 0,
+      external_invoice_ref:     payload.externalInvoiceRef   || null,
+      // ── Snapshot columns — frozen at time of closure ──────────────────────
+      // Falls back to any pre-existing snapshot in case the profile was already
+      // deactivated before this WO was closed (edge case).
+      assigned_to_name_snapshot: assignedProfile?.fullName  || wo.assignedToNameSnapshot || null,
+      vendor_name_snapshot:      assignedVendor?.name       || wo.vendorNameSnapshot     || null,
+      asset_name_snapshot:       assignedAsset?.name        || wo.assetNameSnapshot      || null,
     };
 
     const { error } = await supabase.from('work_orders').update(updates).eq('id', id);

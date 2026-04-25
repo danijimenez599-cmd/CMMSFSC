@@ -9,8 +9,11 @@ export interface AssetSlice {
   assetTree: AssetTreeNode[];
   selectedAssetId: string | null;
   assetsLoading: boolean;
+  /** Controls whether decommissioned assets are included in the loaded set */
+  showDecommissioned: boolean;
 
-  fetchAssets: () => Promise<void>;
+  /** Pass true to include decommissioned assets; defaults to current showDecommissioned flag */
+  fetchAssets: (includeDecommissioned?: boolean) => Promise<void>;
   createAsset: (input: AssetInput) => Promise<Asset>;
   updateAsset: (id: string, input: Partial<AssetInput>) => Promise<void>;
   /** @deprecated Use decommissionAsset instead — never physically deletes */
@@ -24,17 +27,27 @@ export const createAssetSlice: StateCreator<AssetSlice, [], []> = (set, get) => 
   assetTree: [],
   selectedAssetId: null,
   assetsLoading: false,
+  showDecommissioned: false,
 
-  fetchAssets: async () => {
+  fetchAssets: async (includeDecommissioned?: boolean) => {
     set({ assetsLoading: true });
-    const { data, error } = await supabase
-      .from('assets')
-      .select('*')
-      // PHASE 4: Only show active/standby assets in all selectors and the tree.
-      // Decommissioned assets are hidden from day-to-day operations but their
-      // work order history is preserved via the RESTRICT FK constraint in the DB.
-      .neq('status', 'decommissioned')
-      .order('name');
+
+    // Resolve whether to load archived assets: explicit param > store flag
+    const showAll = includeDecommissioned ?? get().showDecommissioned;
+
+    // Persist toggle state so the UI re-renders correctly after refetch
+    if (includeDecommissioned !== undefined) {
+      set({ showDecommissioned: includeDecommissioned });
+    }
+
+    let query = supabase.from('assets').select('*').order('name');
+    if (!showAll) {
+      // SOFT DELETE: never physically removed — just hidden from day-to-day ops.
+      // WO history is preserved via ON DELETE RESTRICT on work_orders.asset_id.
+      query = query.neq('status', 'decommissioned');
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       console.error('Error fetching assets:', error);
