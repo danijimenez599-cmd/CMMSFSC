@@ -222,7 +222,7 @@ export default function PmCalendarView() {
         </div>
       </div>
 
-      <aside className="w-full lg:w-80 border-t lg:border-t-0 lg:border-l border-slate-200 bg-white flex flex-col shrink-0 max-h-[50vh] lg:max-h-none overflow-y-auto">
+      <aside className="w-full lg:w-80 border-t lg:border-t-0 lg:border-l border-slate-200 bg-white flex flex-col shrink-0 max-h-[40vh] lg:max-h-none overflow-y-auto">
         <div className="p-6 border-b border-slate-100 bg-slate-50/50"><h3 className="font-display font-black text-slate-900 text-sm uppercase tracking-widest">Dashboard Mensual</h3></div>
         <div className="flex-1 overflow-y-auto p-5 space-y-8 scrollbar-none">
           <section>

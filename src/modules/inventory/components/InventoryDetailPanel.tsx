@@ -21,7 +21,7 @@ export default function InventoryDetailPanel({ onEdit, onAdjust }: InventoryDeta
 
   if (!selectedItemId) {
     return (
-      <div className="w-80 xl:w-96 border-l border-border flex items-center justify-center h-full bg-slate-50/50 shrink-0">
+      <div className="w-full xl:w-96 xl:border-l xl:border-border flex items-center justify-center h-full bg-slate-50/50 shrink-0">
         <div className="text-center p-8">
           <div className="w-16 h-16 rounded-[24px] bg-white border border-border shadow-sm flex items-center justify-center mx-auto mb-4">
             <Package size={28} className="text-slate-300" />
@@ -45,7 +45,7 @@ export default function InventoryDetailPanel({ onEdit, onAdjust }: InventoryDeta
   const totalValue = item.stockCurrent * (item.unitCost || 0);
 
   return (
-    <div className="w-80 xl:w-96 border-l border-border bg-white flex flex-col h-full shrink-0 overflow-hidden">
+    <div className="w-full xl:w-96 xl:border-l xl:border-border bg-white flex flex-col h-full shrink-0 overflow-hidden">
       {/* Header */}
       <div className="px-5 py-4 border-b border-border bg-bg-3">
         <div className="flex items-start justify-between gap-3 mb-2">

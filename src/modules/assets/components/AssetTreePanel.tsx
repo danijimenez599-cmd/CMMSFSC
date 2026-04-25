@@ -8,6 +8,7 @@ import { searchTree } from '../utils/buildTree';
 import { ASSET_TYPE_ICONS, CRITICALITY_CONFIG } from '../utils/assetHelpers';
 
 interface AssetTreePanelProps {
+  onSelect: (id: string) => void;
   onNewAsset: (parentId?: string) => void;
   onEditAsset: (id: string) => void;
   onDeleteAsset: (id: string) => void;
@@ -184,7 +185,7 @@ const AssetTreeItem: React.FC<TreeItemProps> = ({
 };
 
 // ─── MAIN PANEL ───────────────────────────────────────────────────────────────
-export default function AssetTreePanel({ onNewAsset, onEditAsset, onDeleteAsset }: AssetTreePanelProps) {
+export default function AssetTreePanel({ onSelect, onNewAsset, onEditAsset, onDeleteAsset }: AssetTreePanelProps) {
   const store = useStore() as any;
   const { assets, assetTree, selectedAssetId, selectAsset, assetsLoading,
           currentUser, fetchAssets, showDecommissioned } = store;
@@ -371,7 +372,7 @@ export default function AssetTreePanel({ onNewAsset, onEditAsset, onDeleteAsset 
                 key={node.id} node={node}
                 expanded={expanded} forceExpand={isSearching}
                 toggleExpand={toggleExpand} selectedId={selectedAssetId}
-                onSelect={selectAsset} onNewChild={onNewAsset}
+                onSelect={onSelect} onNewChild={onNewAsset}
                 onEdit={onEditAsset} onDelete={onDeleteAsset}
                 activeMenuId={activeMenuId} setActiveMenuId={setActiveMenuId}
               />

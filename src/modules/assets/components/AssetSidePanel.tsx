@@ -90,6 +90,7 @@ export default function AssetSidePanel() {
     selectedAssetId, setModule = () => {}, workOrders = [], pmPlans = [],
     assetPlans = [], measurementPoints = [], pmTasks = [],
     saveAssetPlan = () => {}, unlinkAssetPlan, showToast = () => {},
+    projectionMonths,
   } = store;
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [selectedPlanId, setSelectedPlanId] = useState('');
@@ -200,7 +201,7 @@ export default function AssetSidePanel() {
         ) : (
           <div className="space-y-8 animate-in slide-in-from-right duration-500 pb-10">
             <div className="p-6 bg-slate-900 rounded-[32px] text-white shadow-2xl relative overflow-hidden group">
-              <div className="relative z-10"><div className="flex items-center gap-2 mb-3"><Activity size={16} className="text-brand" /><p className="text-[10px] font-black uppercase tracking-[0.3em] text-brand">Análisis Predictivo</p></div><p className="text-xs font-medium text-slate-300 leading-relaxed">Línea de tiempo calculada para los próximos 24 meses basada en ciclos de ingeniería.</p></div>
+              <div className="relative z-10"><div className="flex items-center gap-2 mb-3"><Activity size={16} className="text-brand" /><p className="text-[10px] font-black uppercase tracking-[0.3em] text-brand">Análisis Predictivo</p></div><p className="text-xs font-medium text-slate-300 leading-relaxed">Línea de tiempo calculada para los próximos {projectionMonths || 12} meses basada en ciclos de ingeniería.</p></div>
             </div>
 
             <div className="space-y-2">
@@ -209,7 +210,7 @@ export default function AssetSidePanel() {
                   const basePlan = pmPlans.find((p: any) => p.id === ap.pmPlanId);
                   if (!basePlan) return null;
                   const planWithTasks = { ...basePlan, tasks: (Array.isArray(pmTasks) ? pmTasks : []).filter((t: any) => t.pmPlanId === basePlan.id) };
-                  const projections = calculateProjections(ap, planWithTasks, 24);
+                  const projections = calculateProjections(ap, planWithTasks, projectionMonths || 12);
                   return (
                     <div key={ap.id} className="pt-4">
                       <div className="flex items-center justify-between mb-8 px-2"><h5 className="text-[11px] font-black text-slate-900 uppercase tracking-widest border-l-4 border-brand pl-3">{basePlan.name}</h5><Badge variant="neutral" className="text-[9px] font-black">{(projections || []).length} HITOS</Badge></div>

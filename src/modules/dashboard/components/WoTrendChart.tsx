@@ -18,7 +18,7 @@ export default function WoTrendChart({ data }: WoTrendChartProps) {
   }
 
   return (
-    <div style={{ height: 200 }}>
+    <div className="h-full">
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={data} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
           <defs>

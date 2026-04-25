@@ -6,6 +6,7 @@ import { cn } from '../utils/generateId';
 import { ToastPayload } from '../types';
 
 export { cn } from '../utils/generateId';
+export * from './MobilePanelTransition';
 
 // ─── BUTTON ──────────────────────────────────────────────────────────────────
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -298,7 +299,7 @@ export const StatCard = ({
     <motion.div
       whileHover={onClick ? { y: -4 } : {}}
       className={cn(
-        'bg-white rounded-[14px] border border-slate-100 shadow-card p-6 flex flex-col gap-4',
+        'bg-white rounded-[14px] border border-slate-100 shadow-card p-4 sm:p-6 flex flex-col gap-3 sm:gap-4',
         onClick ? 'cursor-pointer' : ''
       )}
       onClick={onClick}
@@ -312,9 +313,9 @@ export const StatCard = ({
         )}
       </div>
       <div>
-        <div className="text-3xl font-display font-bold text-slate-900 tracking-tight">{value}</div>
+        <div className="text-2xl sm:text-3xl font-display font-bold text-slate-900 tracking-tight">{value}</div>
         {(description || trend) && (
-          <div className="flex items-center justify-between mt-2 pt-3 border-t border-slate-50">
+          <div className="flex items-center justify-between mt-2 pt-2 sm:pt-3 border-t border-slate-50">
             {description && <p className="text-xs text-slate-500 font-medium">{description}</p>}
             {trend && (
               <span className={cn('text-[10px] font-bold uppercase tracking-wide', trend.value >= 0 ? 'text-green-600' : 'text-brand')}>

@@ -24,6 +24,7 @@ export function canDeleteAsset(id: string, assets: Asset[]): boolean {
 }
 
 export interface DeleteAssetCheck {
+  canDelete: boolean;
   hasChildren: boolean;
   hasCompletedWos: boolean;
   linkedPlans: number;

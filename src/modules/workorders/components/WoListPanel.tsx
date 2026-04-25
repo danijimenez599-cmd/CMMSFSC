@@ -8,10 +8,11 @@ import { WoStatus } from '../types';
 import { formatDate } from '../../../shared/utils/utils';
 
 interface WoListPanelProps {
+  onSelect: (id: string) => void;
   onNewWo: () => void;
 }
 
-export default function WoListPanel({ onNewWo }: WoListPanelProps) {
+export default function WoListPanel({ onSelect, onNewWo }: WoListPanelProps) {
   const { workOrders, selectedWoId, selectWo, assets, users, pmPlans, assetPlans } = useStore() as any;
 
   const [search, setSearch] = useState('');
@@ -260,7 +261,7 @@ export default function WoListPanel({ onNewWo }: WoListPanelProps) {
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: Math.min(idx * 0.05, 0.5) }}
-              onClick={() => selectWo(wo.id)}
+              onClick={() => onSelect(wo.id)}
               className={cn(
                 'group relative bg-white rounded-xl border border-slate-200 p-4 cursor-pointer transition-all shadow-sm hover:shadow-md hover:border-brand/20',
                 isSelected ? 'ring-[3px] ring-brand/10 border-brand/40 bg-brand/[0.02]' : '',

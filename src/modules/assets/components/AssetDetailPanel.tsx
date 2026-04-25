@@ -5,7 +5,7 @@ import { Badge, Button, cn, AlertBanner } from '../../../shared/components';
 import MeasurementPointsPanel from '../../pm/components/MeasurementPointsPanel';
 import {
   Settings, Activity, Info, ChevronRight, Package, Gauge,
-  Calendar, Layers, Factory, Cpu, ShieldCheck, Database
+  Calendar, Layers, Factory, Cpu, ShieldCheck, Database, Wrench
 } from 'lucide-react';
 import { formatDate } from '../../../shared/utils/utils';
 import { ASSET_TYPE_LABELS, CATEGORY_LABELS, CRITICALITY_CONFIG } from '../utils/assetHelpers';
@@ -79,13 +79,13 @@ export default function AssetDetailPanel({ onEdit }: AssetDetailPanelProps) {
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden bg-white">
       {/* Premium Header */}
-      <div className="bg-slate-50/50 border-b border-slate-200 px-8 py-6 shrink-0 relative overflow-hidden">
+      <div className="bg-slate-50/50 border-b border-slate-200 px-4 sm:px-8 py-4 sm:py-6 shrink-0 relative overflow-hidden">
         <div className="absolute top-0 right-0 p-8 opacity-[0.03] pointer-events-none">
           <Factory size={160} />
         </div>
         
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2 mb-4">
+        {/* Breadcrumb - Hidden on Mobile */}
+        <div className="hidden sm:flex items-center gap-2 mb-4">
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest hover:text-brand cursor-pointer transition-colors">Sistema</span>
           <ChevronRight size={10} className="text-slate-300" />
           {parent && (
@@ -97,27 +97,28 @@ export default function AssetDetailPanel({ onEdit }: AssetDetailPanelProps) {
           <span className="text-[10px] font-bold text-brand uppercase tracking-widest truncate">{asset.name}</span>
         </div>
 
-        <div className="flex items-start justify-between gap-6 relative z-10">
+        <div className="flex items-center justify-between gap-4 relative z-10">
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-xl bg-brand text-white flex items-center justify-center shadow-lg shadow-brand/20 border border-brand-dark/10">
-                <Cpu size={20} />
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-brand text-white flex items-center justify-center shadow-lg shadow-brand/20 border border-brand-dark/10">
+                <Cpu size={16} className="sm:hidden" />
+                <Cpu size={20} className="hidden sm:block" />
               </div>
-              <h2 className="font-display text-2xl font-bold text-slate-900 tracking-tight truncate">{asset.name}</h2>
+              <h2 className="font-display text-lg sm:text-2xl font-bold text-slate-900 tracking-tight truncate">{asset.name}</h2>
             </div>
             
-            <div className="flex items-center flex-wrap gap-2 mt-3">
+            <div className="flex items-center flex-wrap gap-1.5 sm:gap-2 mt-2 sm:mt-3">
               {asset.code && (
-                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-900 text-white rounded-lg shadow-sm">
-                  <span className="text-[10px] font-bold uppercase tracking-widest opacity-60">TAG:</span>
-                  <span className="font-mono text-[10px] font-bold">{asset.code}</span>
+                <div className="flex items-center gap-1 px-1.5 sm:px-2.5 py-0.5 sm:py-1 bg-slate-900 text-white rounded-md sm:rounded-lg shadow-sm">
+                  <span className="text-[8px] sm:text-[10px] font-bold uppercase tracking-widest opacity-60">TAG:</span>
+                  <span className="font-mono text-[8px] sm:text-[10px] font-bold">{asset.code}</span>
                 </div>
               )}
-              <Badge variant={critConfig.badgeVariant as any} dot>
-                {critConfig.label} Criticidad
+              <Badge variant={critConfig.badgeVariant as any} dot className="text-[8px] sm:text-[10px] px-1.5 sm:px-2.5">
+                {critConfig.label}
               </Badge>
-              <Badge variant={asset.status === 'active' ? 'ok' : asset.status === 'standby' ? 'warn' : 'neutral'}>
-                Estado: {asset.status}
+              <Badge variant={asset.status === 'active' ? 'ok' : asset.status === 'standby' ? 'warn' : 'neutral'} className="text-[8px] sm:text-[10px] px-1.5 sm:px-2.5">
+                {asset.status}
               </Badge>
             </div>
           </div>
@@ -125,44 +126,44 @@ export default function AssetDetailPanel({ onEdit }: AssetDetailPanelProps) {
           <Button 
             variant="outline" 
             size="sm" 
-            className="bg-white"
+            className="bg-white h-8 w-8 p-0 sm:h-10 sm:w-auto sm:px-4"
             icon={<Settings size={14} />} 
             onClick={() => onEdit(asset.id)}
           >
-            Configurar Activo
+            <span className="hidden sm:inline ml-2">Configurar</span>
           </Button>
         </div>
 
-        {/* Quick Stats Grid */}
-        <div className="grid grid-cols-3 gap-8 mt-8 py-6 border-t border-slate-200/60">
+        {/* Quick Stats Grid - Hidden on Mobile Header */}
+        <div className="hidden sm:grid grid-cols-3 gap-8 mt-8 py-6 border-t border-slate-200/60">
           <div>
             <p className="text-3xl font-display font-bold text-slate-900 tracking-tight">{openWos.length}</p>
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.15em] mt-1">OTs Pendientes</p>
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.15em] mt-1">OTs Abiertas</p>
           </div>
           <div className="border-l border-slate-200 pl-8">
             <p className="text-3xl font-display font-bold text-slate-900 tracking-tight">{completedWos.length}</p>
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.15em] mt-1">Órdenes Cerradas</p>
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.15em] mt-1">Cerradas</p>
           </div>
           <div className="border-l border-slate-200 pl-8">
             <p className="text-3xl font-display font-bold text-slate-900 tracking-tight">{children.length}</p>
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.15em] mt-1">Sub-componentes</p>
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.15em] mt-1">Componentes</p>
           </div>
         </div>
       </div>
 
       {/* Navigation Tabs */}
-      <div className="bg-white border-b border-slate-200 px-8">
+      <div className="bg-white border-b border-slate-200 px-4 sm:px-8">
         <div className="flex gap-8">
           {TABS.map(t => (
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
               className={cn(
-                'flex items-center gap-2 py-4 text-[11px] font-bold uppercase tracking-[0.2em] relative transition-all',
+                'flex items-center gap-1.5 sm:gap-2 py-3 sm:py-4 text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.15em] sm:tracking-[0.2em] relative transition-all',
                 tab === t.id ? 'text-brand' : 'text-slate-400 hover:text-slate-900'
               )}
             >
-              {t.icon}
+              {React.cloneElement(t.icon as React.ReactElement, { size: 12, className: 'sm:w-3.5 sm:h-3.5' })}
               {t.label}
               {tab === t.id && (
                 <motion.div 
@@ -187,7 +188,23 @@ export default function AssetDetailPanel({ onEdit }: AssetDetailPanelProps) {
             className="max-w-5xl"
           >
             {tab === 'info' && (
-              <div className="space-y-8">
+              <div className="space-y-6 sm:space-y-8">
+                {/* Stats Grid for Mobile (Hidden on Desktop Header) */}
+                <div className="sm:hidden grid grid-cols-3 gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100 mb-6">
+                  <div className="text-center">
+                    <p className="text-lg font-display font-bold text-slate-900 leading-none">{openWos.length}</p>
+                    <p className="text-[8px] text-slate-400 font-bold uppercase tracking-wider mt-1">OTs Abiertas</p>
+                  </div>
+                  <div className="text-center border-l border-slate-200">
+                    <p className="text-lg font-display font-bold text-slate-900 leading-none">{completedWos.length}</p>
+                    <p className="text-[8px] text-slate-400 font-bold uppercase tracking-wider mt-1">Cerradas</p>
+                  </div>
+                  <div className="text-center border-l border-slate-200">
+                    <p className="text-lg font-display font-bold text-slate-900 leading-none">{children.length}</p>
+                    <p className="text-[8px] text-slate-400 font-bold uppercase tracking-wider mt-1">Componentes</p>
+                  </div>
+                </div>
+
                 {asset.description && (
                   <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100 relative overflow-hidden">
                     <Info className="absolute -top-2 -right-2 text-slate-200/50" size={64} />
@@ -217,9 +234,12 @@ export default function AssetDetailPanel({ onEdit }: AssetDetailPanelProps) {
 
                 {/* Open Work Orders Preview */}
                 {openWos.length > 0 && (
-                  <div className="mt-10">
-                    <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Órdenes Abiertas</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="mt-6 sm:mt-10">
+                    <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                      <Wrench size={14} />
+                      Órdenes Abiertas
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                       {openWos.map((wo: any) => (
                         <motion.div
                           key={wo.id}

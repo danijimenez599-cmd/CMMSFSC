@@ -5,6 +5,7 @@ import { Button, Badge, cn, ConfirmDialog } from '../../../shared/components';
 import { formatCurrency } from '../../../shared/utils/utils';
 
 interface InventoryTableProps {
+  onSelect: (id: string) => void;
   onNew: () => void;
   onEdit: (id: string) => void;
   onAdjust: (id: string) => void;
@@ -12,8 +13,8 @@ interface InventoryTableProps {
 
 type SortCol = 'name' | 'partNumber' | 'category' | 'stockCurrent' | 'unitCost';
 
-export default function InventoryTable({ onNew, onEdit, onAdjust }: InventoryTableProps) {
-  const { inventoryItems, selectedItemId, selectItem, deleteItem } = useStore() as any;
+export default function InventoryTable({ onSelect, onNew, onEdit, onAdjust }: InventoryTableProps) {
+  const { inventoryItems, selectedItemId, selectItem, deleteItem, showToast } = useStore() as any;
 
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
@@ -23,6 +24,16 @@ export default function InventoryTable({ onNew, onEdit, onAdjust }: InventoryTab
   const [page, setPage] = useState(1);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
+  
+  const handleDeleteItem = async (id: string) => {
+    try {
+      await deleteItem(id);
+      showToast({ type: 'success', title: 'Artículo desactivado' });
+    } catch (err: any) {
+      showToast({ type: 'error', title: 'Error al desactivar', message: err.message });
+    }
+    setDeletingId(null);
+  };
 
   const ITEMS_PER_PAGE = 25;
 
@@ -192,7 +203,7 @@ export default function InventoryTable({ onNew, onEdit, onAdjust }: InventoryTab
               {paginatedData.map((item: any) => (
                 <tr
                   key={item.id}
-                  onClick={() => selectItem(item.id)}
+                  onClick={() => onSelect(item.id)}
                   className={cn(
                     'hover:bg-bg-3/40 cursor-pointer transition-colors group',
                     selectedItemId === item.id ? 'bg-brand/5 border-l-2 border-l-brand' : ''
@@ -289,7 +300,7 @@ export default function InventoryTable({ onNew, onEdit, onAdjust }: InventoryTab
           isOpen
           title="Eliminar artículo"
           description="¿Seguro que deseas eliminar este artículo del inventario? Esta acción no se puede deshacer."
-          onConfirm={() => { deleteItem(deletingId); setDeletingId(null); }}
+          onConfirm={() => handleDeleteItem(deletingId)}
           onClose={() => setDeletingId(null)}
           confirmText="Eliminar"
           danger

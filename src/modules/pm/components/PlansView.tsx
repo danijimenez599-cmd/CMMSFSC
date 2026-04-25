@@ -22,6 +22,7 @@ export default function PlansView() {
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [showLinkedAssets, setShowLinkedAssets] = useState(false);
 
   const selectedPlan = pmPlans.find((p: PmPlan) => p.id === selectedPlanId);
   const selectedPlanTasks = selectedPlan
@@ -335,11 +336,56 @@ export default function PlansView() {
                     }
                   </div>
                 ) : (
-                  <div className="p-12 text-center">
-                    <p className="text-xs text-slate-400 italic font-medium">No se han definido tareas técnicas para este protocolo.</p>
+                  <div className="p-12 text-center text-slate-400 text-[10px] font-bold uppercase tracking-widest">
+                    Sin tareas registradas
                   </div>
                 )}
               </div>
+
+              {/* Linked Assets (Only visible on screens < xl where side panel is hidden) */}
+              {selectedPlan && activeAssetPlans.length > 0 && (
+                <div className="xl:hidden bg-white border border-slate-100 rounded-3xl shadow-sm overflow-hidden">
+                  <button 
+                    onClick={() => setShowLinkedAssets(!showLinkedAssets)}
+                    className="w-full bg-slate-50/50 px-6 py-4 border-b border-slate-100 flex items-center justify-between hover:bg-slate-50 transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Activos Vinculados</p>
+                      <Badge variant="neutral" className="text-[10px] font-bold">{activeAssetPlans.length}</Badge>
+                    </div>
+                    <ChevronRight size={16} className={cn('text-slate-400 transition-transform', showLinkedAssets ? 'rotate-90' : '')} />
+                  </button>
+                  
+                  {showLinkedAssets && (
+                    <div className="divide-y divide-slate-100 animate-in slide-in-from-top-2 duration-200">
+                      {activeAssetPlans.map((ap: any) => {
+                        const asset = assets.find((a: any) => a.id === ap.assetId);
+                        const isOverdue = ap.nextDueDate && new Date(ap.nextDueDate) <= new Date();
+                        return (
+                          <div key={ap.id} className="px-6 py-4 flex items-center justify-between group">
+                            <div>
+                              <p className="text-sm font-bold text-slate-900">{asset?.name || 'Unidad Técnica'}</p>
+                              <div className="flex items-center gap-4 mt-1">
+                                {ap.nextDueDate && (
+                                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                    Prox. Venc: <span className={cn('font-mono', isOverdue ? 'text-brand' : 'text-slate-600')}>
+                                      {format(new Date(ap.nextDueDate), 'dd/MM/yy', { locale: es })}
+                                    </span>
+                                  </p>
+                                )}
+                                <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">{ap.woCount} OTs</p>
+                              </div>
+                            </div>
+                            <Badge variant={ap.active ? 'ok' : 'neutral'} className="text-[9px] px-2">
+                              {ap.active ? 'OK' : 'PAUSA'}
+                            </Badge>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
             </motion.div>
           ) : (
             <motion.div 

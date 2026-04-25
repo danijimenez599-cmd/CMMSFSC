@@ -116,8 +116,8 @@ export default function MeasurementPointsPanel({ assetId }: MeasurementPointsPan
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
           <div>
             <h3 className="font-display font-black text-slate-900 flex items-center gap-2 text-base tracking-tight">
               <Gauge size={20} className="text-brand" />
@@ -128,7 +128,7 @@ export default function MeasurementPointsPanel({ assetId }: MeasurementPointsPan
             </p>
           </div>
           <div className="h-8 w-px bg-slate-200 hidden sm:block" />
-          <div className="flex bg-slate-100 p-1 rounded-xl">
+          <div className="flex bg-slate-100 p-1 rounded-xl w-fit">
             <button 
               onClick={() => setViewMode('cards')}
               className={cn("px-4 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all", viewMode === 'cards' ? "bg-white text-slate-900 shadow-sm" : "text-slate-400 hover:text-slate-600")}
@@ -147,7 +147,7 @@ export default function MeasurementPointsPanel({ assetId }: MeasurementPointsPan
           <Button
             variant="primary"
             size="sm"
-            className="rounded-full font-bold text-[10px] uppercase tracking-widest px-6"
+            className="rounded-full font-bold text-[10px] uppercase tracking-widest px-6 w-full sm:w-auto"
             icon={<Plus size={14} />}
             onClick={() => {
               if (measurementConfigs.length === 0) {

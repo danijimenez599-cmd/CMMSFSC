@@ -5,44 +5,46 @@ import InventoryDetailPanel from './components/InventoryDetailPanel';
 import InventoryItemForm from './components/InventoryItemForm';
 import StockAdjustForm from './components/StockAdjustForm';
 import { ChevronLeft } from 'lucide-react';
-import { cn } from '../../shared/components';
+import { cn, MobilePanelTransition } from '../../shared/components';
 
 export default function InventoryView() {
-  const { fetchInventory, selectedItemId, inventoryItems } = useStore() as any;
+  const { fetchInventory, selectedItemId, inventoryItems, selectItem } = useStore() as any;
   const [formOpen, setFormOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [adjustingId, setAdjustingId] = useState<string | null>(null);
   const [mobileView, setMobileView] = useState<'list' | 'detail'>('list');
 
-  useEffect(() => {
-    if (selectedItemId) setMobileView('detail');
-  }, [selectedItemId]);
-
   useEffect(() => { fetchInventory(); }, []);
+
+  const handleSelectItem = (id: string) => {
+    selectItem(id);
+    setMobileView('detail');
+  };
 
   const editingItem = editingId ? inventoryItems.find((i: any) => i.id === editingId) : null;
 
   return (
     <div className="flex h-full overflow-hidden">
-      {/* Tabla — visible en móvil solo cuando mobileView es list */}
-      <div className={cn(
-        'flex-col overflow-hidden',
-        mobileView === 'list' ? 'flex w-full' : 'hidden',
-        'lg:flex lg:flex-1'
-      )}>
+      {/* Tabla */}
+      <MobilePanelTransition 
+        activePanel={mobileView} 
+        panelKey="list" 
+        className="lg:flex-1"
+      >
         <InventoryTable
+          onSelect={handleSelectItem}
           onNew={() => { setEditingId(null); setFormOpen(true); }}
           onEdit={(id) => { setEditingId(id); setFormOpen(true); }}
           onAdjust={(id) => setAdjustingId(id)}
         />
-      </div>
+      </MobilePanelTransition>
 
-      {/* Detalle — visible en móvil solo cuando mobileView es detail */}
-      <div className={cn(
-        'flex-col h-full',
-        mobileView === 'detail' ? 'flex w-full' : 'hidden',
-        'lg:flex lg:w-auto'
-      )}>
+      {/* Detalle */}
+      <MobilePanelTransition 
+        activePanel={mobileView} 
+        panelKey="detail" 
+        className="lg:w-auto"
+      >
         {/* Botón volver — solo visible en móvil */}
         <div className="lg:hidden flex items-center px-4 py-2 bg-white border-b border-slate-200 shrink-0">
           <button
@@ -56,7 +58,7 @@ export default function InventoryView() {
           onEdit={(id) => { setEditingId(id); setFormOpen(true); }}
           onAdjust={(id) => setAdjustingId(id)}
         />
-      </div>
+      </MobilePanelTransition>
 
       {formOpen && (
         <InventoryItemForm

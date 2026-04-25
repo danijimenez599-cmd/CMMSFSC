@@ -8,18 +8,15 @@ import AssetSidePanel from './components/AssetSidePanel';
 import AssetForm from './components/AssetForm';
 import { checkAssetDeletability } from './utils/assetHelpers';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { cn } from '../../shared/components';
+import { cn, MobilePanelTransition } from '../../shared/components';
 
 export default function AssetRegistryView() {
-  const { fetchAssets, assets, selectedAssetId, deleteAsset, decommissionAsset, showToast, currentUser, assetPlans, workOrders, measurementPoints } = useStore() as any;
+  const { fetchAssets, assets, selectedAssetId, selectAsset, deleteAsset, decommissionAsset, showToast, currentUser, assetPlans, workOrders, measurementPoints } = useStore() as any;
   const [formOpen, setFormOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [defaultParentId, setDefaultParentId] = useState<string | null>(null);
   const [mobileView, setMobileView] = useState<'tree' | 'detail' | 'side'>('tree');
 
-  useEffect(() => {
-    if (selectedAssetId) setMobileView('detail');
-  }, [selectedAssetId]);
   const [confirmConfig, setConfirmConfig] = useState<{
     isOpen: boolean;
     title: string;
@@ -85,6 +82,11 @@ export default function AssetRegistryView() {
     setFormOpen(true);
   };
 
+  const handleSelectAsset = (id: string) => {
+    selectAsset(id);
+    setMobileView('detail');
+  };
+
   return (
     <motion.div 
       initial={{ opacity: 0, x: 20 }}
@@ -92,25 +94,26 @@ export default function AssetRegistryView() {
       exit={{ opacity: 0, x: -20 }}
       className="flex h-full overflow-hidden bg-white"
     >
-      {/* Panel árbol — visible en móvil solo cuando mobileView es tree */}
-      <div className={cn(
-        'flex-col h-full',
-        mobileView === 'tree' ? 'flex w-full' : 'hidden',
-        'lg:flex lg:w-72 xl:w-80'
-      )}>
+      {/* Panel árbol */}
+      <MobilePanelTransition 
+        activePanel={mobileView} 
+        panelKey="tree" 
+        className="lg:w-72 xl:w-80"
+      >
         <AssetTreePanel
+          onSelect={handleSelectAsset}
           onNewAsset={handleNewAsset}
           onEditAsset={(id) => { setEditingId(id); setFormOpen(true); }}
           onDeleteAsset={handleDelete}
         />
-      </div>
+      </MobilePanelTransition>
 
-      {/* Panel detalle — visible en móvil solo cuando mobileView es detail */}
-      <div className={cn(
-        'flex-col h-full flex-1 min-w-0',
-        mobileView === 'detail' ? 'flex' : 'hidden',
-        'lg:flex'
-      )}>
+      {/* Panel detalle */}
+      <MobilePanelTransition 
+        activePanel={mobileView} 
+        panelKey="detail" 
+        className="flex-1 min-w-0"
+      >
         {/* Barra de navegación móvil */}
         <div className="lg:hidden flex items-center justify-between px-4 py-2 bg-white border-b border-slate-200 shrink-0">
           <button
@@ -129,14 +132,14 @@ export default function AssetRegistryView() {
           )}
         </div>
         <AssetDetailPanel onEdit={(id) => { setEditingId(id); setFormOpen(true); }} />
-      </div>
+      </MobilePanelTransition>
 
-      {/* Panel lateral Planes PM — visible en móvil solo cuando mobileView es side */}
-      <div className={cn(
-        'flex-col h-full',
-        mobileView === 'side' && selectedAssetId ? 'flex w-full' : 'hidden',
-        'xl:flex xl:w-[400px] xl:border-l xl:border-slate-200'
-      )}>
+      {/* Panel lateral Planes PM */}
+      <MobilePanelTransition 
+        activePanel={mobileView} 
+        panelKey="side" 
+        className="xl:w-[400px] xl:border-l xl:border-slate-200"
+      >
         {/* Botón volver — solo visible en móvil */}
         <div className="xl:hidden flex items-center px-4 py-2 bg-white border-b border-slate-200 shrink-0">
           <button
@@ -147,7 +150,7 @@ export default function AssetRegistryView() {
           </button>
         </div>
         {selectedAssetId && <AssetSidePanel />}
-      </div>
+      </MobilePanelTransition>
 
       <AssetForm
         isOpen={formOpen}

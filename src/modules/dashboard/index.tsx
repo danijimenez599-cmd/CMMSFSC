@@ -36,6 +36,14 @@ const DASHBOARD_STALE_MS = 30_000;
 // ─── DASHBOARD ────────────────────────────────────────────────────────────────
 export default function DashboardView() {
   const [lastUpdate, setLastUpdate] = useState(new Date());
+  const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
+
+  useEffect(() => {
+    const handler = () => setIsDesktop(window.innerWidth >= 1024);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
+
   const metrics = useDashboardMetrics();
   const store = useStore() as any;
   const { fetchAssets, fetchWorkOrders, fetchInventory, fetchPmData, setModule } = store;
@@ -99,11 +107,11 @@ export default function DashboardView() {
         className="p-6 space-y-6 max-w-[1600px] mx-auto"
       >
         {/* KPI Row 1: Operations */}
-        <motion.div variants={item} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <motion.div variants={item} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
             title="OTs Abiertas"
             value={metrics.wos_open}
-            description={`${metrics.wos_in_progress} actualmente en ejecución`}
+            description={`${metrics.wos_in_progress} en ejecución`}
             icon={<AlertCircle />}
             variant="info"
             onClick={() => setModule('workorders')}
@@ -111,7 +119,7 @@ export default function DashboardView() {
           <StatCard
             title="OTs Vencidas"
             value={metrics.wos_overdue}
-            description="Atención inmediata requerida"
+            description="Atención inmediata"
             icon={<AlertTriangle />}
             variant={metrics.wos_overdue > 0 ? 'danger' : 'default'}
             onClick={() => setModule('workorders')}
@@ -119,14 +127,14 @@ export default function DashboardView() {
           <StatCard
             title="Completadas (Mes)"
             value={metrics.wos_completed_month}
-            description="Órdenes cerradas este ciclo"
+            description="Órdenes cerradas"
             icon={<CheckCircle2 />}
             variant="ok"
           />
           <StatCard
             title="Alertas de Stock"
             value={metrics.inventory_low}
-            description="ítems bajo el nivel mínimo"
+            description="ítems bajo mínimo"
             icon={<PackageMinus />}
             variant={metrics.inventory_low > 0 ? 'warn' : 'default'}
             onClick={() => setModule('inventory')}
@@ -134,21 +142,23 @@ export default function DashboardView() {
         </motion.div>
 
         {/* KPI Row 2: Performance */}
-        <motion.div variants={item} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white rounded-[14px] border border-slate-100 shadow-card p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <motion.div variants={item} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-white rounded-[14px] border border-slate-100 shadow-card p-4 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div>
               <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">PM Compliance</p>
               <div className="flex items-baseline gap-1">
-                <span className="text-3xl font-display font-bold text-slate-900 tracking-tight">{Math.round(metrics.pm_compliance)}%</span>
+                <span className="text-2xl sm:text-3xl font-display font-bold text-slate-900 tracking-tight">{Math.round(metrics.pm_compliance)}%</span>
               </div>
-              <p className="text-[10px] text-slate-400 font-bold uppercase mt-2">Mantenimiento Preventivo</p>
+              <p className="text-[10px] text-slate-400 font-bold uppercase mt-2 hidden sm:block">Mantenimiento Preventivo</p>
             </div>
-            <PmGauge value={metrics.pm_compliance} />
+            <div className="shrink-0">
+              <PmGauge value={metrics.pm_compliance} size={isDesktop ? 72 : 56} />
+            </div>
           </div>
           <StatCard
             title="Backlog Preventivo"
             value={metrics.pm_backlog}
-            description="Planes pendientes de generación"
+            description="Pendientes de generar"
             icon={<Clock />}
             variant={metrics.pm_backlog > 0 ? 'danger' : 'ok'}
             onClick={() => setModule('pm')}
@@ -156,14 +166,14 @@ export default function DashboardView() {
           <StatCard
             title="Carga de Trabajo"
             value={metrics.wos_in_progress}
-            description="Técnicos asignados en campo"
+            description="Técnicos en campo"
             icon={<TrendingUp />}
             variant="info"
           />
           <StatCard
             title="Valor Inventario"
             value={`$${metrics.inventory_value.toLocaleString('es-SV', { maximumFractionDigits: 0 })}`}
-            description="Capital total en repuestos"
+            description="Capital en repuestos"
             icon={<DollarSign />}
           />
         </motion.div>

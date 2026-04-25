@@ -5,22 +5,23 @@ import WoListPanel from './components/WoListPanel';
 import WoDetailPanel from './components/WoDetailPanel';
 import WoForm from './components/WoForm';
 import { ChevronLeft } from 'lucide-react';
-import { cn } from '../../shared/components';
+import { cn, MobilePanelTransition } from '../../shared/components';
 
 export default function WorkOrdersView() {
-  const { fetchWorkOrders, fetchAssets, fetchInventory, selectedWoId } = useStore() as any;
+  const { fetchWorkOrders, fetchAssets, fetchInventory, selectedWoId, selectWo } = useStore() as any;
   const [formOpen, setFormOpen] = useState(false);
   const [mobileView, setMobileView] = useState<'list' | 'detail'>('list');
-
-  useEffect(() => {
-    if (selectedWoId) setMobileView('detail');
-  }, [selectedWoId]);
 
   useEffect(() => {
     fetchWorkOrders();
     fetchAssets();
     fetchInventory();
   }, []);
+
+  const handleSelectWo = (id: string) => {
+    selectWo(id);
+    setMobileView('detail');
+  };
 
   return (
     <motion.div 
@@ -29,21 +30,24 @@ export default function WorkOrdersView() {
       exit={{ opacity: 0, x: -20 }}
       className="flex h-full overflow-hidden bg-white"
     >
-      {/* Lista de OTs — visible en móvil solo cuando mobileView es list */}
-      <div className={cn(
-        'h-full flex-col',
-        mobileView === 'list' ? 'flex w-full' : 'hidden',
-        'lg:flex lg:w-auto'
-      )}>
-        <WoListPanel onNewWo={() => setFormOpen(true)} />
-      </div>
+      {/* Lista de OTs */}
+      <MobilePanelTransition 
+        activePanel={mobileView} 
+        panelKey="list" 
+        className="lg:w-auto"
+      >
+        <WoListPanel 
+          onSelect={handleSelectWo}
+          onNewWo={() => setFormOpen(true)} 
+        />
+      </MobilePanelTransition>
 
-      {/* Detalle de OT — visible en móvil solo cuando mobileView es detail */}
-      <div className={cn(
-        'h-full flex-col flex-1 min-w-0 relative bg-slate-50/30',
-        mobileView === 'detail' ? 'flex' : 'hidden',
-        'lg:flex'
-      )}>
+      {/* Detalle de OT */}
+      <MobilePanelTransition 
+        activePanel={mobileView} 
+        panelKey="detail" 
+        className="flex-1 min-w-0 relative bg-slate-50/30"
+      >
         {/* Botón volver — solo visible en móvil */}
         <div className="lg:hidden flex items-center px-4 py-2 bg-white border-b border-slate-200 shrink-0">
           <button
@@ -54,7 +58,7 @@ export default function WorkOrdersView() {
           </button>
         </div>
         <WoDetailPanel />
-      </div>
+      </MobilePanelTransition>
 
       {formOpen && (
         <WoForm isOpen={formOpen} onClose={() => setFormOpen(false)} />

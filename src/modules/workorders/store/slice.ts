@@ -60,8 +60,8 @@ export const createWoSlice: StateCreator<WoSlice & { currentUser?: any; inventor
       supabase.from('work_orders')
         .select('*')
         .in('status', ['completed', 'cancelled'])
-        .gte('completed_at', cutoffIso)
-        .order('completed_at', { ascending: false })
+        .or(`completed_at.gte.${cutoffIso},completed_at.is.null`)
+        .order('completed_at', { ascending: false, nullsFirst: false })
         .limit(200),
       supabase.from('vendors').select('*').order('name'),
     ]);
@@ -435,10 +435,13 @@ export const createWoSlice: StateCreator<WoSlice & { currentUser?: any; inventor
   },
 
   addComment: async (woId, body, attachment) => {
+    const userId = get().currentUser?.id;
+    if (!userId) throw new Error('Usuario no autenticado');
+
     const { error } = await supabase.from('wo_comments').insert({
       id: generateId(),
       work_order_id: woId,
-      author_id: get().currentUser?.id,
+      author_id: userId,
       body,
       attachment_url: attachment || null,
     });

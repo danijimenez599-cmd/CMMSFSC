@@ -346,11 +346,12 @@ export const createPmSlice: StateCreator<StoreState, [], [], PmSlice> = (set, ge
 
           if (!woError) {
             // 2. Add automatic comment to Bitácora
+            const authorId = get().currentUser?.id || '00000000-0000-4000-a000-000000000000';
             await supabase.from('wo_comments').insert({
               id: generateId(),
               work_order_id: woId,
+              author_id: authorId,
               body: `SISTEMA: Alerta CBM disparada automáticamente. Lectura fuera de rango detectada: ${readingData.value} ${point.unit} en ${point.name}.`,
-              created_by: get().currentUser?.id || null,
             });
 
             // 3. Update Point with last trigger timestamp

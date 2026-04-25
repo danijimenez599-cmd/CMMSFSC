@@ -211,8 +211,7 @@ export default function PmSettingsView() {
                   ))}
                 </tbody>
               </table>
-              </div>
-            )}
+            ) : null}
             </div>
           </div>
         </div>
