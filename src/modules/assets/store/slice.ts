@@ -13,6 +13,7 @@ export interface AssetSlice {
   fetchAssets: () => Promise<void>;
   createAsset: (input: AssetInput) => Promise<Asset>;
   updateAsset: (id: string, input: Partial<AssetInput>) => Promise<void>;
+  /** @deprecated Use decommissionAsset instead — never physically deletes */
   deleteAsset: (id: string) => Promise<void>;
   decommissionAsset: (id: string) => Promise<void>;
   selectAsset: (id: string | null) => void;
@@ -29,6 +30,10 @@ export const createAssetSlice: StateCreator<AssetSlice, [], []> = (set, get) => 
     const { data, error } = await supabase
       .from('assets')
       .select('*')
+      // PHASE 4: Only show active/standby assets in all selectors and the tree.
+      // Decommissioned assets are hidden from day-to-day operations but their
+      // work order history is preserved via the RESTRICT FK constraint in the DB.
+      .neq('status', 'decommissioned')
       .order('name');
 
     if (error) {
@@ -121,7 +126,13 @@ export const createAssetSlice: StateCreator<AssetSlice, [], []> = (set, get) => 
   },
 
   deleteAsset: async (id) => {
-    const { error } = await supabase.from('assets').delete().eq('id', id);
+    // PHASE 3 — Soft Delete: never physically remove an asset from the database.
+    // The DB has ON DELETE RESTRICT on work_orders.asset_id, so a hard delete
+    // would be blocked anyway if the asset has any work order history.
+    const { error } = await supabase
+      .from('assets')
+      .update({ status: 'decommissioned', updated_at: new Date().toISOString() })
+      .eq('id', id);
     if (error) throw error;
     if (get().selectedAssetId === id) set({ selectedAssetId: null });
     await get().fetchAssets();

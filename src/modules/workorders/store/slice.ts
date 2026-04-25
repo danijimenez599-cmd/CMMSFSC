@@ -110,6 +110,8 @@ export const createWoSlice: StateCreator<WoSlice & { currentUser?: any; inventor
       generatedFromPlanId: w.generated_from_plan_id,
       pmPlanNameSnapshot: w.pm_plan_name_snapshot,
       assetNameSnapshot: w.asset_name_snapshot,
+      assignedToNameSnapshot: w.assigned_to_name_snapshot,
+      vendorNameSnapshot: w.vendor_name_snapshot,
       pmCycleIndex: w.pm_cycle_index,
       sourcePointId: w.source_point_id,
       vendorId: w.vendor_id,
@@ -303,6 +305,12 @@ export const createWoSlice: StateCreator<WoSlice & { currentUser?: any; inventor
 
     const completedAt = new Date().toISOString();
 
+    // PHASE 3 — History Snapshot: before closing the WO, capture the live
+    // names of the assigned technician and vendor as plain text. If these
+    // users/vendors are later deactivated, the historical record stays intact.
+    const assignedProfile = (get() as any).users?.find((u: any) => u.id === wo.assignedTo);
+    const assignedVendor = (get() as any).vendors?.find((v: any) => v.id === (payload.vendorId || wo.vendorId));
+
     const updates: any = {
       status: 'completed',
       actual_hours: payload.actualHours,
@@ -314,6 +322,9 @@ export const createWoSlice: StateCreator<WoSlice & { currentUser?: any; inventor
       vendor_id: payload.vendorId || null,
       external_service_cost: payload.externalServiceCost || 0,
       external_invoice_ref: payload.externalInvoiceRef || null,
+      // Snapshot columns — frozen at time of closure
+      assigned_to_name_snapshot: assignedProfile?.fullName || wo.assignedToNameSnapshot || null,
+      vendor_name_snapshot: assignedVendor?.name || wo.vendorNameSnapshot || null,
     };
 
     const { error } = await supabase.from('work_orders').update(updates).eq('id', id);

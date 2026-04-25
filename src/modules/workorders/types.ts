@@ -37,6 +37,10 @@ export interface WorkOrder {
   generatedFromPlanId: string | null;
   pmPlanNameSnapshot: string | null;
   assetNameSnapshot: string | null;
+  // Snapshot fields: capture live names at the moment of closing the WO
+  // so history survives even if the technician or vendor is later deactivated
+  assignedToNameSnapshot: string | null;
+  vendorNameSnapshot: string | null;
   sourcePointId: string | null;
   vendorId: string | null;
   externalServiceCost: number | null;

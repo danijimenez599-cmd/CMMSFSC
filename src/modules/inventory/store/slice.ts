@@ -27,7 +27,14 @@ export const createInventorySlice: StateCreator<InventorySlice, [], []> = (set, 
     set({ inventoryLoading: true });
 
     const [itemsRes, movementsRes] = await Promise.all([
-      supabase.from('inventory_items').select('*').order('name'),
+      supabase
+        .from('inventory_items')
+        .select('*')
+        // PHASE 4: Only show active items in daily operations.
+        // Deactivated parts are hidden but their part_usage / stock_movement
+        // history is preserved via the RESTRICT FK constraint in the DB.
+        .eq('active', true)
+        .order('name'),
       supabase.from('stock_movements').select('*').order('performed_at', { ascending: false }).limit(200),
     ]);
 
@@ -114,7 +121,14 @@ export const createInventorySlice: StateCreator<InventorySlice, [], []> = (set, 
   },
 
   deleteItem: async (id) => {
-    const { error } = await supabase.from('inventory_items').delete().eq('id', id);
+    // PHASE 3 — Soft Delete: never physically remove an inventory item.
+    // The DB has ON DELETE RESTRICT on part_usages.inventory_item_id and
+    // stock_movements.inventory_item_id, so a hard delete would be blocked
+    // anyway if the item has any historical transactions.
+    const { error } = await supabase
+      .from('inventory_items')
+      .update({ active: false, updated_at: new Date().toISOString() })
+      .eq('id', id);
     if (error) throw error;
     if (get().selectedItemId === id) set({ selectedItemId: null });
     await get().fetchInventory();

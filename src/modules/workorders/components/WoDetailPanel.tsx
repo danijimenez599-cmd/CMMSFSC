@@ -190,24 +190,43 @@ export default function WoDetailPanel() {
           <div className="space-y-3">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 shrink-0">
-                {vendor ? <Truck size={18} className="text-brand" /> : <User size={18} />}
+                {(isCompleted ? wo.vendorNameSnapshot : vendor?.name) ? <Truck size={18} className="text-brand" /> : <User size={18} />}
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">
-                  {vendor ? 'Contratista / Proveedor' : 'Responsable Interno'}
+                  {(isCompleted ? wo.vendorNameSnapshot : vendor?.name) ? 'Contratista / Proveedor' : 'Responsable Interno'}
                 </p>
-                {vendor ? (
-                  <div>
-                    <p className="text-[13px] font-bold text-slate-900 truncate tracking-tight">{vendor.name}</p>
-                    <p className="text-[9px] font-bold text-slate-400 truncate tracking-widest">SUPERVISIÓN: {assignee?.fullName || '—'}</p>
-                  </div>
-                ) : assignee ? (
-                  <div className="flex items-center gap-2">
-                    <Avatar name={assignee.fullName} size="xs" />
-                    <span className="text-[13px] font-bold text-slate-900 truncate">{assignee.fullName}</span>
-                  </div>
+                {/* PHASE 4: If WO is completed, read from frozen snapshot so the record
+                    survives even if the technician resigned or vendor was deactivated */}
+                {isCompleted ? (
+                  wo.vendorNameSnapshot ? (
+                    <div>
+                      <p className="text-[13px] font-bold text-slate-900 truncate tracking-tight">{wo.vendorNameSnapshot}</p>
+                      <p className="text-[9px] font-bold text-slate-400 truncate tracking-widest">SUPERVISIÓN: {wo.assignedToNameSnapshot || '—'}</p>
+                    </div>
+                  ) : wo.assignedToNameSnapshot ? (
+                    <div className="flex items-center gap-2">
+                      <Avatar name={wo.assignedToNameSnapshot} size="xs" />
+                      <span className="text-[13px] font-bold text-slate-900 truncate">{wo.assignedToNameSnapshot}</span>
+                    </div>
+                  ) : (
+                    <span className="text-[13px] font-bold text-slate-400 italic">Sin asignar</span>
+                  )
                 ) : (
-                  <span className="text-[13px] font-bold text-slate-400 italic">No asignado</span>
+                  /* WO still open — read live relations */
+                  vendor ? (
+                    <div>
+                      <p className="text-[13px] font-bold text-slate-900 truncate tracking-tight">{vendor.name}</p>
+                      <p className="text-[9px] font-bold text-slate-400 truncate tracking-widest">SUPERVISIÓN: {assignee?.fullName || '—'}</p>
+                    </div>
+                  ) : assignee ? (
+                    <div className="flex items-center gap-2">
+                      <Avatar name={assignee.fullName} size="xs" />
+                      <span className="text-[13px] font-bold text-slate-900 truncate">{assignee.fullName}</span>
+                    </div>
+                  ) : (
+                    <span className="text-[13px] font-bold text-slate-400 italic">No asignado</span>
+                  )
                 )}
               </div>
             </div>
