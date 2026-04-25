@@ -36,6 +36,7 @@ export interface WorkOrder {
   resolution: string | null;
   generatedFromPlanId: string | null;
   pmPlanNameSnapshot: string | null;
+  assetNameSnapshot: string | null;
   sourcePointId: string | null;
   vendorId: string | null;
   externalServiceCost: number | null;

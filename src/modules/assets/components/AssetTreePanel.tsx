@@ -59,7 +59,9 @@ const AssetTreeItem: React.FC<TreeItemProps> = ({
           'flex items-center group py-1.5 pr-2 rounded-lg mx-2 transition-all duration-200 cursor-pointer relative',
           isSelected
             ? 'bg-brand/10 text-brand'
-            : 'hover:bg-slate-200/50 text-slate-600 hover:text-slate-900'
+            : 'hover:bg-slate-200/50 text-slate-600 hover:text-slate-900',
+          showMenu && 'z-50',
+          node.status === 'decommissioned' && 'opacity-50 grayscale contrast-75'
         )}
         style={{ paddingLeft: `${node.depth * 14 + 6}px` }}
         onClick={() => onSelect(node.id)}
@@ -134,7 +136,7 @@ const AssetTreeItem: React.FC<TreeItemProps> = ({
                 {[
                   { icon: <Edit2 size={12} />, label: 'Editar Propiedades', action: () => onEdit(node.id) },
                   { icon: <Plus size={12} />, label: 'Agregar Sub-activo', action: () => onNewChild(node.id) },
-                  { icon: <Trash2 size={12} />, label: 'Eliminar Registro', danger: true, action: () => onDelete(node.id) },
+                  { icon: <Trash2 size={12} />, label: 'Eliminar / Baja', danger: true, action: () => onDelete(node.id) },
                 ].map((item, idx) => (
                   <button
                     key={idx}
@@ -162,7 +164,7 @@ const AssetTreeItem: React.FC<TreeItemProps> = ({
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="overflow-hidden"
+            className="overflow-visible"
           >
             {node.children.map(child => (
               <AssetTreeItem
@@ -186,6 +188,7 @@ export default function AssetTreePanel({ onNewAsset, onEditAsset, onDeleteAsset 
   const { assets, assetTree, selectedAssetId, selectAsset, assetsLoading, currentUser } = useStore() as any;
 
   const [query, setQuery] = useState('');
+  const [showInactive, setShowInactive] = useState(false);
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
   const initDone = useRef(false);
 
@@ -228,7 +231,27 @@ export default function AssetTreePanel({ onNewAsset, onEditAsset, onDeleteAsset 
   }, [expanded]);
 
   const isSearching = query.trim().length > 0;
-  const filteredTree = useMemo(() => searchTree(assetTree, query), [assetTree, query]);
+  
+  // Recursively filter out decommissioned assets if not showInactive
+  const filterInactive = useCallback((nodes: AssetTreeNode[]): AssetTreeNode[] => {
+    return nodes
+      .filter(n => showInactive || n.status !== 'decommissioned')
+      .map(n => ({ ...n, children: filterInactive(n.children) }));
+  }, [showInactive]);
+
+  const processedTree = useMemo(() => filterInactive(assetTree), [assetTree, filterInactive]);
+  const filteredTree = useMemo(() => searchTree(processedTree, query), [processedTree, query]);
+  
+  const inactiveCount = useMemo(() => {
+    const countInactive = (nodes: AssetTreeNode[]): number => {
+      return nodes.reduce((acc, n) => {
+        const self = n.status === 'decommissioned' ? 1 : 0;
+        return acc + self + countInactive(n.children);
+      }, 0);
+    };
+    return countInactive(assetTree);
+  }, [assetTree]);
+
   const resultCount = useMemo(() => isSearching ? countNodes(filteredTree) : null, [filteredTree, isSearching]);
 
   const toggleExpand = useCallback((id: string) => {
@@ -253,14 +276,34 @@ export default function AssetTreePanel({ onNewAsset, onEditAsset, onDeleteAsset 
             </h2>
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{assets.length} activos registrados</p>
           </div>
-          {canModify && (
-            <button 
-              onClick={() => onNewAsset()}
-              className="p-2 rounded-lg bg-slate-100 text-slate-600 hover:bg-brand hover:text-white transition-all shadow-sm group"
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setShowInactive(!showInactive)}
+              className={cn(
+                "h-9 px-2.5 rounded-lg transition-all shadow-sm group border flex items-center gap-2",
+                showInactive ? "bg-slate-800 text-white border-slate-800" : "bg-white text-slate-400 border-slate-200 hover:text-slate-600"
+              )}
+              title={showInactive ? "Ocultar equipos de baja" : "Ver equipos de baja"}
             >
-              <Plus size={16} className="group-hover:rotate-90 transition-transform" />
+              <div className="relative">
+                <Database size={16} className={cn(showInactive ? "opacity-100" : "opacity-40")} />
+                {!showInactive && <div className="absolute -top-1 -right-1 w-1.5 h-1.5 bg-brand rounded-full ring-2 ring-white" />}
+              </div>
+              {!showInactive && inactiveCount > 0 && (
+                <span className="text-[10px] font-bold bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-full">
+                  {inactiveCount}
+                </span>
+              )}
             </button>
-          )}
+            {canModify && (
+              <button 
+                onClick={() => onNewAsset()}
+                className="h-9 w-9 flex items-center justify-center rounded-lg bg-slate-100 text-slate-600 hover:bg-brand hover:text-white transition-all shadow-sm group"
+              >
+                <Plus size={16} className="group-hover:rotate-90 transition-transform" />
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Search */}

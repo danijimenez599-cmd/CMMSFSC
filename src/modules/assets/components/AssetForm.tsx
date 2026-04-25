@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useStore } from '../../../store';
-import { Modal, Button, FormField, Input, Select, Textarea } from '../../../shared/components';
+import { Modal, Button, FormField, Input, Select, Textarea, ConfirmDialog } from '../../../shared/components';
 import { Asset, AssetInput, AssetType, AssetCategory, AssetCriticality, AssetStatus } from '../types';
-import { ASSET_TYPE_LABELS, CATEGORY_LABELS } from '../utils/assetHelpers';
+import { ASSET_TYPE_LABELS, CATEGORY_LABELS, getDescendantIds } from '../utils/assetHelpers';
 
 interface AssetFormProps {
   isOpen: boolean;
@@ -18,33 +18,56 @@ const EMPTY: AssetInput = {
   category: 'rotating',
   criticality: 'medium',
   status: 'active',
-  code: '',
-  manufacturer: '',
-  model: '',
-  serialNumber: '',
-  description: '',
+  code: null,
+  manufacturer: null,
+  model: null,
+  serialNumber: null,
+  description: null,
 };
 
 export default function AssetForm({ isOpen, asset, defaultParentId, onClose }: AssetFormProps) {
-  const { assets, createAsset, updateAsset, showToast } = useStore() as any;
+  const { assets, createAsset, updateAsset, decommissionAsset, workOrders, showToast } = useStore() as any;
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [confirmConfig, setConfirmConfig] = useState<{
+    isOpen: boolean;
+    title: string;
+    description: string;
+    onConfirm: () => void;
+    danger?: boolean;
+  }>({
+    isOpen: false,
+    title: '',
+    description: '',
+    onConfirm: () => {},
+  });
 
-  const [form, setForm] = useState<AssetInput>(() => asset ? {
-    name: asset.name,
-    parentId: asset.parentId,
-    assetType: asset.assetType,
-    category: asset.category,
-    criticality: asset.criticality,
-    status: asset.status,
-    code: asset.code || '',
-    manufacturer: asset.manufacturer || '',
-    model: asset.model || '',
-    serialNumber: asset.serialNumber || '',
-    description: asset.description || '',
-    installDate: asset.installDate || '',
-    warrantyUntil: asset.warrantyUntil || '',
-  } : { ...EMPTY, parentId: defaultParentId || null });
+  const [form, setForm] = useState<AssetInput>(EMPTY);
+
+  React.useEffect(() => {
+    if (isOpen) {
+      if (asset) {
+        setForm({
+          name: asset.name,
+          parentId: asset.parentId,
+          assetType: asset.assetType,
+          category: asset.category,
+          criticality: asset.criticality,
+          status: asset.status,
+          code: asset.code,
+          manufacturer: asset.manufacturer,
+          model: asset.model,
+          serialNumber: asset.serialNumber,
+          description: asset.description,
+          installDate: asset.installDate,
+          warrantyUntil: asset.warrantyUntil,
+        });
+      } else {
+        setForm({ ...EMPTY, parentId: defaultParentId || null });
+      }
+      setErrors({});
+    }
+  }, [isOpen, asset, defaultParentId]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -65,8 +88,41 @@ export default function AssetForm({ isOpen, asset, defaultParentId, onClose }: A
     setLoading(true);
     try {
       if (asset) {
-        await updateAsset(asset.id, form);
-        showToast({ type: 'success', title: 'Activo actualizado' });
+        // Technical Decommission Logic
+        if (form.status === 'decommissioned' && asset.status !== 'decommissioned') {
+          const descendants = getDescendantIds(asset.id, assets);
+          const affectedIds = [asset.id, ...descendants];
+          const pendingWos = workOrders.filter((wo: any) => 
+            affectedIds.includes(wo.assetId) && 
+            !['completed', 'cancelled'].includes(wo.status)
+          );
+
+          const confirmMsg = `Estás dando de baja técnica a este activo. Esto tendrá las siguientes consecuencias: 1) El activo y sus ${descendants.length} sub-activos cambiarán a estado 'Fuera de Servicio'. 2) Se CANCELARÁN automáticamente ${pendingWos.length} órdenes de trabajo pendientes. 3) No se generarán nuevas órdenes preventivas para esta jerarquía.`;
+
+          setConfirmConfig({
+            isOpen: true,
+            title: 'Confirmar Baja Técnica',
+            description: confirmMsg,
+            danger: true,
+            onConfirm: async () => {
+              try {
+                setLoading(true);
+                await decommissionAsset(asset.id);
+                showToast({ type: 'success', title: 'Baja técnica procesada', message: 'Activo y jerarquía desactivados.' });
+                onClose();
+              } catch (err: any) {
+                showToast({ type: 'error', title: 'Error', message: err.message });
+              } finally {
+                setLoading(false);
+              }
+            }
+          });
+          setLoading(false);
+          return;
+        } else {
+          await updateAsset(asset.id, form);
+          showToast({ type: 'success', title: 'Activo actualizado' });
+        }
       } else {
         await createAsset(form);
         showToast({ type: 'success', title: 'Activo creado' });
@@ -186,6 +242,10 @@ export default function AssetForm({ isOpen, asset, defaultParentId, onClose }: A
           </FormField>
         </div>
       </form>
+      <ConfirmDialog
+        {...confirmConfig}
+        onClose={() => setConfirmConfig(prev => ({ ...prev, isOpen: false }))}
+      />
     </Modal>
   );
 }

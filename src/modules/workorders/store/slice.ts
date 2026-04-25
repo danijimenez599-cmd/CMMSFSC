@@ -109,6 +109,7 @@ export const createWoSlice: StateCreator<WoSlice & { currentUser?: any; inventor
       resolution: w.resolution,
       generatedFromPlanId: w.generated_from_plan_id,
       pmPlanNameSnapshot: w.pm_plan_name_snapshot,
+      assetNameSnapshot: w.asset_name_snapshot,
       pmCycleIndex: w.pm_cycle_index,
       sourcePointId: w.source_point_id,
       vendorId: w.vendor_id,
@@ -232,6 +233,7 @@ export const createWoSlice: StateCreator<WoSlice & { currentUser?: any; inventor
       vendor_id: input.vendorId || null,
       external_service_cost: input.externalServiceCost || 0,
       external_invoice_ref: input.externalInvoiceRef || null,
+      asset_name_snapshot: (get() as any).assets?.find((a: any) => a.id === input.assetId)?.name || 'Activo Desconocido',
       created_by: currentUser?.id || null,
     };
 

@@ -14,6 +14,7 @@ export interface AssetSlice {
   createAsset: (input: AssetInput) => Promise<Asset>;
   updateAsset: (id: string, input: Partial<AssetInput>) => Promise<void>;
   deleteAsset: (id: string) => Promise<void>;
+  decommissionAsset: (id: string) => Promise<void>;
   selectAsset: (id: string | null) => void;
 }
 
@@ -124,6 +125,37 @@ export const createAssetSlice: StateCreator<AssetSlice, [], []> = (set, get) => 
     if (error) throw error;
     if (get().selectedAssetId === id) set({ selectedAssetId: null });
     await get().fetchAssets();
+  },
+
+  decommissionAsset: async (id) => {
+    const { assets, fetchAssets } = get();
+    const { getDescendantIds } = await import('../utils/assetHelpers');
+    const ids = [id, ...getDescendantIds(id, assets)];
+
+    // 1. Update all assets and descendants to decommissioned
+    const { error: assetError } = await supabase
+      .from('assets')
+      .update({ status: 'decommissioned', updated_at: new Date().toISOString() })
+      .in('id', ids);
+
+    if (assetError) throw assetError;
+
+    // 2. Cancel all open/assigned work orders for these assets
+    const { error: woError } = await supabase
+      .from('work_orders')
+      .update({ 
+        status: 'cancelled', 
+        resolution: 'Cancelada automáticamente por baja técnica del activo.',
+        updated_at: new Date().toISOString() 
+      })
+      .in('asset_id', ids)
+      .not('status', 'in', '("completed","cancelled")');
+
+    if (woError) throw woError;
+
+    await fetchAssets();
+    const store = (get() as any);
+    if (store.fetchWorkOrders) await store.fetchWorkOrders();
   },
 
   selectAsset: (id) => set({ selectedAssetId: id }),

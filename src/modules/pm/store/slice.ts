@@ -301,6 +301,7 @@ export const createPmSlice: StateCreator<StoreState, [], [], PmSlice> = (set, ge
             priority: point.triggerPriority || 'high',
             status: 'open',
             source_point_id: point.id, // Linking the WO to the sensor
+            asset_name_snapshot: asset?.name || 'Activo Desconocido',
             created_by: get().currentUser?.id || null,
           });
 
@@ -377,6 +378,7 @@ export const createPmSlice: StateCreator<StoreState, [], [], PmSlice> = (set, ge
           due_date: wo.dueDate,
           pm_plan_name_snapshot: wo.pmPlanNameSnapshot,
           pm_cycle_index: wo.pmCycleIndex,
+          asset_name_snapshot: (get() as any).assets?.find((a: any) => a.id === wo.assetId)?.name || 'Activo Desconocido',
           created_by: bestUser,
         });
 

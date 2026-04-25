@@ -24,8 +24,8 @@ export function canDeleteAsset(id: string, assets: Asset[]): boolean {
 }
 
 export interface DeleteAssetCheck {
-  canDelete: boolean;
   hasChildren: boolean;
+  hasCompletedWos: boolean;
   linkedPlans: number;
   linkedWorkOrders: number;
   linkedPoints: number;
@@ -39,11 +39,15 @@ export function checkAssetDeletability(
   measurementPoints: any[]
 ): DeleteAssetCheck {
   const hasChildren = assets.filter(a => a.parentId === id).length > 0;
+  const linkedWos = (workOrders || []).filter((wo: any) => wo.assetId === id);
+  const hasCompletedWos = linkedWos.some((wo: any) => wo.status === 'completed');
+
   return {
-    canDelete: !hasChildren,
+    canDelete: !hasChildren && !hasCompletedWos,
     hasChildren,
+    hasCompletedWos,
     linkedPlans: (assetPlans || []).filter((ap: any) => ap.assetId === id).length,
-    linkedWorkOrders: (workOrders || []).filter((wo: any) => wo.assetId === id).length,
+    linkedWorkOrders: linkedWos.length,
     linkedPoints: (measurementPoints || []).filter((mp: any) => mp.assetId === id).length,
   };
 }
