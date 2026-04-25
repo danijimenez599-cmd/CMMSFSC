@@ -1,7 +1,7 @@
 import { StateCreator } from 'zustand';
 import { Asset, AssetInput, AssetTreeNode } from '../types';
 import { buildTree } from '../utils/buildTree';
-import { generateId } from '../../../shared/utils/generateId';
+import { generateId } from '../../../shared/utils/utils';
 import { supabase } from '../../../lib/supabase';
 
 export interface AssetSlice {

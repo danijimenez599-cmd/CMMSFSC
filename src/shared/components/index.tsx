@@ -99,7 +99,7 @@ export const Badge = ({ variant = 'neutral', dot, className, children, ...props 
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
-  title: string;
+  title: ReactNode;
   children: ReactNode;
   footer?: ReactNode;
   size?: 'sm' | 'md' | 'lg' | 'xl';
@@ -187,7 +187,7 @@ const inputBase = [
   'text-slate-900',
 ].join(' ');
 
-interface InputWithLabelProps extends InputHTMLAttributes<HTMLInputElement> {
+interface InputWithLabelProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'prefix' | 'suffix'> {
   label?: string;
   prefix?: ReactNode;
   suffix?: ReactNode;
@@ -253,16 +253,17 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaHTMLAttrib
 Textarea.displayName = 'Textarea';
 
 interface FormFieldProps {
-  label: string;
+  label: ReactNode;
   error?: string;
-  hint?: string;
+  hint?: ReactNode;
   children: ReactNode;
   id?: string;
   required?: boolean;
+  className?: string;
 }
 
-export const FormField = ({ label, error, hint, children, id, required }: FormFieldProps) => (
-  <div className="space-y-1 w-full">
+export const FormField = ({ label, error, hint, children, id, required, className }: FormFieldProps) => (
+  <div className={cn('space-y-1 w-full', className)}>
     <label htmlFor={id} className="block text-[10px] uppercase tracking-wide font-bold text-slate-500 ml-0.5">
       {label}
       {required && <span className="text-brand ml-1">*</span>}
@@ -431,11 +432,12 @@ export const ToastRack = ({ toast, onDismiss }: { toast: ToastPayload | null; on
 
 // ─── AVATAR ───────────────────────────────────────────────────────────────────
 export const Avatar = ({
-  name = '?', size = 'md', src
+  name = '?', size = 'md', src, className
 }: {
   name?: string;
   size?: 'xs' | 'sm' | 'md' | 'lg';
   src?: string;
+  className?: string;
 }) => {
   const safeName = name || '?';
   const initials = safeName.split(' ').map(n => n[0] || '').join('').substring(0, 2).toUpperCase();
@@ -457,13 +459,13 @@ export const Avatar = ({
       <img
         src={src}
         alt={name}
-        className={cn('rounded-full object-cover shrink-0 ring-1 ring-slate-100', sizes[size])}
+        className={cn('rounded-full object-cover shrink-0 ring-1 ring-slate-100', sizes[size], className)}
       />
     );
   }
 
   return (
-    <div className={cn('rounded-full flex items-center justify-center text-white font-bold shrink-0', sizes[size], color)}>
+    <div className={cn('rounded-full flex items-center justify-center text-white font-bold shrink-0', sizes[size], color, className)}>
       {initials}
     </div>
   );

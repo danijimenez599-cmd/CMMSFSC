@@ -7,8 +7,9 @@ import {
   Settings, Activity, Info, ChevronRight, Package, Gauge,
   Calendar, Layers, Factory, Cpu, ShieldCheck, Database
 } from 'lucide-react';
-import { formatDate } from '../../../shared/utils/generateId';
+import { formatDate } from '../../../shared/utils/utils';
 import { ASSET_TYPE_LABELS, CATEGORY_LABELS, CRITICALITY_CONFIG } from '../utils/assetHelpers';
+import { AssetType, AssetCategory, AssetCriticality } from '../types';
 
 const TABS = [
   { id: 'info', label: 'Información', icon: <Info size={14} /> },
@@ -67,7 +68,7 @@ export default function AssetDetailPanel({ onEdit }: AssetDetailPanelProps) {
 
   const parent = asset.parentId ? assets.find((a: any) => a.id === asset.parentId) : null;
   const children = assets.filter((a: any) => a.parentId === asset.id);
-  const critConfig = CRITICALITY_CONFIG[asset.criticality] || CRITICALITY_CONFIG.medium;
+  const critConfig = CRITICALITY_CONFIG[asset.criticality as AssetCriticality] || CRITICALITY_CONFIG.medium;
 
   const assetWos = workOrders?.filter((w: any) => w.assetId === asset.id) || [];
   const openWos = assetWos.filter((w: any) => !['completed', 'cancelled'].includes(w.status));
@@ -196,8 +197,8 @@ export default function AssetDetailPanel({ onEdit }: AssetDetailPanelProps) {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {[
-                    { label: 'Tipo de Activo', value: ASSET_TYPE_LABELS[asset.assetType], icon: <Layers size={14} /> },
-                    { label: 'Categoría Operativa', value: asset.category ? CATEGORY_LABELS[asset.category] : 'Sin categoría', icon: <Package size={14} /> },
+                    { label: 'Tipo de Activo', value: ASSET_TYPE_LABELS[asset.assetType as AssetType], icon: <Layers size={14} /> },
+                    { label: 'Categoría Operativa', value: asset.category ? CATEGORY_LABELS[asset.category as AssetCategory] : 'Sin categoría', icon: <Package size={14} /> },
                     { label: 'Fabricante / OEM', value: asset.manufacturer || 'Desconocido', icon: <ShieldCheck size={14} /> },
                     { label: 'Modelo Técnico', value: asset.model || 'No especificado', icon: <Settings size={14} /> },
                     { label: 'Identificador Serial', value: asset.serialNumber || 'N/A', icon: <Info size={14} /> },
@@ -264,8 +265,8 @@ export default function AssetDetailPanel({ onEdit }: AssetDetailPanelProps) {
                             <p className="text-sm font-bold text-slate-900 truncate tracking-tight">{child.name}</p>
                             {child.code && <p className="text-[10px] font-mono font-bold text-slate-400 uppercase mt-0.5">{child.code}</p>}
                           </div>
-                          <Badge variant={CRITICALITY_CONFIG[child.criticality].badgeVariant as any} className="text-[9px]">
-                            {CRITICALITY_CONFIG[child.criticality].label}
+                          <Badge variant={CRITICALITY_CONFIG[child.criticality as AssetCriticality]?.badgeVariant as any} className="text-[9px]">
+                            {CRITICALITY_CONFIG[child.criticality as AssetCriticality]?.label}
                           </Badge>
                         </div>
                       ))}

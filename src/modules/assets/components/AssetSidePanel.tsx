@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { useStore } from '../../../store';
 import { Badge, Button, cn, Modal, Select, FormField } from '../../../shared/components';
-import { formatDate, generateId } from '../../../shared/utils/generateId';
+import { formatDate, generateId } from '../../../shared/utils/utils';
 import { calcNextDueDate, computePlanStatus } from '../../pm/store/pmEngine';
 import { calculateProjections } from '../../pm/utils/projections';
 import { format, isValid } from 'date-fns';

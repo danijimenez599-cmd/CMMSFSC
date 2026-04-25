@@ -1,3 +1,7 @@
+export type WoStatus = 'open' | 'assigned' | 'in_progress' | 'on_hold' | 'completed' | 'cancelled';
+export type WoType = 'preventive' | 'corrective' | 'predictive' | 'inspection';
+export type WoPriority = 'critical' | 'high' | 'medium' | 'low';
+
 export interface Vendor {
   id: string;
   name: string;

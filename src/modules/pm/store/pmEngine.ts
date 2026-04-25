@@ -9,24 +9,34 @@ import {
   isBefore, isAfter, startOfDay, parseISO, format
 } from 'date-fns';
 import { PmPlan, AssetPlan } from '../types';
-import { generateId } from '../../../shared/utils/generateId';
+import { generateId } from '../../../shared/utils/utils';
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
 export function calcNextDueDate(
   plan: PmPlan,
   assetPlan: Pick<AssetPlan, 'nextDueDate' | 'lastCompletedAt'>,
-  fromDate?: string
+  completedAt?: string
 ): string {
   if (!plan.intervalValue || !plan.intervalUnit) {
     return addDays(new Date(), 30).toISOString();
   }
 
-  const base = fromDate
-    ? new Date(fromDate)
-    : assetPlan.nextDueDate
-      ? new Date(assetPlan.nextDueDate)
-      : new Date();
+  // FIXED mode: advance from previous due date to maintain a rigid calendar
+  // FLOATING mode: advance from completion date (adaptive calendar)
+  let base: Date;
+  if (plan.intervalMode === 'fixed' && assetPlan.nextDueDate) {
+    base = new Date(assetPlan.nextDueDate);
+    if (isNaN(base.getTime())) {
+      base = completedAt ? new Date(completedAt) : new Date();
+    }
+  } else {
+    base = completedAt
+      ? new Date(completedAt)
+      : assetPlan.nextDueDate
+        ? new Date(assetPlan.nextDueDate)
+        : new Date();
+  }
 
   let next: Date;
   switch (plan.intervalUnit) {
@@ -52,11 +62,11 @@ export interface PlanStatus {
 }
 
 export function computePlanStatus(
-  plan: PmPlan | undefined,
-  assetPlan: AssetPlan,
+  plan: PmPlan | undefined | null,
+  assetPlan: AssetPlan | undefined | null,
   currentPointValue: number | null = 0
 ): PlanStatus {
-  if (!plan || !assetPlan.active) {
+  if (!plan || !assetPlan || !assetPlan.active) {
     return { isOverdue: false, progress: 0, reason: null, label: 'Inactivo' };
   }
 
@@ -126,6 +136,7 @@ interface GeneratedWo {
   dueDate: string | null;
   pmPlanIdSnapshot: string | null;
   pmPlanNameSnapshot: string | null;
+  pmCycleIndex: number;
   tasks: { id: string; description: string; sortOrder: number }[];
 }
 
@@ -170,12 +181,24 @@ export function runScheduler(
     if (plan.triggerType === 'calendar' || plan.triggerType === 'hybrid') {
       if (assetPlan.nextDueDate) {
         const nextDue = parseISO(assetPlan.nextDueDate);
-        const leadDate = addDays(nextDue, -(plan.leadDays || 0));
-        if (!isAfter(leadDate, horizon)) {
+        if (isNaN(nextDue.getTime())) {
+          reason = 'Fecha de vencimiento inválida';
+        } else if (isBefore(nextDue, today)) {
           shouldGenerate = true;
-          reason = `Fecha vencimiento ${assetPlan.nextDueDate} (Lead: ${plan.leadDays}d) dentro de horizonte`;
+          reason = `Vencida desde ${assetPlan.nextDueDate}`;
         } else {
-          reason = `Fecha vencimiento ${assetPlan.nextDueDate} fuera de horizonte (Lead: ${plan.leadDays}d)`;
+          // Lead days cannot exceed the horizon to prevent premature generation
+          const effectiveLeadDays = Math.min(plan.leadDays || 0, horizonDays);
+          const leadDate = addDays(nextDue, -effectiveLeadDays);
+          if (!isAfter(leadDate, today)) {
+            shouldGenerate = true;
+            reason = `Vencimiento ${assetPlan.nextDueDate} con lead ${effectiveLeadDays}d — en ventana de generación`;
+          } else if (!isAfter(nextDue, horizon)) {
+            shouldGenerate = true;
+            reason = `Vencimiento ${assetPlan.nextDueDate} dentro del horizonte de ${horizonDays}d`;
+          } else {
+            reason = `Vencimiento ${assetPlan.nextDueDate} fuera del horizonte`;
+          }
         }
       } else {
         shouldGenerate = true; // No due date = generate now
@@ -241,9 +264,17 @@ export function runScheduler(
       ? format(addDays(parseISO(assetPlan.nextDueDate), -(plan.leadDays || 0)), 'yyyy-MM-dd')
       : format(today, 'yyyy-MM-dd');
 
-    const dueDate = assetPlan.nextDueMeter
-      ? null
-      : assetPlan.nextDueDate ?? null;
+    // If no nextDueDate and not purely meter-based, calculate first due date to
+    // prevent the scheduler from generating a new WO on every run (Fix 6.2)
+    let dueDate: string | null;
+    if (assetPlan.nextDueMeter && !assetPlan.nextDueDate) {
+      dueDate = null;
+    } else if (assetPlan.nextDueDate) {
+      dueDate = assetPlan.nextDueDate;
+    } else {
+      const computedNext = calcNextDueDate(plan, assetPlan, format(today, "yyyy-MM-dd'T'HH:mm:ss"));
+      dueDate = format(new Date(computedNext), 'yyyy-MM-dd');
+    }
 
     generated.push({
       id: generateId(),

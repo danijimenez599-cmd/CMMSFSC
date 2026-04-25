@@ -70,8 +70,8 @@ export function canTransition(
   if (!TRANSITIONS[from].includes(to)) return false;
   if (role === 'admin' || role === 'supervisor') return true;
   if (role === 'technician' && isAssignee) {
-    // Technicians can start, pause, but not cancel or complete without resolving
-    return ['in_progress', 'on_hold'].includes(to);
+    // Assigned technicians can start, pause, and complete their own work orders
+    return ['in_progress', 'on_hold', 'completed'].includes(to);
   }
   return false;
 }

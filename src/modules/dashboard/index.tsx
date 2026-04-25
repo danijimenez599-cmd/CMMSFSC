@@ -29,6 +29,10 @@ const item = {
   show: { opacity: 1, y: 0 }
 };
 
+// Module-level timestamp so the guard survives re-mounts within the same session
+let _lastDashboardFetch = 0;
+const DASHBOARD_STALE_MS = 30_000;
+
 // ─── DASHBOARD ────────────────────────────────────────────────────────────────
 export default function DashboardView() {
   const [lastUpdate, setLastUpdate] = useState(new Date());
@@ -38,6 +42,9 @@ export default function DashboardView() {
   const workOrders = store.workOrders || [];
 
   useEffect(() => {
+    const now = Date.now();
+    if (now - _lastDashboardFetch < DASHBOARD_STALE_MS) return;
+    _lastDashboardFetch = now;
     fetchAssets();
     fetchWorkOrders();
     fetchInventory();

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useStore } from '../../../store';
 import { Badge, Button, cn } from '../../../shared/components';
-import { formatDate, formatRelative, formatCurrency } from '../../../shared/utils/generateId';
+import { formatDate, formatRelative, formatCurrency } from '../../../shared/utils/utils';
 import { Package, TrendingDown, TrendingUp, ArrowLeftRight, Edit2 } from 'lucide-react';
 
 interface InventoryDetailPanelProps {

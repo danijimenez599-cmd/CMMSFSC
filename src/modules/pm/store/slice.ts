@@ -3,7 +3,7 @@ import { StoreState } from '../../../store';
 import { PmPlan, AssetPlan, MeasurementPoint, MeterReading, PmTask, MeasurementConfig } from '../types';
 import { WorkOrder } from '../../workorders/types';
 import { runScheduler, calcNextDueDate } from './pmEngine';
-import { generateId } from '../../../shared/utils/generateId';
+import { generateId } from '../../../shared/utils/utils';
 import { supabase } from '../../../lib/supabase';
 
 export interface PmSlice {
@@ -318,10 +318,10 @@ export const createPmSlice: StateCreator<StoreState, [], [], PmSlice> = (set, ge
               last_trigger_at: now
             }).eq('id', point.id);
             
-            showToast({ 
-              type: 'warning', 
-              title: 'Alerta de Condición', 
-              message: `Se ha generado una OT automática para ${asset?.name || 'el activo'}.` 
+            (get() as any).showToast?.({
+              type: 'warning',
+              title: 'Alerta de Condición',
+              message: `Se ha generado una OT automática para ${asset?.name || 'el activo'}.`
             });
             
             if ((get() as any).fetchWorkOrders) await (get() as any).fetchWorkOrders();
@@ -397,6 +397,15 @@ export const createPmSlice: StateCreator<StoreState, [], [], PmSlice> = (set, ge
           }));
           const { error: tasksError } = await supabase.from('wo_tasks').insert(dbTasks);
           if (tasksError) console.error('Error persisting tasks:', tasksError);
+        }
+
+        // Fix 6.2: If asset_plan had no nextDueDate, persist the computed dueDate so
+        // the scheduler doesn't generate a new WO on every subsequent run
+        const sourceAp = dbData.assetPlans.find(ap => ap.id === wo.assetPlanId);
+        if (sourceAp && !sourceAp.nextDueDate && wo.dueDate) {
+          await supabase.from('asset_plans').update({
+            next_due_date: wo.dueDate,
+          }).eq('id', wo.assetPlanId);
         }
       }
 

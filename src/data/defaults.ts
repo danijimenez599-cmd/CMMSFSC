@@ -12,6 +12,8 @@ export const defaultPmPlans: PmPlan[] = [
     intervalUnit: 'months',
     intervalMode: 'fixed',
     leadDays: 5,
+    meterIntervalValue: null,
+    meterIntervalUnit: null,
     estimatedDuration: 2,
     criticality: 'high',
     createdAt: new Date().toISOString()
@@ -25,6 +27,8 @@ export const defaultPmPlans: PmPlan[] = [
     intervalUnit: 'months',
     intervalMode: 'floating',
     leadDays: 14,
+    meterIntervalValue: null,
+    meterIntervalUnit: null,
     estimatedDuration: 6,
     criticality: 'critical',
     createdAt: new Date().toISOString()

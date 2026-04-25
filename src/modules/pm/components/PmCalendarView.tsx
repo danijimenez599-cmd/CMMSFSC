@@ -109,11 +109,17 @@ export default function PmCalendarView() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
 
-  const monthStart = startOfMonth(currentDate);
+  // Use primitive deps so memo isn't invalidated on every render (Fix 3.5)
+  const currentMonth = currentDate.getMonth();
+  const currentYear = currentDate.getFullYear();
+  const monthStart = useMemo(() => startOfMonth(currentDate), [currentMonth, currentYear]);
   const monthEnd = endOfMonth(monthStart);
   const startDate = startOfWeek(monthStart, { weekStartsOn: 1 });
   const endDate = endOfWeek(monthEnd, { weekStartsOn: 1 });
-  const calendarDays = eachDayOfInterval({ start: startDate, end: endDate });
+  const calendarDays = useMemo(
+    () => eachDayOfInterval({ start: startDate, end: endDate }),
+    [currentMonth, currentYear]
+  );
 
   const events = useMemo(() => {
     try {
@@ -147,7 +153,7 @@ export default function PmCalendarView() {
       });
       return evs.sort((a, b) => a.date.getTime() - b.date.getTime());
     } catch (e) { return []; }
-  }, [workOrders, assetPlans, assets, pmPlans, pmTasks, monthStart]);
+  }, [workOrders, assetPlans, assets, pmPlans, pmTasks, currentMonth, currentYear]);
 
   const pendingWOs = events.filter(e => e.type === 'wo' && !['completed', 'cancelled'].includes(e.status) && isSameMonth(e.date, currentDate));
   const completedWOs = events.filter(e => e.type === 'wo' && e.status === 'completed' && isSameMonth(e.date, currentDate));

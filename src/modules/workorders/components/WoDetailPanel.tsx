@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useStore } from '../../../store';
 import { Badge, Button, Avatar, cn, AlertBanner } from '../../../shared/components';
-import { 
-  WO_STATUS_LABELS, WO_TYPE_LABELS, WO_PRIORITY_CONFIG, 
-  isOverdue, getNextStatuses, WO_ACTION_LABELS, WO_ACTION_THEME 
+import {
+  WO_STATUS_LABELS, WO_TYPE_LABELS, WO_PRIORITY_CONFIG,
+  isOverdue, getNextStatuses, WO_ACTION_LABELS, WO_ACTION_THEME
 } from '../utils/statusHelpers';
-import { formatDate, formatRelative, generateId } from '../../../shared/utils/generateId';
+import { WoStatus } from '../types';
+import { formatDate, formatRelative, generateId } from '../../../shared/utils/utils';
 import {
   CheckSquare, Square, Send, Clock, User,
   Wrench, Package, MessageSquare, ChevronDown, AlertTriangle,
@@ -159,7 +160,7 @@ export default function WoDetailPanel() {
               </p>
             </div>
             <div className="flex items-center gap-2 shrink-0 ml-4">
-              <Badge variant={wo.status as any} dot>{WO_STATUS_LABELS[wo.status]}</Badge>
+              <Badge variant={wo.status as any} dot>{WO_STATUS_LABELS[wo.status as WoStatus]}</Badge>
               <Badge variant={wo.priority === 'critical' ? 'danger' : wo.priority === 'high' ? 'warn' : 'info'}>
                 {prioConfig.label}
               </Badge>
@@ -244,7 +245,7 @@ export default function WoDetailPanel() {
               <>
                 <div className="flex items-center gap-2">
                   {nextStatuses.map((status: string) => {
-                    const theme = WO_ACTION_THEME[status as any] || { variant: 'outline', icon: 'ArrowRight' };
+                    const theme = WO_ACTION_THEME[status as WoStatus] || { variant: 'outline', icon: 'ArrowRight' };
                     return (
                       <Button
                         key={status}
@@ -253,7 +254,7 @@ export default function WoDetailPanel() {
                         className="flex-1"
                         onClick={() => status === 'completed' ? setShowComplete(true) : handleStatusChange(status)}
                       >
-                        {WO_ACTION_LABELS[status as any]}
+                        {WO_ACTION_LABELS[status as WoStatus]}
                       </Button>
                     );
                   })}

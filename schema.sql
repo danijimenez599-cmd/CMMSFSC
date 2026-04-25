@@ -20,7 +20,8 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE public.profiles (
   id UUID PRIMARY KEY,
   full_name TEXT,
-  role TEXT DEFAULT 'technician' CHECK (role IN ('admin', 'manager', 'technician', 'viewer')),
+  email TEXT,
+  role TEXT DEFAULT 'technician' CHECK (role IN ('admin', 'supervisor', 'technician', 'viewer')),
   avatar_url TEXT,
   specialty TEXT,
   active BOOLEAN DEFAULT true,
@@ -132,6 +133,7 @@ CREATE TABLE public.asset_plans (
 CREATE TABLE public.vendors (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name TEXT NOT NULL,
+  category TEXT CHECK (category IN ('parts', 'service', 'tools', 'oem', 'other')),
   contact_name TEXT,
   email TEXT,
   phone TEXT,

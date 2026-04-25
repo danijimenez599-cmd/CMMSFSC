@@ -1,5 +1,5 @@
 import { StateCreator } from 'zustand';
-import { generateId } from '../shared/utils/generateId';
+import { generateId } from '../shared/utils/utils';
 
 export interface MeterAlert {
   id: string;

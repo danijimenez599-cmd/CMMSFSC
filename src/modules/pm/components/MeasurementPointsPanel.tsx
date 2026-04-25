@@ -5,7 +5,7 @@ import { Button, Input, Badge, Select } from '../../../shared/components';
 import { Activity, Plus, History, Info, Gauge, TrendingUp, Bell, AlertTriangle, Settings2, Trash2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { generateId, cn } from '../../../shared/utils/generateId';
+import { generateId, cn } from '../../../shared/utils/utils';
 import { computePlanStatus } from '../store/pmEngine';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 

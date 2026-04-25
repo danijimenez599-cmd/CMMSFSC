@@ -23,6 +23,9 @@ export default function WoCompleteForm({ wo, onClose }: WoCompleteFormProps) {
     failureCode: '',
     rootCause: '',
     resolution: '',
+    vendorId: wo.vendorId || null,
+    externalServiceCost: wo.externalServiceCost || null,
+    externalInvoiceRef: wo.externalInvoiceRef || null,
   });
 
   // Find linked asset plan and measurement point

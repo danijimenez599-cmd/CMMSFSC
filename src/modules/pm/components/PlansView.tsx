@@ -268,10 +268,10 @@ export default function PlansView() {
                 {selectedPlanTasks.length > 0 ? (
                   <div className="divide-y divide-slate-100">
                     {/* Agrupación por multiplicador */}
-                    {Array.from(new Set(selectedPlanTasks.map(t => t.frequencyMultiplier || 1)))
-                      .sort((a, b) => a - b)
-                      .map(multiplier => {
-                        const tasksInGroup = selectedPlanTasks.filter(t => (t.frequencyMultiplier || 1) === multiplier);
+                    {(Array.from(new Set((selectedPlanTasks as PmTask[]).map((t: PmTask) => t.frequencyMultiplier || 1))) as number[])
+                      .sort((a: number, b: number) => a - b)
+                      .map((multiplier: number) => {
+                        const tasksInGroup = (selectedPlanTasks as PmTask[]).filter((t: PmTask) => (t.frequencyMultiplier || 1) === multiplier);
                         
                         // Cálculo de valor absoluto
                         const isCalendar = selectedPlan.triggerType === 'calendar' || selectedPlan.triggerType === 'hybrid';
@@ -301,7 +301,7 @@ export default function PlansView() {
                               <span className="text-[10px] font-mono font-bold text-brand uppercase">{absoluteInterval}</span>
                             </div>
                             <div className="divide-y divide-slate-50">
-                              {tasksInGroup.map((t, i) => (
+                              {tasksInGroup.map((t: PmTask, i: number) => (
                                 <div key={t.id} className="px-8 py-4 flex gap-4 hover:bg-slate-50/50 transition-colors group">
                                   <span className="text-[10px] font-mono font-bold text-slate-300 group-hover:text-brand transition-colors pt-0.5">
                                     {(i + 1).toString().padStart(2, '0')}

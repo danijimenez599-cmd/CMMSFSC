@@ -4,7 +4,8 @@ import { Search, Plus, X, Filter, ChevronDown, ListChecks, Calendar, User, Layou
 import { useStore } from '../../../store';
 import { Badge, Button, Avatar, EmptyState, cn } from '../../../shared/components';
 import { WO_STATUS_LABELS, WO_STATUS_BADGE, WO_PRIORITY_CONFIG, WO_TYPE_LABELS, isOverdue } from '../utils/statusHelpers';
-import { formatDate } from '../../../shared/utils/generateId';
+import { WoStatus } from '../types';
+import { formatDate } from '../../../shared/utils/utils';
 
 interface WoListPanelProps {
   onNewWo: () => void;
@@ -243,7 +244,7 @@ export default function WoListPanel({ onNewWo }: WoListPanelProps) {
                   )}
                 </div>
                 <Badge variant={wo.status as any} className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5">
-                  {WO_STATUS_LABELS[wo.status]}
+                  {WO_STATUS_LABELS[wo.status as WoStatus]}
                 </Badge>
               </div>
 

@@ -2,7 +2,8 @@ import React from 'react';
 import { useStore } from '../../../store';
 import { Badge, Avatar, cn } from '../../../shared/components';
 import { WO_STATUS_LABELS, WO_PRIORITY_CONFIG, isOverdue } from '../../workorders/utils/statusHelpers';
-import { formatDate } from '../../../shared/utils/generateId';
+import { WoStatus } from '../../workorders/types';
+import { formatDate } from '../../../shared/utils/utils';
 import { AlertTriangle } from 'lucide-react';
 
 export default function CriticalWoTable() {
@@ -73,7 +74,7 @@ export default function CriticalWoTable() {
                 </td>
                 <td className="px-2 py-3">
                   <Badge variant={wo.status as any} className="text-[10px]">
-                    {WO_STATUS_LABELS[wo.status]}
+                    {WO_STATUS_LABELS[wo.status as WoStatus]}
                   </Badge>
                 </td>
                 <td className="px-2 py-3 hidden md:table-cell">

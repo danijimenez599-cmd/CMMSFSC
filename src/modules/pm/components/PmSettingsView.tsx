@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { useStore } from '../../../store';
 import { Button, Input, Badge, AlertBanner } from '../../../shared/components';
 import { Gauge, Plus, Trash2, CheckCircle2, AlertCircle, Truck, Settings2 } from 'lucide-react';
-import { generateId } from '../../../shared/utils/generateId';
+import { generateId } from '../../../shared/utils/utils';
 import VendorsPanel from '../../workorders/components/VendorsPanel';
-import { cn } from '../../../shared/utils/generateId';
+import { cn } from '../../../shared/utils/utils';
 
 export default function PmSettingsView() {
   const [activeTab, setActiveTab] = useState<'magnitudes' | 'vendors'>('magnitudes');

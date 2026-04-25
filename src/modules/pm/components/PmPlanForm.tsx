@@ -4,7 +4,7 @@ import { useStore } from '../../../store';
 import { PmPlan, PmTask, TriggerType } from '../types';
 import { Button, FormField, Input, Select, Textarea, Badge, AlertBanner, cn } from '../../../shared/components';
 import { Plus, Trash2, GripVertical, Calendar, Activity, Zap, Info, Clock, Target } from 'lucide-react';
-import { generateId } from '../../../shared/utils/generateId';
+import { generateId } from '../../../shared/utils/utils';
 
 interface PmPlanFormProps {
   initialPlan?: PmPlan | null;

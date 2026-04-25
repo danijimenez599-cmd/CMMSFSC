@@ -1,6 +1,6 @@
 import { StateCreator } from 'zustand';
 import { InventoryItem, StockMovement, StockAdjustInput, InventoryItemInput } from '../types';
-import { generateId } from '../../../shared/utils/generateId';
+import { generateId } from '../../../shared/utils/utils';
 import { supabase } from '../../../lib/supabase';
 
 export interface InventorySlice {

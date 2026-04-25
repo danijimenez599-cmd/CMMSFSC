@@ -1,6 +1,6 @@
 import { StateCreator } from 'zustand';
 import { AppModule, ToastPayload } from '../shared/types';
-import { generateId } from '../shared/utils/generateId';
+import { generateId } from '../shared/utils/utils';
 
 export interface UiSlice {
   activeModule: AppModule;

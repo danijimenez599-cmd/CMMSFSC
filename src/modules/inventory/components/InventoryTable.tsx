@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Search, Plus, ArrowUpDown, X, Filter } from 'lucide-react';
 import { useStore } from '../../../store';
 import { Button, Badge, cn, ConfirmDialog } from '../../../shared/components';
-import { formatCurrency } from '../../../shared/utils/generateId';
+import { formatCurrency } from '../../../shared/utils/utils';
 
 interface InventoryTableProps {
   onNew: () => void;

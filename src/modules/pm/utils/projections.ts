@@ -36,23 +36,35 @@ export function calculateProjections(
     const horizonDate = addMonths(new Date(), horizonMonths);
     const tasks = Array.isArray(pmPlan.tasks) ? pmPlan.tasks : [];
 
-    // Simulamos hasta alcanzar el horizonte
-    // Limitamos a 50 iteraciones para evitar bucles infinitos por error de config
+    // Limit to 100 iterations to prevent infinite loops on misconfigured plans
     let iterations = 0;
-    while (currentSimDate <= horizonDate && iterations < 50) {
+    let isFirstIteration = true;
+
+    while (currentSimDate <= horizonDate && iterations < 100) {
       iterations++;
-      
-      // Determinar tareas para este ciclo simulado
+
+      // First iteration evaluates the current cycle using nextDueDate as-is (the real next event).
+      // Subsequent iterations advance the cycle and date before evaluating (Fix 2.2).
+      if (!isFirstIteration) {
+        switch (pmPlan.intervalUnit) {
+          case 'days': currentSimDate = addDays(currentSimDate, pmPlan.intervalValue); break;
+          case 'weeks': currentSimDate = addWeeks(currentSimDate, pmPlan.intervalValue); break;
+          case 'months': currentSimDate = addMonths(currentSimDate, pmPlan.intervalValue); break;
+          case 'years': currentSimDate = addYears(currentSimDate, pmPlan.intervalValue); break;
+          default: currentSimDate = addMonths(currentSimDate, 1);
+        }
+        currentSimCycle++;
+        if (!isValid(currentSimDate)) break;
+      }
+      isFirstIteration = false;
+
       const cycleTasks = tasks.filter((t: any) => {
         const mult = Number(t.frequencyMultiplier) || 1;
         return currentSimCycle % mult === 0;
       });
 
-      // Si hay tareas, es un hito válido
       if (cycleTasks.length > 0) {
-        // Un hito es "Major" si tiene tareas con multiplicador > 1
         const isMajor = cycleTasks.some((t: any) => (Number(t.frequencyMultiplier) || 1) > 1);
-
         projections.push({
           date: new Date(currentSimDate),
           label: isMajor ? 'Mantenimiento Mayor' : 'Rutina Preventiva',
@@ -62,17 +74,6 @@ export function calculateProjections(
           tasksCount: cycleTasks.length
         });
       }
-
-      // Avanzar a la siguiente fecha teórica
-      switch (pmPlan.intervalUnit) {
-        case 'days': currentSimDate = addDays(currentSimDate, pmPlan.intervalValue); break;
-        case 'weeks': currentSimDate = addWeeks(currentSimDate, pmPlan.intervalValue); break;
-        case 'months': currentSimDate = addMonths(currentSimDate, pmPlan.intervalValue); break;
-        case 'years': currentSimDate = addYears(currentSimDate, pmPlan.intervalValue); break;
-        default: currentSimDate = addMonths(currentSimDate, 1);
-      }
-      
-      currentSimCycle++;
     }
   } catch (error) {
     console.error('Error en el motor de proyecciones:', error);
