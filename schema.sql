@@ -109,7 +109,8 @@ CREATE TABLE public.pm_tasks (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   pm_plan_id UUID NOT NULL REFERENCES public.pm_plans(id) ON DELETE CASCADE,
   description TEXT NOT NULL,
-  sort_order INTEGER DEFAULT 0
+  sort_order INTEGER DEFAULT 0,
+  frequency_multiplier INTEGER DEFAULT 1 -- Nuevo: x1, x2, x4, etc.
 );
 
 -- 8. ASSET PLANS
@@ -122,12 +123,24 @@ CREATE TABLE public.asset_plans (
   next_due_meter NUMERIC,
   last_completed_at TIMESTAMPTZ,
   wo_count INTEGER DEFAULT 0,
+  current_cycle_index INTEGER DEFAULT 1, -- Nuevo: Rastreo de ciclo actual
   active BOOLEAN DEFAULT true,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 9. WORK ORDERS
-CREATE SEQUENCE IF NOT EXISTS public.wo_number_seq START WITH 1;
+-- 9. VENDORS
+CREATE TABLE public.vendors (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name TEXT NOT NULL,
+  contact_name TEXT,
+  email TEXT,
+  phone TEXT,
+  tax_id TEXT,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 10. WORK ORDERS
 
 CREATE TABLE public.work_orders (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -139,6 +152,7 @@ CREATE TABLE public.work_orders (
   wo_type TEXT NOT NULL CHECK (wo_type IN ('preventive', 'corrective', 'predictive', 'inspection')),
   status TEXT DEFAULT 'open' CHECK (status IN ('open', 'assigned', 'in_progress', 'on_hold', 'completed', 'cancelled')),
   priority TEXT DEFAULT 'medium' CHECK (priority IN ('critical', 'high', 'medium', 'low')),
+  pm_cycle_index INTEGER, -- Snapshot del hito preventivo (Ciclo 1, 2, 3...)
   assigned_to UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
   scheduled_date DATE,
   due_date DATE,
@@ -151,12 +165,16 @@ CREATE TABLE public.work_orders (
   resolution TEXT,
   generated_from_plan_id UUID,
   pm_plan_name_snapshot TEXT,
+  source_point_id UUID REFERENCES public.measurement_points(id) ON DELETE SET NULL,
+  vendor_id UUID REFERENCES public.vendors(id) ON DELETE SET NULL,
+  external_service_cost NUMERIC DEFAULT 0,
+  external_invoice_ref TEXT,
   created_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 10. WO TASKS
+-- 11. WO TASKS
 CREATE TABLE public.wo_tasks (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   work_order_id UUID NOT NULL REFERENCES public.work_orders(id) ON DELETE CASCADE,
@@ -227,12 +245,27 @@ CREATE TABLE public.stock_movements (
 CREATE OR REPLACE FUNCTION public.fn_assign_wo_number()
 RETURNS TRIGGER AS $$
 DECLARE
-    current_year TEXT;
-    next_seq BIGINT;
+    current_yy TEXT;
+    current_mm TEXT;
+    next_seq INT;
 BEGIN
-    current_year := TO_CHAR(NOW(), 'YYYY');
-    SELECT nextval('public.wo_number_seq') INTO next_seq;
-    NEW.wo_number := 'WO-' || current_year || '-' || LPAD(next_seq::TEXT, 5, '0');
+    -- Obtenemos Año (2 dígitos) y Mes (2 dígitos)
+    current_yy := TO_CHAR(NOW(), 'YY');
+    current_mm := TO_CHAR(NOW(), 'MM');
+
+    -- Buscamos el último correlativo para este mes específico
+    -- El formato buscado es WO-YY-MM-XXXXX
+    SELECT COALESCE(
+        MAX(CAST(SUBSTRING(wo_number FROM 10) AS INT)), 
+        0
+    ) + 1
+    INTO next_seq
+    FROM public.work_orders
+    WHERE wo_number LIKE 'WO-' || current_yy || '-' || current_mm || '-%';
+
+    -- Construimos el nuevo número: WO-24-04-00001
+    NEW.wo_number := 'WO-' || current_yy || '-' || current_mm || '-' || LPAD(next_seq::TEXT, 5, '0');
+    
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
@@ -272,6 +305,7 @@ ALTER TABLE public.meter_readings DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.wo_comments DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.part_usages DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.stock_movements DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.vendors DISABLE ROW LEVEL SECURITY;
 
 -- ========================================================
 -- AUTOMATION: AUTH SYNC (Supabase Auth -> Profiles)

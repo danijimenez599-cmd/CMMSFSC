@@ -82,6 +82,7 @@ export const createPmSlice: StateCreator<StoreState, [], [], PmSlice> = (set, ge
       pmPlanId: t.pm_plan_id,
       description: t.description,
       sortOrder: t.sort_order,
+      frequencyMultiplier: t.frequency_multiplier || 1, // Nuevo
     }));
 
     const measurementConfigs: MeasurementConfig[] = (configsRes.data || []).map(c => ({
@@ -101,6 +102,7 @@ export const createPmSlice: StateCreator<StoreState, [], [], PmSlice> = (set, ge
       nextDueMeter: ap.next_due_meter,
       lastCompletedAt: ap.last_completed_at,
       woCount: ap.wo_count,
+      currentCycleIndex: ap.current_cycle_index || 1, // Nuevo
       active: ap.active,
       createdAt: ap.created_at,
     }));
@@ -161,6 +163,7 @@ export const createPmSlice: StateCreator<StoreState, [], [], PmSlice> = (set, ge
         pm_plan_id: plan.id,
         description: t.description,
         sort_order: i,
+        frequency_multiplier: t.frequencyMultiplier || 1, // Nuevo
       }));
       const { error: tasksError } = await supabase.from('pm_tasks').insert(dbTasks);
       if (tasksError) throw tasksError;
@@ -203,6 +206,7 @@ export const createPmSlice: StateCreator<StoreState, [], [], PmSlice> = (set, ge
       last_completed_at: assetPlan.lastCompletedAt,
       wo_count: assetPlan.woCount,
       active: assetPlan.active,
+      current_cycle_index: assetPlan.currentCycleIndex || 1, // Nuevo
     };
     const { error } = await supabase.from('asset_plans').upsert(dbAssetPlan);
     if (error) throw error;
@@ -272,12 +276,16 @@ export const createPmSlice: StateCreator<StoreState, [], [], PmSlice> = (set, ge
       const isHigh = point.maxThreshold !== null && readingData.value > point.maxThreshold;
 
       if (isLow || isHigh) {
-        // Cooldown: Check if we triggered an alert recently (e.g. last 24h) or if there's an open WO
-        const lastTrigger = point.lastTriggerAt ? new Date(point.lastTriggerAt).getTime() : 0;
-        const cooldownMs = 24 * 60 * 60 * 1000; // 24h cooldown
-        const inCooldown = (Date.now() - lastTrigger) < cooldownMs;
+        // CHECK: If there's an active (not completed/cancelled) WO for this specific sensor, don't trigger another one.
+        const { data: activeWos, error: checkError } = await supabase
+          .from('work_orders')
+          .select('id')
+          .eq('source_point_id', point.id)
+          .in('status', ['open', 'assigned', 'in_progress', 'on_hold']);
 
-        if (!inCooldown) {
+        if (checkError) throw checkError;
+
+        if (!activeWos || activeWos.length === 0) {
           const asset = (get() as any).assets?.find((a: any) => a.id === point.assetId);
           const woTitle = point.triggerWoTitle || `Alerta CBM: ${point.name} fuera de rango`;
           
@@ -292,6 +300,7 @@ export const createPmSlice: StateCreator<StoreState, [], [], PmSlice> = (set, ge
             wo_type: 'predictive',
             priority: point.triggerPriority || 'high',
             status: 'open',
+            source_point_id: point.id, // Linking the WO to the sensor
             created_by: get().currentUser?.id || null,
           });
 
@@ -367,6 +376,7 @@ export const createPmSlice: StateCreator<StoreState, [], [], PmSlice> = (set, ge
           scheduled_date: wo.scheduledDate,
           due_date: wo.dueDate,
           pm_plan_name_snapshot: wo.pmPlanNameSnapshot,
+          pm_cycle_index: wo.pmCycleIndex,
           created_by: bestUser,
         });
 
@@ -415,6 +425,7 @@ export const createPmSlice: StateCreator<StoreState, [], [], PmSlice> = (set, ge
     const updates: any = {
       last_completed_at: completedAt,
       wo_count: assetPlan.woCount + 1,
+      current_cycle_index: (assetPlan.currentCycleIndex || 1) + 1, // Incremento de ciclo
     };
 
     // Calendar trigger: advance next due date

@@ -4,7 +4,7 @@ import { Settings, Gauge, Database, Bell, ChevronRight } from 'lucide-react';
 import { cn } from '../../shared/components';
 
 const TABS = [
-  { id: 'magnitudes', label: 'Catálogo Medidores', icon: <Gauge size={18} />, desc: 'Tipos de magnitud para equipos' },
+  { id: 'magnitudes', label: 'Catálogos', icon: <Database size={18} />, desc: 'Medidores, magnitudes y proveedores' },
   { id: 'general', label: 'Datos de Empresa', icon: <Database size={18} />, desc: 'Configuración general' },
   { id: 'notifications', label: 'Notificaciones', icon: <Bell size={18} />, desc: 'Alertas y recordatorios' },
 ];

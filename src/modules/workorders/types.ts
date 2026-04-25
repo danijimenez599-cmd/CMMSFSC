@@ -1,6 +1,13 @@
-export type WoType = 'preventive' | 'corrective' | 'predictive' | 'inspection';
-export type WoStatus = 'open' | 'assigned' | 'in_progress' | 'on_hold' | 'completed' | 'cancelled';
-export type WoPriority = 'critical' | 'high' | 'medium' | 'low';
+export interface Vendor {
+  id: string;
+  name: string;
+  contactName: string | null;
+  email: string | null;
+  phone: string | null;
+  taxId: string | null;
+  isActive: boolean;
+  createdAt: string;
+}
 
 export interface WorkOrder {
   id: string;
@@ -12,6 +19,7 @@ export interface WorkOrder {
   woType: WoType;
   status: WoStatus;
   priority: WoPriority;
+  pmCycleIndex: number | null;
   assignedTo: string | null;
   scheduledDate: string | null;
   dueDate: string | null;
@@ -24,6 +32,10 @@ export interface WorkOrder {
   resolution: string | null;
   generatedFromPlanId: string | null;
   pmPlanNameSnapshot: string | null;
+  sourcePointId: string | null;
+  vendorId: string | null;
+  externalServiceCost: number | null;
+  externalInvoiceRef: string | null;
   createdBy: string | null;
   createdAt: string;
   updatedAt: string;
@@ -69,6 +81,9 @@ export interface WoInput {
   scheduledDate?: string | null;
   dueDate?: string | null;
   estimatedHours?: number | null;
+  vendorId?: string | null;
+  externalServiceCost?: number | null;
+  externalInvoiceRef?: string | null;
 }
 
 export interface StatusMeta {
@@ -81,4 +96,7 @@ export interface CompletePayload {
   failureCode?: string | null;
   rootCause?: string | null;
   resolution: string;
+  externalServiceCost?: number | null;
+  externalInvoiceRef?: string | null;
+  vendorId?: string | null;
 }

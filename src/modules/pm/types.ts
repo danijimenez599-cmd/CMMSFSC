@@ -24,6 +24,7 @@ export interface PmTask {
   pmPlanId: string;
   description: string;
   sortOrder: number;
+  frequencyMultiplier: number; // Nuevo
 }
 
 export interface AssetPlan {
@@ -35,6 +36,7 @@ export interface AssetPlan {
   nextDueMeter: number | null;
   lastCompletedAt: string | null;
   woCount: number;
+  currentCycleIndex: number; // Nuevo
   active: boolean;
   createdAt: string;
 }

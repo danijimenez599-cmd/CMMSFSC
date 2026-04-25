@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Menu, X, LayoutDashboard, Wrench, Package, Settings,
   CalendarClock, Factory, Bell, ChevronDown, LogOut, User,
-  Mail, ShieldCheck, Cpu
+  Mail, ShieldCheck, Cpu, FileText
 } from 'lucide-react';
 import { useStore } from './store';
 import { AppModule } from './shared/types';
@@ -20,7 +20,8 @@ const MODULES: { id: AppModule; label: string; icon: React.ReactNode; shortLabel
   { id: 'assets',      label: 'Activos',           shortLabel: 'Activos',   icon: <Factory size={18} /> },
   { id: 'workorders',  label: 'Órdenes de Trabajo',shortLabel: 'OTs',       icon: <Wrench size={18} /> },
   { id: 'inventory',   label: 'Inventario',         shortLabel: 'Stock',     icon: <Package size={18} /> },
-  { id: 'pm',          label: 'Planes PM',          shortLabel: 'PM',        icon: <CalendarClock size={18} /> },
+  { id: 'pm',          label: 'Planes PM',          shortLabel: 'Planes',    icon: <FileText size={18} /> },
+  { id: 'scheduler',   label: 'Programador',        shortLabel: 'Agenda',    icon: <CalendarClock size={18} /> },
   { id: 'settings',    label: 'Configuración',      shortLabel: 'Config',    icon: <Settings size={18} /> },
 ];
 
@@ -237,7 +238,7 @@ export default function App() {
               animate={{ opacity: 1 }}
               className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] px-4 mb-4"
             >
-              Operaciones
+              Mantenimiento
             </motion.p>
           )}
           {MODULES.map(mod => {
@@ -443,7 +444,8 @@ export default function App() {
               {activeModule === 'assets'     && <AssetRegistryView />}
               {activeModule === 'workorders' && <WorkOrdersView />}
               {activeModule === 'inventory'  && <InventoryView />}
-              {activeModule === 'pm'         && <PmEngineView />}
+              {activeModule === 'pm'         && <PmEngineView mode="plans" />}
+              {activeModule === 'scheduler'  && <PmEngineView mode="scheduler" />}
               {activeModule === 'settings'   && <SettingsView />}
             </motion.div>
           </AnimatePresence>

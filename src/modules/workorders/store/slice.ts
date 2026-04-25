@@ -1,5 +1,5 @@
 import { StateCreator } from 'zustand';
-import { WorkOrder, WoTask, WoComment, PartUsage, WoInput, WoStatus, StatusMeta, CompletePayload } from '../types';
+import { WorkOrder, WoTask, WoComment, PartUsage, WoInput, WoStatus, StatusMeta, CompletePayload, Vendor } from '../types';
 import { generateId } from '../../../shared/utils/generateId';
 import { canTransition } from '../utils/statusHelpers';
 import { supabase } from '../../../lib/supabase';
@@ -9,10 +9,15 @@ export interface WoSlice {
   woTasks: WoTask[];
   woComments: WoComment[];
   partUsages: PartUsage[];
+  vendors: Vendor[];
   selectedWoId: string | null;
   woLoading: boolean;
 
   fetchWorkOrders: () => Promise<void>;
+  fetchVendors: () => Promise<void>;
+  saveVendor: (vendor: Partial<Vendor>) => Promise<void>;
+  deleteVendor: (id: string) => Promise<void>;
+
   createWo: (input: WoInput, tasks?: string[]) => Promise<WorkOrder>;
   updateWoStatus: (id: string, status: WoStatus, meta?: StatusMeta) => Promise<void>;
   assignWo: (id: string, userId: string) => Promise<void>;
@@ -30,22 +35,24 @@ export interface WoSlice {
   selectWo: (id: string | null) => void;
 }
 
-export const createWoSlice: StateCreator<WoSlice & { currentUser?: any; inventoryItems?: any[]; adjustStock?: any; recalcNextDue?: any; assetPlans?: any[]; measurementPoints?: any[] }, [], []> = (set, get) => ({
+export const createWoSlice: StateCreator<WoSlice & { currentUser?: any; inventoryItems?: any[]; adjustStock?: any; recalcNextDue?: any; assetPlans?: any[]; measurementPoints?: any[]; showToast?: any }, [], []> = (set, get) => ({
   workOrders: [],
   woTasks: [],
   woComments: [],
   partUsages: [],
+  vendors: [],
   selectedWoId: null,
   woLoading: false,
 
   fetchWorkOrders: async () => {
     set({ woLoading: true });
 
-    const [woRes, taskRes, commentRes, usageRes] = await Promise.all([
+    const [woRes, taskRes, commentRes, usageRes, vendorRes] = await Promise.all([
       supabase.from('work_orders').select('*').order('created_at', { ascending: false }),
       supabase.from('wo_tasks').select('*').order('sort_order'),
       supabase.from('wo_comments').select('*').order('created_at'),
       supabase.from('part_usages').select('*').order('added_at'),
+      supabase.from('vendors').select('*').order('name'),
     ]);
 
     if (woRes.error) {
@@ -76,42 +83,108 @@ export const createWoSlice: StateCreator<WoSlice & { currentUser?: any; inventor
       resolution: w.resolution,
       generatedFromPlanId: w.generated_from_plan_id,
       pmPlanNameSnapshot: w.pm_plan_name_snapshot,
+      pmCycleIndex: w.pm_cycle_index,
+      sourcePointId: w.source_point_id,
+      vendorId: w.vendor_id,
+      externalServiceCost: w.external_service_cost,
+      externalInvoiceRef: w.external_invoice_ref,
       createdBy: w.created_by,
       createdAt: w.created_at,
       updatedAt: w.updated_at,
     }));
 
-    const woTasks: WoTask[] = (taskRes.data || []).map(t => ({
-      id: t.id,
-      workOrderId: t.work_order_id,
-      sortOrder: t.sort_order,
-      description: t.description,
-      completed: t.completed,
-      completedAt: t.completed_at,
-      completedBy: t.completed_by,
-      notes: t.notes,
+    const vendors: Vendor[] = (vendorRes.data || []).map(v => ({
+      id: v.id,
+      name: v.name,
+      contactName: v.contact_name,
+      email: v.email,
+      phone: v.phone,
+      taxId: v.tax_id,
+      isActive: v.is_active,
+      createdAt: v.created_at,
     }));
 
-    const woComments: WoComment[] = (commentRes.data || []).map(c => ({
-      id: c.id,
-      workOrderId: c.work_order_id,
-      authorId: c.author_id,
-      body: c.body,
-      attachmentUrl: c.attachment_url,
-      createdAt: c.created_at,
-    }));
+    set({ 
+      workOrders, 
+      woTasks: (taskRes.data || []).map(t => ({
+        id: t.id,
+        workOrderId: t.work_order_id,
+        sortOrder: t.sort_order,
+        description: t.description,
+        completed: t.completed,
+        completedAt: t.completed_at,
+        completedBy: t.completed_by,
+        notes: t.notes,
+      })),
+      woComments: (commentRes.data || []).map(c => ({
+        id: c.id,
+        workOrderId: c.work_order_id,
+        authorId: c.author_id,
+        body: c.body,
+        attachmentUrl: c.attachment_url,
+        createdAt: c.created_at,
+      })),
+      partUsages: (usageRes.data || []).map(u => ({
+        id: u.id,
+        workOrderId: u.work_order_id,
+        inventoryItemId: u.inventory_item_id,
+        quantity: u.quantity,
+        unitCost: u.unit_cost,
+        addedBy: u.added_by,
+        added_at: u.added_at,
+      })),
+      vendors,
+      woLoading: false 
+    });
+  },
 
-    const partUsages: PartUsage[] = (usageRes.data || []).map(u => ({
-      id: u.id,
-      workOrderId: u.work_order_id,
-      inventoryItemId: u.inventory_item_id,
-      quantity: u.quantity,
-      unitCost: u.unit_cost,
-      addedBy: u.added_by,
-      addedAt: u.added_at,
-    }));
+  fetchVendors: async () => {
+    const { data, error } = await supabase.from('vendors').select('*').order('name');
+    if (error) return;
+    set({ vendors: data.map(v => ({
+      id: v.id,
+      name: v.name,
+      contactName: v.contact_name,
+      email: v.email,
+      phone: v.phone,
+      taxId: v.tax_id,
+      isActive: v.is_active,
+      createdAt: v.created_at,
+    }))});
+  },
 
-    set({ workOrders, woTasks, woComments, partUsages, woLoading: false });
+  saveVendor: async (vendor) => {
+    const isNew = !vendor.id;
+    const payload = {
+      name: vendor.name,
+      contact_name: vendor.contactName,
+      email: vendor.email,
+      phone: vendor.phone,
+      tax_id: vendor.taxId,
+      is_active: vendor.isActive,
+    };
+
+    const { error } = isNew 
+      ? await supabase.from('vendors').insert({ ...payload, id: generateId() })
+      : await supabase.from('vendors').update(payload).eq('id', vendor.id);
+
+    if (error) {
+      get().showToast?.({ type: 'error', title: 'Error', message: 'No se pudo guardar el proveedor' });
+      return;
+    }
+
+    get().showToast?.({ type: 'success', title: 'Éxito', message: 'Proveedor guardado correctamente' });
+    await get().fetchVendors();
+  },
+
+  deleteVendor: async (id) => {
+    const { error } = await supabase.from('vendors').delete().eq('id', id);
+    if (error) {
+      get().showToast?.({ type: 'error', title: 'Error', message: 'No se pudo eliminar el proveedor' });
+      return;
+    }
+    get().showToast?.({ type: 'success', title: 'Éxito', message: 'Proveedor eliminado' });
+    await get().fetchVendors();
   },
 
   createWo: async (input, tasks) => {
@@ -130,6 +203,9 @@ export const createWoSlice: StateCreator<WoSlice & { currentUser?: any; inventor
       due_date: input.dueDate || null,
       estimated_hours: input.estimatedHours || null,
       status: input.assignedTo ? 'assigned' : 'open',
+      vendor_id: input.vendorId || null,
+      external_service_cost: input.externalServiceCost || 0,
+      external_invoice_ref: input.externalInvoiceRef || null,
       created_by: currentUser?.id || null,
     };
 
@@ -199,6 +275,9 @@ export const createWoSlice: StateCreator<WoSlice & { currentUser?: any; inventor
       failure_code: payload.failureCode || null,
       root_cause: payload.rootCause || null,
       resolution: payload.resolution || null,
+      vendor_id: payload.vendorId || null,
+      external_service_cost: payload.externalServiceCost || 0,
+      external_invoice_ref: payload.externalInvoiceRef || null,
     };
 
     const { error } = await supabase.from('work_orders').update(updates).eq('id', id);

@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useStore } from '../../../store';
 import { Modal, Button, FormField, Input, Select, Textarea, AlertBanner } from '../../../shared/components';
 import { WorkOrder, CompletePayload } from '../types';
-import { Gauge, CheckCircle2, AlertTriangle, Clock, History, FileCheck, Layers } from 'lucide-react';
+import { Gauge, CheckCircle2, AlertTriangle, Clock, History, FileCheck, Layers, Truck } from 'lucide-react';
 
 interface WoCompleteFormProps {
   wo: WorkOrder;
@@ -183,6 +183,53 @@ export default function WoCompleteForm({ wo, onClose }: WoCompleteFormProps) {
             rows={2}
           />
         </FormField>
+
+        {/* EXTERNAL SERVICES SECTION */}
+        <div className="pt-4 border-t border-slate-100">
+          <div className="flex items-center gap-2 mb-4">
+            <Truck size={14} className="text-slate-400" />
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Servicios Externos y Subcontratación</span>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <FormField label={<span className="font-bold uppercase tracking-widest text-[10px] text-slate-400">Proveedor / Empresa</span>}>
+              <Select
+                name="vendorId"
+                value={formData.vendorId || ''}
+                onChange={handleChange}
+                className="font-bold text-sm h-11 bg-slate-50 border-slate-200"
+              >
+                <option value="">MANO DE OBRA INTERNA</option>
+                {store.vendors?.map((v: any) => (
+                  <option key={v.id} value={v.id}>{v.name}</option>
+                ))}
+              </Select>
+            </FormField>
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField label={<span className="font-bold uppercase tracking-widest text-[10px] text-slate-400">Costo Facturado</span>}>
+                <Input
+                  type="number"
+                  name="externalServiceCost"
+                  value={formData.externalServiceCost || ''}
+                  onChange={handleChange}
+                  placeholder="0.00"
+                  className="font-bold text-sm h-11 text-center bg-slate-50 border-slate-200"
+                />
+              </FormField>
+              <FormField label={<span className="font-bold uppercase tracking-widest text-[10px] text-slate-400">Referencia Factura</span>}>
+                <Input
+                  name="externalInvoiceRef"
+                  value={formData.externalInvoiceRef || ''}
+                  onChange={handleChange}
+                  placeholder="Factura #"
+                  className="font-bold text-sm h-11 bg-slate-50 border-slate-200"
+                />
+              </FormField>
+            </div>
+          </div>
+          <p className="text-[9px] font-medium text-slate-400 mt-2 italic">* Registre el costo de servicios externos. Este monto se sumará al total de repuestos de la OT.</p>
+        </div>
 
         {/* Meter reading at completion (for meter-based PMs) */}
         {isMeterBased && linkedPoint && (

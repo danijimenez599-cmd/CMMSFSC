@@ -14,19 +14,29 @@ const TABS = [
 
 type TabId = typeof TABS[number]['id'];
 
-export default function PmEngineView() {
-  const { fetchPmData } = useStore() as any;
-  const [activeTab, setActiveTab] = useState<TabId>('plans');
+interface PmEngineViewProps {
+  mode?: 'plans' | 'scheduler';
+}
 
-  useEffect(() => { fetchPmData(); }, []);
+export default function PmEngineView({ mode = 'plans' }: PmEngineViewProps) {
+  const { fetchPmData } = useStore() as any;
+  const [activeTab, setActiveTab] = useState<TabId>(mode === 'plans' ? 'plans' : 'calendar');
+
+  useEffect(() => { 
+    fetchPmData(); 
+  }, []);
+
+  // Filter tabs based on mode
+  const visibleTabs = mode === 'plans' 
+    ? TABS.filter(t => t.id === 'plans')
+    : TABS.filter(t => t.id !== 'plans');
 
   return (
     <div className="flex flex-col h-full bg-bg-app">
-      {/* Tab bar */}
+      {/* Tab bar - Only show if there's more than 1 tab or if we are in scheduler mode */}
       <div className="bg-white border-b border-border px-4 sm:px-6 py-2 flex items-center gap-1 sticky top-0 z-10">
-        <h1 className="font-display font-bold text-tx mr-4 hidden sm:block">Mantenimiento Preventivo</h1>
         <div className="flex gap-1 bg-bg-3 p-1 rounded-xl border border-border">
-          {TABS.map(tab => (
+          {visibleTabs.map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}

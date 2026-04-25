@@ -204,15 +204,28 @@ export function runScheduler(
 
     console.log(`[Engine] GENERANDO OT para AP ${assetPlan.id} (${plan.name}). Razón: ${reason}`);
 
-    // Build WO tasks
+    // Build WO tasks based on cycle multiplier
+    const currentCycle = assetPlan.currentCycleIndex || 1;
     const planTasks = pmTasks
-      .filter((t: any) => t.pmPlanId === plan.id)
+      .filter((t: any) => {
+        if (t.pmPlanId !== plan.id) return false;
+        // Logic: Include task if (Current Cycle % Multiplier == 0)
+        return currentCycle % (t.frequencyMultiplier || 1) === 0;
+      })
       .sort((a: any, b: any) => a.sortOrder - b.sortOrder)
       .map((t: any, idx: number) => ({
         id: generateId(),
         description: t.description,
         sortOrder: idx,
       }));
+
+    // If no tasks match this cycle (rare but possible), we still generate the WO 
+    // or we could skip. Industrial preference: Always have at least the x1 tasks.
+    if (planTasks.length === 0) {
+      console.log(`[Engine] Saltando AP ${assetPlan.id}: No hay tareas para el ciclo ${currentCycle}`);
+      skipped.push(assetPlan.id);
+      continue;
+    }
 
     // Priority based on criticality
     const priorityMap: Record<string, string> = {
@@ -245,6 +258,7 @@ export function runScheduler(
       dueDate,
       pmPlanIdSnapshot: plan.id,
       pmPlanNameSnapshot: plan.name,
+      pmCycleIndex: currentCycle,
       tasks: planTasks,
     });
   }

@@ -11,7 +11,7 @@ interface WoListPanelProps {
 }
 
 export default function WoListPanel({ onNewWo }: WoListPanelProps) {
-  const { workOrders, selectedWoId, selectWo, assets, users } = useStore() as any;
+  const { workOrders, selectedWoId, selectWo, assets, users, pmPlans, assetPlans } = useStore() as any;
 
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('active');
@@ -218,7 +218,28 @@ export default function WoListPanel({ onNewWo }: WoListPanelProps) {
                     #{wo.woNumber}
                   </span>
                   {wo.woType === 'preventive' && (
-                    <Calendar size={10} className="text-brand" />
+                    <div className="flex items-center gap-1.5">
+                      <Calendar size={10} className="text-brand" />
+                      {wo.pmCycleIndex && (
+                        <span className="text-[9px] font-black text-brand bg-brand/5 px-1.5 py-0.5 rounded border border-brand/10">
+                          C{wo.pmCycleIndex} 
+                          {(() => {
+                            const ap = assetPlans.find((p: any) => p.id === wo.assetPlanId);
+                            const plan = pmPlans.find((p: any) => p.id === (ap?.pmPlanId || wo.generatedFromPlanId));
+                            if (!plan) return '';
+                            
+                            const val = plan.triggerType === 'meter' 
+                              ? (plan.meterIntervalValue || 0) * wo.pmCycleIndex
+                              : (plan.intervalValue || 0) * wo.pmCycleIndex;
+                            const unit = plan.triggerType === 'meter' 
+                              ? plan.meterIntervalUnit?.toUpperCase() 
+                              : (plan.intervalUnit === 'months' ? 'M' : plan.intervalUnit === 'days' ? 'D' : 'W');
+                            
+                            return ` • ${val.toLocaleString()}${unit}`;
+                          })()}
+                        </span>
+                      )}
+                    </div>
                   )}
                 </div>
                 <Badge variant={wo.status as any} className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5">
@@ -248,13 +269,18 @@ export default function WoListPanel({ onNewWo }: WoListPanelProps) {
                     {assignee?.fullName || 'S/A'}
                   </span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col items-end gap-1">
                   {wo.dueDate && (
                     <span className={cn(
                       'text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded',
-                      overdue ? 'bg-brand text-white shadow-sm' : 'text-slate-400'
+                      overdue && wo.status !== 'completed' ? 'bg-brand text-white shadow-sm' : 'text-slate-400'
                     )}>
-                      {overdue ? 'Vencida' : formatDate(wo.dueDate)}
+                      Vence: {formatDate(wo.dueDate)}
+                    </span>
+                  )}
+                  {wo.status === 'completed' && wo.completedAt && (
+                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-50 text-emerald-600">
+                      Ejecución: {formatDate(wo.completedAt)}
                     </span>
                   )}
                 </div>

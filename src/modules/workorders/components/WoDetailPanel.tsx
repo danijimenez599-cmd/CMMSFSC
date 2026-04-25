@@ -12,7 +12,7 @@ import {
   Wrench, Package, MessageSquare, ChevronDown, AlertTriangle,
   History, Settings, Activity, Gauge, DollarSign, Briefcase,
   FileText, ArrowRight, ShieldCheck, Shield, Layers, Info, ListChecks,
-  Plus, Play, Pause, RotateCcw, UserPlus, CheckCircle, XCircle, X, Calendar
+  Plus, Play, Pause, RotateCcw, UserPlus, CheckCircle, XCircle, X, Calendar, Truck
 } from 'lucide-react';
 import WoCompleteForm from './WoCompleteForm';
 
@@ -66,6 +66,8 @@ export default function WoDetailPanel() {
   const asset = assets.find((a: any) => a.id === wo.assetId);
   const assignee = users.find((u: any) => u.id === wo.assignedTo);
   const creator = users.find((u: any) => u.id === wo.createdBy);
+  const vendor = store.vendors?.find((v: any) => v.id === wo.vendorId);
+  
   const woTaskList = woTasks.filter((t: any) => t.workOrderId === wo.id).sort((a: any, b: any) => a.sortOrder - b.sortOrder);
   const commentList = woComments.filter((c: any) => c.workOrderId === wo.id);
   const partList = partUsages.filter((p: any) => p.workOrderId === wo.id);
@@ -76,7 +78,9 @@ export default function WoDetailPanel() {
   const isCancelled = wo.status === 'cancelled';
   const overdue = isOverdue(wo);
   const completedTaskCount = woTaskList.filter((t: any) => t.completed).length;
+  
   const totalParts = partList.reduce((sum: number, p: any) => sum + (p.quantity * (p.unitCost || 0)), 0);
+  const totalInvestment = totalParts + (wo.externalServiceCost || 0);
 
   const handleStatusChange = async (status: string) => {
     try {
@@ -128,7 +132,31 @@ export default function WoDetailPanel() {
             <span className="font-mono text-[11px] font-bold text-brand bg-brand/10 px-2 py-1 rounded tracking-wider shrink-0">#{wo.woNumber}</span>
             <div className="min-w-0">
               <h2 className="font-display text-xl font-bold text-slate-900 truncate tracking-tight leading-tight">{wo.title}</h2>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{WO_TYPE_LABELS[wo.woType]} • {wo.assetPlanId ? 'Planificado' : 'Manual'}</p>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5 flex items-center gap-2">
+                {WO_TYPE_LABELS[wo.woType]} 
+                {wo.pmCycleIndex && (
+                  <>
+                    <span className="text-slate-200">/</span>
+                    <span className="text-brand font-black bg-brand/5 px-2 py-0.5 rounded border border-brand/10">
+                      CICLO {wo.pmCycleIndex} 
+                      {(() => {
+                        const ap = store.assetPlans?.find((p: any) => p.id === wo.assetPlanId);
+                        const plan = store.pmPlans?.find((p: any) => p.id === (ap?.pmPlanId || wo.generatedFromPlanId));
+                        if (!plan) return '';
+                        const val = plan.triggerType === 'meter' 
+                          ? (plan.meterIntervalValue || 0) * wo.pmCycleIndex
+                          : (plan.intervalValue || 0) * wo.pmCycleIndex;
+                        const unitLabel = plan.triggerType === 'meter' 
+                          ? plan.meterIntervalUnit?.toUpperCase() 
+                          : (plan.intervalUnit === 'months' ? 'MESES' : plan.intervalUnit === 'days' ? 'DÍAS' : 'SEMANAS');
+                        return ` (${val.toLocaleString()} ${unitLabel})`;
+                      })()}
+                    </span>
+                  </>
+                )}
+                {!wo.pmCycleIndex && wo.assetPlanId && <span className="text-slate-300">• Planificado</span>}
+                {!wo.assetPlanId && <span className="text-slate-300">• Manual</span>}
+              </p>
             </div>
             <div className="flex items-center gap-2 shrink-0 ml-4">
               <Badge variant={wo.status as any} dot>{WO_STATUS_LABELS[wo.status]}</Badge>
@@ -160,10 +188,19 @@ export default function WoDetailPanel() {
 
           <div className="space-y-3">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 shrink-0"><User size={18} /></div>
+              <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 shrink-0">
+                {vendor ? <Truck size={18} className="text-brand" /> : <User size={18} />}
+              </div>
               <div className="min-w-0 flex-1">
-                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Responsable</p>
-                {assignee ? (
+                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">
+                  {vendor ? 'Contratista / Proveedor' : 'Responsable Interno'}
+                </p>
+                {vendor ? (
+                  <div>
+                    <p className="text-[13px] font-bold text-slate-900 truncate tracking-tight">{vendor.name}</p>
+                    <p className="text-[9px] font-bold text-slate-400 truncate tracking-widest">SUPERVISIÓN: {assignee?.fullName || '—'}</p>
+                  </div>
+                ) : assignee ? (
                   <div className="flex items-center gap-2">
                     <Avatar name={assignee.fullName} size="xs" />
                     <span className="text-[13px] font-bold text-slate-900 truncate">{assignee.fullName}</span>
@@ -177,15 +214,27 @@ export default function WoDetailPanel() {
 
           <div className="space-y-3">
             <div className="flex items-center gap-3">
-              <div className={cn('w-9 h-9 rounded-xl flex items-center justify-center shrink-0', overdue ? 'bg-brand/10 text-brand' : 'bg-slate-100 text-slate-500')}>
+              <div className={cn('w-9 h-9 rounded-xl flex items-center justify-center shrink-0', overdue && !isCompleted ? 'bg-brand/10 text-brand' : 'bg-slate-100 text-slate-500')}>
                 <Calendar size={18} />
               </div>
               <div className="min-w-0">
-                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Vencimiento</p>
-                <p className={cn('text-[13px] font-bold tracking-tight', overdue ? 'text-brand' : 'text-slate-900')}>
-                  {wo.dueDate ? formatDate(wo.dueDate) : '—'}
-                </p>
-                <p className="text-[9px] font-bold text-slate-400">Creada: {formatDate(wo.createdAt)}</p>
+                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Cronología del Servicio</p>
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-bold text-slate-400 w-12">Vence:</span>
+                    <span className={cn('text-[13px] font-bold tracking-tight', overdue && !isCompleted ? 'text-brand' : 'text-slate-900')}>
+                      {wo.dueDate ? formatDate(wo.dueDate) : 'S/F'}
+                    </span>
+                  </div>
+                  {isCompleted && wo.completedAt && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-bold text-emerald-600 w-12">Cierre:</span>
+                      <span className="text-[13px] font-bold text-emerald-600 tracking-tight">
+                        {formatDate(wo.completedAt)}
+                      </span>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -460,11 +509,34 @@ export default function WoDetailPanel() {
                           </tr>
                         );
                       })}
+                      
+                      {/* EXTERNAL SERVICE ROW */}
+                      {(wo.externalServiceCost > 0 || wo.vendorId) && (
+                        <tr className="bg-amber-50/30 border-t-2 border-slate-100">
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-2">
+                              <Truck size={14} className="text-amber-600" />
+                              <p className="text-[13px] font-bold text-slate-900">Servicio Externo: {vendor?.name || 'Proveedor'}</p>
+                            </div>
+                            <p className="text-[9px] font-bold text-amber-600 uppercase tracking-widest mt-0.5">REF: {wo.externalInvoiceRef || 'S/FACTURA'}</p>
+                          </td>
+                          <td className="px-6 py-4 text-center">
+                            <span className="text-xs font-bold text-slate-900 bg-amber-100 px-2 py-1 rounded-lg">GLB</span>
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <span className="text-xs font-bold text-slate-400">${(wo.externalServiceCost || 0).toFixed(2)}</span>
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <span className="text-sm font-bold text-slate-900 font-mono">${(wo.externalServiceCost || 0).toFixed(2)}</span>
+                          </td>
+                          {!isCompleted && <td className="px-6 py-4"></td>}
+                        </tr>
+                      )}
                     </tbody>
                   </table>
                   <div className="bg-slate-900 p-6 flex justify-between items-center text-white">
-                    <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">Inversión Total</span>
-                    <span className="text-2xl font-display font-bold tracking-tight font-mono text-white">${totalParts.toFixed(2)}</span>
+                    <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">Inversión Total Acumulada</span>
+                    <span className="text-2xl font-display font-bold tracking-tight font-mono text-white">${totalInvestment.toFixed(2)}</span>
                   </div>
                 </div>
               </div>

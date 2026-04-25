@@ -258,20 +258,62 @@ export default function PlansView() {
                 </div>
               )}
 
-              {/* Checklist Section */}
+              {/* Checklist Section Agrupado */}
               <div className="bg-white border border-slate-100 rounded-3xl shadow-sm overflow-hidden">
                 <div className="bg-slate-50/50 px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Checklist de Inspección</p>
-                  <Badge variant="neutral" className="text-[10px] font-bold">{selectedPlanTasks.length} TAREAS</Badge>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Checklist de Operaciones por Ciclo</p>
+                  <Badge variant="neutral" className="text-[10px] font-bold">{selectedPlanTasks.length} TAREAS TOTALES</Badge>
                 </div>
+                
                 {selectedPlanTasks.length > 0 ? (
-                  <div className="divide-y divide-slate-50">
-                    {selectedPlanTasks.map((t: PmTask, i: number) => (
-                      <div key={t.id} className="px-6 py-4 flex gap-4 hover:bg-slate-50/50 transition-colors group">
-                        <span className="text-xs font-mono font-bold text-slate-300 group-hover:text-brand transition-colors pt-0.5">{(i + 1).toString().padStart(2, '0')}</span>
-                        <span className="text-sm text-slate-700 font-medium leading-relaxed">{t.description}</span>
-                      </div>
-                    ))}
+                  <div className="divide-y divide-slate-100">
+                    {/* Agrupación por multiplicador */}
+                    {Array.from(new Set(selectedPlanTasks.map(t => t.frequencyMultiplier || 1)))
+                      .sort((a, b) => a - b)
+                      .map(multiplier => {
+                        const tasksInGroup = selectedPlanTasks.filter(t => (t.frequencyMultiplier || 1) === multiplier);
+                        
+                        // Cálculo de valor absoluto
+                        const isCalendar = selectedPlan.triggerType === 'calendar' || selectedPlan.triggerType === 'hybrid';
+                        const isMeter = selectedPlan.triggerType === 'meter' || selectedPlan.triggerType === 'hybrid';
+                        
+                        let absoluteInterval = '';
+                        if (isCalendar && selectedPlan.intervalValue) {
+                          const total = selectedPlan.intervalValue * multiplier;
+                          const units: Record<string, string> = { 
+                            days: 'Días', weeks: 'Semanas', months: 'Meses', years: 'Años' 
+                          };
+                          absoluteInterval = `Cada ${total} ${units[selectedPlan.intervalUnit || 'months']}`;
+                        } else if (isMeter && selectedPlan.meterIntervalValue) {
+                          const total = selectedPlan.meterIntervalValue * multiplier;
+                          absoluteInterval = `Cada ${total.toLocaleString()} ${selectedPlan.meterIntervalUnit?.toUpperCase()}`;
+                        }
+
+                        return (
+                          <div key={multiplier} className="bg-white">
+                            <div className="px-6 py-3 bg-slate-50/30 flex items-center justify-between border-b border-slate-50">
+                              <div className="flex items-center gap-2">
+                                <Badge variant="brand" className="text-[9px] font-black h-5 px-1.5">x{multiplier}</Badge>
+                                <span className="text-[11px] font-bold text-slate-900 uppercase tracking-tight">
+                                  {multiplier === 1 ? 'Rutina Base' : `Frecuencia Extendida`}
+                                </span>
+                              </div>
+                              <span className="text-[10px] font-mono font-bold text-brand uppercase">{absoluteInterval}</span>
+                            </div>
+                            <div className="divide-y divide-slate-50">
+                              {tasksInGroup.map((t, i) => (
+                                <div key={t.id} className="px-8 py-4 flex gap-4 hover:bg-slate-50/50 transition-colors group">
+                                  <span className="text-[10px] font-mono font-bold text-slate-300 group-hover:text-brand transition-colors pt-0.5">
+                                    {(i + 1).toString().padStart(2, '0')}
+                                  </span>
+                                  <span className="text-sm text-slate-700 font-medium leading-relaxed">{t.description}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })
+                    }
                   </div>
                 ) : (
                   <div className="p-12 text-center">
