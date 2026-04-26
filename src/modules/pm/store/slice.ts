@@ -38,7 +38,7 @@ export interface PmSlice {
   addMeterReading: (reading: Omit<MeterReading, 'id' | 'readingAt'>) => Promise<void>;
 
   runPmScheduler: (horizonDays: number) => Promise<{ generatedCount: number; skippedCount: number }>;
-  recalcNextDue: (assetPlanId: string, completedAt: string, meterValue?: number) => Promise<void>;
+  recalcNextDue: (assetPlanId: string, completedAt: string, meterValue?: number, completedCycleIndex?: number) => Promise<void>;
 }
 
 export const createPmSlice: StateCreator<StoreState, [], [], PmSlice> = (set, get) => ({
@@ -490,22 +490,33 @@ export const createPmSlice: StateCreator<StoreState, [], [], PmSlice> = (set, ge
    *   nextDueMeter = actualReadingAtCompletion + interval
    *   Schedule drifts to always be X hours after the last service.
    */
-  recalcNextDue: async (assetPlanId, completedAt, meterValue) => {
+  recalcNextDue: async (assetPlanId, completedAt, meterValue, completedCycleIndex) => {
     const assetPlan = get().assetPlans.find(ap => ap.id === assetPlanId);
     if (!assetPlan) return;
 
     const plan = get().pmPlans.find(p => p.id === assetPlan.pmPlanId);
     if (!plan) return;
 
+    // Use the actual effective cycle from the WO (completedCycleIndex = wo.pmCycleIndex).
+    // Falls back to currentCycleIndex for manual WOs (no pmCycleIndex).
+    const nextBase = (completedCycleIndex ?? assetPlan.currentCycleIndex ?? 1) + 1;
+
+    // Fixed-mode: when the engine jumped ahead (e.g. cycle 1→12 via heaviestCycleInRange),
+    // the threshold must advance by the full number of consumed intervals, not just 1.
+    // For floating mode or normal single-step operation this is always 1.
+    const cyclesConsumed = plan.intervalMode === 'fixed'
+      ? Math.max(1, (completedCycleIndex ?? assetPlan.currentCycleIndex ?? 1) - (assetPlan.currentCycleIndex ?? 1) + 1)
+      : 1;
+
     const updates: any = {
       last_completed_at: completedAt,
       wo_count: assetPlan.woCount + 1,
-      current_cycle_index: (assetPlan.currentCycleIndex || 1) + 1,
+      current_cycle_index: nextBase,
     };
 
     // Calendar trigger: advance next due date (fixed/floating handled inside calcNextDueDate)
     if (plan.triggerType === 'calendar' || plan.triggerType === 'hybrid') {
-      updates.next_due_date = calcNextDueDate(plan, assetPlan, completedAt);
+      updates.next_due_date = calcNextDueDate(plan, assetPlan, completedAt, cyclesConsumed);
     }
 
     // Meter trigger
@@ -514,9 +525,9 @@ export const createPmSlice: StateCreator<StoreState, [], [], PmSlice> = (set, ge
         const isFixed = plan.intervalMode === 'fixed';
 
         if (isFixed && assetPlan.nextDueMeter != null) {
-          // FIXED: advance from the previous scheduled threshold, not from actual completion value.
-          // Keeps the 100/200/300h cadence rigid.
-          updates.next_due_meter = assetPlan.nextDueMeter + plan.meterIntervalValue;
+          // FIXED: advance from the previous scheduled threshold by all consumed intervals.
+          // Keeps the rigid 100/200/300h cadence and prevents cascade re-triggers after a jump.
+          updates.next_due_meter = assetPlan.nextDueMeter + cyclesConsumed * plan.meterIntervalValue;
         } else {
           // FLOATING: advance from the actual reading at completion.
           // Falls back to point's current value when no explicit reading is provided.

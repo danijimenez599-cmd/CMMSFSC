@@ -23,10 +23,13 @@ export function calcNextDueDate(
   plan: PmPlan,
   assetPlan: Pick<AssetPlan, 'nextDueDate' | 'lastCompletedAt'>,
   completedAt?: string,
+  cyclesConsumed: number = 1,
 ): string {
   if (!plan.intervalValue || !plan.intervalUnit) {
     return addDays(new Date(), 30).toISOString();
   }
+
+  const n = Math.max(1, cyclesConsumed);
 
   let base: Date;
   if (plan.intervalMode === 'fixed' && assetPlan.nextDueDate) {
@@ -41,11 +44,11 @@ export function calcNextDueDate(
   }
 
   switch (plan.intervalUnit) {
-    case 'days':   return addDays(base, plan.intervalValue).toISOString();
-    case 'weeks':  return addWeeks(base, plan.intervalValue).toISOString();
-    case 'months': return addMonths(base, plan.intervalValue).toISOString();
-    case 'years':  return addYears(base, plan.intervalValue).toISOString();
-    default:       return addMonths(base, 1).toISOString();
+    case 'days':   return addDays(base, plan.intervalValue * n).toISOString();
+    case 'weeks':  return addWeeks(base, plan.intervalValue * n).toISOString();
+    case 'months': return addMonths(base, plan.intervalValue * n).toISOString();
+    case 'years':  return addYears(base, plan.intervalValue * n).toISOString();
+    default:       return addMonths(base, n).toISOString();
   }
 }
 
@@ -127,23 +130,48 @@ function calcCycleWeight(planTasks: any[], cycleIndex: number): number {
 // ── Effective cycle calculation ────────────────────────────────────────────
 
 /**
- * Returns the cycle index the engine should use for WO generation, accounting
- * for intervals that elapsed while a previous WO was left open.
+ * Scans [from..to] and returns the cycle with the highest task weight.
+ * On ties (equal weight) prefers the latest cycle — the most overdue critical event.
+ * This guarantees that a skipped x12 annual is found even if the arithmetic
+ * extreme lands on a lighter cycle (e.g. range [1..13] → picks 12, not 13).
+ */
+function heaviestCycleInRange(planTasks: any[], from: number, to: number): number {
+  let heaviest = from;
+  let maxWeight = calcCycleWeight(planTasks, from);
+
+  for (let c = from + 1; c <= to; c++) {
+    const w = calcCycleWeight(planTasks, c);
+    if (w >= maxWeight) {
+      maxWeight = w;
+      heaviest = c;
+    }
+  }
+
+  return heaviest;
+}
+
+/**
+ * Returns the cycle index the engine should use for WO generation.
  *
- * Example (meter plan, interval = 500 h):
- *   currentCycleIndex = 1, nextDueMeter = 500, currentMeter = 6000
- *   overshoot = 6000 - 500 = 5500 → extraCycles = floor(5500/500) = 11
- *   effectiveCycle = 1 + 11 = 12  → annual maintenance fires
+ * When multiple intervals have elapsed (WO left open or maintenance skipped),
+ * it scans the full range of reachable cycles and returns the one with the
+ * highest task weight — so a skipped x12 annual always takes priority over
+ * a lighter cycle that happens to be the arithmetic extreme.
  *
- * Example (calendar plan, interval = 1 month):
- *   currentCycleIndex = 1, nextDueDate = 2025-01-01, today = 2026-01-01
- *   daysPast = 365 → extraCycles = floor(365/30.44) = 11 → effectiveCycle = 12
+ * Example (meter, interval = 500 h):
+ *   base = 1, nextDueMeter = 500, currentMeter = 6000
+ *   range [1..12] → heaviest cycle = 12 (if x12 task exists) ✓
+ *
+ * Example (calendar, interval = 1 month, tasks x1/x3/x12):
+ *   base = 1, nextDueDate 12 months ago → range [1..13]
+ *   heaviest = cycle 12 (annual), not cycle 13 (routine) ✓
  */
 function calcEffectiveCycleIndex(
   assetPlan: AssetPlan,
   plan: PmPlan,
   today: Date,
   currentMeterValue: number,
+  planTasks: any[],
 ): number {
   const base = assetPlan.currentCycleIndex || 1;
 
@@ -156,14 +184,18 @@ function calcEffectiveCycleIndex(
   ) {
     const overshoot = currentMeterValue - assetPlan.nextDueMeter;
     if (overshoot > 0) {
-      return base + Math.floor(overshoot / plan.meterIntervalValue);
+      const maxCycle = base + Math.floor(overshoot / plan.meterIntervalValue);
+      return heaviestCycleInRange(planTasks, base, maxCycle);
     }
-    return base;
+    // Pure meter plan: meter hasn't fired, nothing more to check.
+    // Hybrid plan: meter hasn't fired — fall through to calendar dimension scan
+    // so a skipped heavy cycle (e.g. x12 annual) is still detected.
+    if (plan.triggerType === 'meter') return base;
   }
 
-  // Calendar dimension (calendar-only plans)
+  // Calendar dimension (calendar-only plans and hybrid when meter hasn't fired)
   if (
-    plan.triggerType === 'calendar' &&
+    (plan.triggerType === 'calendar' || plan.triggerType === 'hybrid') &&
     assetPlan.nextDueDate &&
     plan.intervalValue &&
     plan.intervalUnit
@@ -173,7 +205,8 @@ function calcEffectiveCycleIndex(
       const daysPast = differenceInDays(today, nextDue);
       const intervalDays = intervalToDays(plan.intervalValue, plan.intervalUnit);
       if (intervalDays > 0) {
-        return base + Math.floor(daysPast / intervalDays);
+        const maxCycle = base + Math.floor(daysPast / intervalDays);
+        return heaviestCycleInRange(planTasks, base, maxCycle);
       }
     }
   }
@@ -285,11 +318,15 @@ export function runScheduler(
       continue;
     }
 
-    // ── Step 2: Effective cycle index ────────────────────────────────────
-    const effectiveCycle = calcEffectiveCycleIndex(assetPlan, plan, today, currentMeterValue);
-
-    // ── Step 3: Task list for this cycle (modular arithmetic) ────────────
+    // ── Step 2: Task list for this plan ──────────────────────────────────
+    // Must be computed before calcEffectiveCycleIndex so the range scan
+    // can evaluate task weights when looking for the heaviest missed cycle.
     const planTasks = pmTasks.filter((t: any) => t.pmPlanId === plan.id);
+
+    // ── Step 3: Effective cycle index ────────────────────────────────────
+    const effectiveCycle = calcEffectiveCycleIndex(assetPlan, plan, today, currentMeterValue, planTasks);
+
+    // ── Step 4: Candidate tasks for this cycle (modular arithmetic) ──────
     const candidateTasks = planTasks
       .filter((t: any) => effectiveCycle % (t.frequencyMultiplier || 1) === 0)
       .sort((a: any, b: any) => a.sortOrder - b.sortOrder)

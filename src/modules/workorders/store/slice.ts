@@ -483,14 +483,19 @@ export const createWoSlice: StateCreator<WoSlice & { currentUser?: any; inventor
         });
       }
 
+      // Refresh workOrders state BEFORE recalcNextDue so that the hasOpenWo
+      // guard inside recalcNextDue sees this WO as 'completed' — otherwise the
+      // calendar auto-trigger is always blocked by the stale 'open' status.
+      await get().fetchWorkOrders();
+
       try {
-        await get().recalcNextDue!(wo.assetPlanId, completedAt, finalMeterValue);
+        await get().recalcNextDue!(wo.assetPlanId, completedAt, finalMeterValue, wo.pmCycleIndex ?? undefined);
       } catch (e) {
         console.error('recalcNextDue failed:', e);
       }
+    } else {
+      await get().fetchWorkOrders();
     }
-
-    await get().fetchWorkOrders();
   },
 
   addTask: async (woId, description) => {
