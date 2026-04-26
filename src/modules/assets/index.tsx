@@ -7,11 +7,19 @@ import AssetDetailPanel from './components/AssetDetailPanel';
 import AssetSidePanel from './components/AssetSidePanel';
 import AssetForm from './components/AssetForm';
 import { checkAssetDeletability } from './utils/assetHelpers';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import { cn, MobilePanelTransition } from '../../shared/components';
+import WoDetailPanel from '../workorders/components/WoDetailPanel';
+import WoListPanel from '../workorders/components/WoListPanel';
 
 export default function AssetRegistryView() {
-  const { fetchAssets, assets, selectedAssetId, selectAsset, deleteAsset, decommissionAsset, showToast, currentUser, assetPlans, workOrders, measurementPoints } = useStore() as any;
+  const { 
+    fetchAssets, assets, selectedAssetId, selectAsset, deleteAsset, 
+    decommissionAsset, showToast, currentUser, assetPlans, workOrders, 
+    measurementPoints, isAuditMode, setAuditMode, selectedWoId,
+    assetHistory, selectWo
+  } = useStore() as any;
+
   const [formOpen, setFormOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [defaultParentId, setDefaultParentId] = useState<string | null>(null);
@@ -30,7 +38,20 @@ export default function AssetRegistryView() {
     onConfirm: () => {},
   });
 
-  useEffect(() => { fetchAssets(); }, []);
+  useEffect(() => { 
+    fetchAssets(); 
+    return () => {
+      setAuditMode(false);
+      selectWo(null);
+    };
+  }, []);
+
+  // Sync history if asset changes while in audit mode
+  useEffect(() => {
+    if (isAuditMode && selectedAssetId) {
+      fetchAssetHistory(selectedAssetId);
+    }
+  }, [selectedAssetId, isAuditMode]);
 
   const editingAsset = editingId ? assets.find((a: any) => a.id === editingId) : null;
 
@@ -108,13 +129,17 @@ export default function AssetRegistryView() {
         />
       </MobilePanelTransition>
 
-      {/* Panel detalle */}
+      {/* Panel detalle / Lista de Auditoría */}
       <MobilePanelTransition 
         activePanel={mobileView} 
         panelKey="detail" 
-        className="flex-1 min-w-0"
+        className={cn(
+          "min-w-0", 
+          isAuditMode 
+            ? "xl:w-[450px] xl:border-r xl:border-slate-200" 
+            : "flex-1"
+        )}
       >
-        {/* Barra de navegación móvil */}
         <div className="lg:hidden flex items-center justify-between px-4 py-2 bg-white border-b border-slate-200 shrink-0">
           <button
             onClick={() => setMobileView('tree')}
@@ -122,23 +147,27 @@ export default function AssetRegistryView() {
           >
             <ChevronLeft size={18} /> Activos
           </button>
-          {selectedAssetId && (
-            <button
-              onClick={() => setMobileView('side')}
-              className="flex items-center gap-1 text-sm font-bold text-slate-600"
-            >
-              Planes PM <ChevronRight size={18} />
-            </button>
-          )}
         </div>
-        <AssetDetailPanel onEdit={(id) => { setEditingId(id); setFormOpen(true); }} />
+        {isAuditMode ? (
+          <WoListPanel 
+            customWorkOrders={assetHistory}
+            onSelect={selectWo}
+            onNewWo={() => {}}
+            title="Auditoría: Historial Total"
+            hideNewButton
+          />
+        ) : (
+          <AssetDetailPanel onEdit={(id) => { setEditingId(id); setFormOpen(true); }} />
+        )}
       </MobilePanelTransition>
 
-      {/* Panel lateral Planes PM */}
+      {/* Panel lateral Planes PM / Detalle OT en Auditoría */}
       <MobilePanelTransition 
         activePanel={mobileView} 
         panelKey="side" 
-        className="xl:w-[400px] xl:border-l xl:border-slate-200"
+        className={cn(
+          isAuditMode ? "flex-1" : (selectedAssetId ? "xl:w-[450px] xl:border-l xl:border-slate-200" : "w-0 overflow-hidden")
+        )}
       >
         {/* Botón volver — solo visible en móvil */}
         <div className="xl:hidden flex items-center px-4 py-2 bg-white border-b border-slate-200 shrink-0">
@@ -146,10 +175,22 @@ export default function AssetRegistryView() {
             onClick={() => setMobileView('detail')}
             className="flex items-center gap-1 text-sm font-bold text-brand"
           >
-            <ChevronLeft size={18} /> Detalle del Activo
+            <ChevronLeft size={18} /> {isAuditMode ? 'Lista de Auditoría' : 'Detalle del Activo'}
           </button>
         </div>
-        {selectedAssetId && <AssetSidePanel />}
+        {isAuditMode ? (
+          selectedWoId ? (
+            <WoDetailPanel />
+          ) : (
+            <div className="h-full flex flex-col items-center justify-center p-10 text-center bg-slate-50 text-slate-400">
+              <Search size={48} className="mb-4 opacity-20" />
+              <h4 className="text-[10px] font-black uppercase tracking-[0.2em]">Seleccione una OT</h4>
+              <p className="text-[10px] mt-2 leading-relaxed">Haga clic en una orden de la lista central para auditar sus detalles técnicos, causa raíz y resolución.</p>
+            </div>
+          )
+        ) : (
+          selectedAssetId ? <AssetSidePanel /> : null
+        )}
       </MobilePanelTransition>
 
       <AssetForm

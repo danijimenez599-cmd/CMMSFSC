@@ -16,7 +16,9 @@ import {
   Wrench,
   AlertTriangle,
   CheckCircle2,
-  Unlink
+  Unlink,
+  History,
+  Search
 } from 'lucide-react';
 import { useStore } from '../../../store';
 import { Badge, Button, cn, Modal, Select, FormField } from '../../../shared/components';
@@ -90,7 +92,7 @@ export default function AssetSidePanel() {
     selectedAssetId, setModule = () => {}, workOrders = [], pmPlans = [],
     assetPlans = [], measurementPoints = [], pmTasks = [],
     saveAssetPlan = () => {}, unlinkAssetPlan, showToast = () => {},
-    projectionMonths,
+    projectionMonths
   } = store;
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [selectedPlanId, setSelectedPlanId] = useState('');

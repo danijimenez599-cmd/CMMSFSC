@@ -29,7 +29,7 @@ Usa exactamente este vocabulario al generar código, comentarios y migraciones:
 | **Repuesto Consumido** | `part_usages` | Registro de qué ítems del inventario se usaron en una OT. Vincula `work_orders` con `inventory_items`. |
 | **Movimiento de Stock** | `stock_movements` | Trazabilidad completa de entradas/salidas del almacén. Tipo: `in`, `out`, `return`, `adjustment`. |
 | **Snapshot** | `*_name_snapshot` | Texto plano congelado al cerrar una OT. El nombre del técnico/activo/proveedor en ese momento exacto. |
-| **Soft Delete** | `status='decommissioned'` / `active=false` | Desactivación lógica. La entidad deja de aparecer en la UI pero su historial permanece intacto. |
+| **Soft Delete** | `active=false` / `status='decommissioned'` | Desactivación lógica. La entidad deja de aparecer en la UI pero su historial permanece intacto. |
 
 ---
 
@@ -134,6 +134,15 @@ const displayPmPlan = wo.status === 'completed'
 
 ---
 
+### REGLA 5: Diseño Responsive y Mobile-First
+
+El sistema está diseñado para operar en tablets y dispositivos móviles industriales.
+- El Sidebar es colapsable y se convierte en menú hamburguesa en pantallas pequeñas (< 1024px).
+- Usa el estado reactivo del store para adaptar layouts complejos (ej. paneles laterales).
+- Los modales deben ocupar el 100% del ancho en mobile.
+
+---
+
 ## 3. MAPA DE ESTRUCTURA DEL CÓDIGO
 
 ### Árbol de Directorios Relevante
@@ -145,10 +154,10 @@ apex-cmms/
 ├── seed_data.sql               ← Datos de prueba. Incluye jerarquía de activos.
 │
 └── src/
-    ├── App.tsx                 ← Shell principal: sidebar, routing por activeModule, auth guard.
+    ├── App.tsx                 ← Shell principal: sidebar, routing por activeModule (Dashboard, Assets, Work Orders, Inventory, PM, Scheduler, Settings, Help).
     ├── store/
     │   ├── index.ts            ← Combinación de todos los slices de Zustand en un store unificado.
-    │   ├── uiSlice.ts          ← Estado de UI: módulo activo (AppModule), sidebar, toasts.
+    │   ├── uiSlice.ts          ← Estado de UI: módulo activo (AppModule), sidebar, toasts, responsive state.
     │   ├── authSlice.ts        ← Autenticación Supabase, usuario actual, perfiles.
     │   └── alertSlice.ts       ← Alertas CBM en memoria (no persisten en DB).
     │
@@ -177,11 +186,10 @@ apex-cmms/
         │   ├── types.ts        ← InventoryItem, StockMovement, PartUsage
         │   └── components/InventoryView.tsx
         │
-        ├── pm/                 ← Módulo de Mantenimiento Preventivo
+        ├── pm/                 ← Módulo de Mantenimiento Preventivo (Planes + Scheduler)
         │   ├── store/
         │   │   ├── slice.ts    ← savePlan, unlinkAssetPlan (soft delete), runPmScheduler,
-        │   │   │                  addMeterReading (CBM trigger), projectionMonths,
-        │   │   │                  setProjectionMonths (clamp 1-24)
+        │   │   │                  addMeterReading (CBM trigger), projectionMonths
         │   │   └── pmEngine.ts ← Scheduling: calcula nextDueDate, genera WOs
         │   ├── utils/
         │   │   └── projections.ts ← calculateProjections(assetPlan, pmPlan, horizonMonths)
@@ -190,12 +198,12 @@ apex-cmms/
         │       ├── PmCalendarView.tsx          ← Calendario: OTs reales (negro) + ghost (azul)
         │       ├── PmSchedulerPanel.tsx         ← Motor de generación manual
         │       ├── PmSettingsView.tsx           ← Tabs: Magnitudes, Proveedores, Motor PM
-        │       └── MeasurementPointsPanel.tsx   ← Instrumentos CBM; empty state si catálogo vacío
+        │       └── MeasurementPointsPanel.tsx   ← Instrumentos CBM
         │
         ├── dashboard/          ← KPIs y métricas agregadas (solo lectura)
         ├── settings/           ← Wrapper de PmSettingsView
         └── help/               ← PURAMENTE PRESENTACIONAL. Sin store. Sin Supabase.
-            └── HelpView.tsx    ← Trainer interactivo de 7 módulos para usuarios finales
+            └── HelpView.tsx    ← Trainer interactivo de 8 módulos para usuarios finales
 ```
 
 ### Arquitectura del State Management (Zustand)
@@ -229,6 +237,7 @@ Antes de escribir código, localiza tu tarea en esta tabla.
 | **Modificar el cierre de OT** | `completeWo()` en `workorders/store/slice.ts` | Los 4 campos `*_name_snapshot` se escriben ANTES del update de status |
 | **Agregar módulo de navegación** | `AppModule` en `shared/types/index.ts` + `App.tsx` | Módulos presentacionales NO deben importar `useStore` |
 | **Resetear el schema** | `schema.sql` completo en SQL Editor (solo DEV) | En producción: migraciones incrementales. NUNCA `DROP SCHEMA` |
+| **Modificar el Trainer / Ayuda** | `modules/help/HelpView.tsx` | Es puramente presentacional, no debe tocar stores |
 
 ---
 
@@ -307,13 +316,14 @@ await supabase.from('work_orders').insert({
 | `calculateProjections(ap, plan, 24)` hardcodeado | Ignora la configuración global `projectionMonths` del usuario |
 | `ON DELETE CASCADE` hacia `work_orders` o `part_usages` | Destruiría el historial completo al borrar un activo o repuesto |
 | `import { useStore }` en `help/HelpView.tsx` | El módulo de ayuda debe permanecer sin lógica de datos |
+| **Z-index ad-hoc** | Usa las clases de utilidad o el sistema de capas de Framer Motion |
 
 > [!NOTE]
 > El trigger `trg_assign_wo_number` auto-genera el campo `wo_number` en formato `WO-YY-MM-XXXXX`. **No asignes `wo_number` desde el cliente.** Déjalo fuera del INSERT; el trigger lo completará automáticamente.
 
 ---
 
-## 7. ENTORNO Y DEPENDENCIAS
+## 7. ENTORNO Y DEPENDENCIAS (v2.5.0)
 
 | Tecnología | Notas |
 |---|---|
@@ -322,7 +332,7 @@ await supabase.from('work_orders').insert({
 | **Zustand** | Store unificado. Slices combinados en `store/index.ts`. |
 | **Supabase JS v2** | Cliente singleton en `src/lib/supabase.ts` |
 | **PostgreSQL** | Supabase managed. Triggers activos en producción. |
-| **Framer Motion** | Animaciones UI. No usar en efectos secundarios de datos. |
+| **Framer Motion** | Animaciones UI premium y transiciones de módulos. |
 | **date-fns** | Toda manipulación de fechas. Locale `es`. |
 | **Recharts** | Gráficas en Instrumentación y Dashboard. |
 | **Lucide React** | Iconografía exclusiva del proyecto. |
@@ -330,4 +340,4 @@ await supabase.from('work_orders').insert({
 
 ---
 
-*Documento generado para uso de agentes de IA. Arquitectura: Soft Deletes + Snapshots + RESTRICT FKs + Trigger de Inmutabilidad. Última actualización: Abril 2026.*
+*Documento actualizado: 25 de Abril, 2026. Versión del Sistema: 2.5.0 Premium Enterprise. Soft Deletes + Snapshots + RESTRICT FKs + Trigger de Inmutabilidad.*

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, X, ChevronRight, ChevronDown, MoreVertical, MoreHorizontal, Plus, Edit2, Trash2, Database, Box } from 'lucide-react';
+import { Search, X, ChevronRight, ChevronDown, MoreVertical, MoreHorizontal, Plus, Edit2, Trash2, Database, Box, History } from 'lucide-react';
 import { useStore } from '../../../store';
 import { Button, Badge, EmptyState, cn } from '../../../shared/components';
 import { AssetTreeNode } from '../types';
@@ -328,6 +328,29 @@ export default function AssetTreePanel({ onSelect, onNewAsset, onEditAsset, onDe
             </button>
           )}
         </div>
+
+        {/* Audit Mode Toggle */}
+        {selectedAssetId && (
+          <button
+            onClick={() => {
+              const nextMode = !store.isAuditMode;
+              if (nextMode) {
+                store.fetchAssetHistory(selectedAssetId);
+              }
+              store.selectWo(null); // Reset selection to avoid "blank" or old detail
+              store.setAuditMode(nextMode);
+            }}
+            className={cn(
+              "w-full mt-3 h-10 rounded-xl flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest transition-all shadow-md border",
+              store.isAuditMode 
+                ? "bg-brand text-white border-brand ring-4 ring-brand/10" 
+                : "bg-slate-900 text-white border-slate-900 hover:bg-slate-800"
+            )}
+          >
+            <History size={14} className={cn(store.isAuditMode ? "animate-pulse" : "")} />
+            {store.isAuditMode ? "Salir de Auditoría" : "Auditoría de Histórico"}
+          </button>
+        )}
       </div>
 
       {/* Tree body */}

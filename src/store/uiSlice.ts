@@ -10,6 +10,8 @@ export interface UiSlice {
   toggleSidebar: () => void;
   showToast: (payload: Omit<ToastPayload, 'id'>) => void;
   dismissToast: () => void;
+  isAuditMode: boolean;
+  setAuditMode: (enabled: boolean) => void;
 }
 
 export const createUiSlice: StateCreator<UiSlice, [], []> = (set) => ({
@@ -30,4 +32,7 @@ export const createUiSlice: StateCreator<UiSlice, [], []> = (set) => ({
   },
 
   dismissToast: () => set({ toast: null }),
+
+  isAuditMode: false,
+  setAuditMode: (enabled) => set({ isAuditMode: enabled }),
 });

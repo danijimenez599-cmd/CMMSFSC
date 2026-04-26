@@ -10,9 +10,12 @@ import { formatDate } from '../../../shared/utils/utils';
 interface WoListPanelProps {
   onSelect: (id: string) => void;
   onNewWo: () => void;
+  customWorkOrders?: any[];
+  title?: string;
+  hideNewButton?: boolean;
 }
 
-export default function WoListPanel({ onSelect, onNewWo }: WoListPanelProps) {
+export default function WoListPanel({ onSelect, onNewWo, customWorkOrders, title, hideNewButton }: WoListPanelProps) {
   const { workOrders, selectedWoId, selectWo, assets, users, pmPlans, assetPlans } = useStore() as any;
 
   const [search, setSearch] = useState('');
@@ -45,7 +48,7 @@ export default function WoListPanel({ onSelect, onNewWo }: WoListPanelProps) {
   }, [assets]);
 
   const filteredOrders = useMemo(() => {
-    let result = [...workOrders];
+    let result = [...(customWorkOrders || workOrders)];
 
     if (statusFilter === 'active') {
       result = result.filter(wo => !['completed', 'cancelled'].includes(wo.status));
@@ -100,18 +103,20 @@ export default function WoListPanel({ onSelect, onNewWo }: WoListPanelProps) {
           <div>
             <h2 className="font-display font-bold text-slate-900 tracking-tight text-base flex items-center gap-2">
               <ListChecks size={18} className="text-brand" />
-              Gestión de OTs
+              {title || 'Gestión de OTs'}
             </h2>
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
               {filteredOrders.length} órdenes filtradas
             </p>
           </div>
-          <button 
-            onClick={onNewWo}
-            className="p-2.5 rounded-xl bg-brand text-white shadow-lg shadow-brand/20 hover:scale-105 transition-all"
-          >
-            <Plus size={18} />
-          </button>
+          {!hideNewButton && (
+            <button 
+              onClick={onNewWo}
+              className="p-2.5 rounded-xl bg-brand text-white shadow-lg shadow-brand/20 hover:scale-105 transition-all"
+            >
+              <Plus size={18} />
+            </button>
+          )}
         </div>
 
         {/* Search */}

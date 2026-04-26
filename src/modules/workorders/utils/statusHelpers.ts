@@ -85,3 +85,13 @@ export function isOverdue(wo: WorkOrder): boolean {
 export function getNextStatuses(current: WoStatus, role: UserRole, isAssignee: boolean): WoStatus[] {
   return TRANSITIONS[current].filter(s => canTransition(current, s, role, isAssignee));
 }
+
+export const FAILURE_CODE_LABELS: Record<string, string> = {
+  'FC-LUB': 'Fallo Lubricación',
+  'FC-ELC': 'Falla Eléctrica',
+  'FC-MEC': 'Desgaste Mecánico',
+  'FC-CAL': 'Descalibración',
+  'FC-VIB': 'Vibración Excesiva',
+  'FC-TEM': 'Temperatura Crítica',
+  'FC-OTH': 'Otros Factores',
+};

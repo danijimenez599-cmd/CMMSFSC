@@ -4,7 +4,8 @@ import { useStore } from '../../../store';
 import { Badge, Button, Avatar, cn, AlertBanner } from '../../../shared/components';
 import {
   WO_STATUS_LABELS, WO_TYPE_LABELS, WO_PRIORITY_CONFIG,
-  isOverdue, getNextStatuses, WO_ACTION_LABELS, WO_ACTION_THEME
+  isOverdue, getNextStatuses, WO_ACTION_LABELS, WO_ACTION_THEME,
+  FAILURE_CODE_LABELS
 } from '../utils/statusHelpers';
 import { WoStatus } from '../types';
 import { formatDate, formatRelative, generateId } from '../../../shared/utils/utils';
@@ -61,7 +62,7 @@ export default function WoDetailPanel() {
     );
   }
 
-  const wo = workOrders.find((w: any) => w.id === selectedWoId);
+  const wo = [...workOrders, ...(store.assetHistory || [])].find((w: any) => w.id === selectedWoId);
   if (!wo) return null;
 
   const asset = assets.find((a: any) => a.id === wo.assetId);
@@ -337,16 +338,6 @@ export default function WoDetailPanel() {
           </div>
         )}
 
-        {/* Reporte de Resolución (Si existe) */}
-        {isCompleted && wo.resolution && (
-          <div className="px-8 py-3 bg-emerald-50/50 border-t border-emerald-100 flex items-start gap-3">
-            <div className="w-6 h-6 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0 mt-0.5"><CheckCircle size={14} /></div>
-            <div>
-              <p className="text-[9px] font-bold text-emerald-700 uppercase tracking-widest mb-0.5">Reporte de Cierre</p>
-              <p className="text-xs font-medium text-slate-700 italic">"{wo.resolution}"</p>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* 2. Navigation Tabs */}
@@ -385,46 +376,107 @@ export default function WoDetailPanel() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="p-8 max-w-5xl mx-auto"
+            className="p-8 max-w-7xl mx-auto"
           >
             {/* TASKS */}
             {sectionTab === 'tasks' && (
-              <div className="space-y-3 pb-10">
-                {woTaskList.length === 0 && (
-                  <div className="bg-slate-50 border border-dashed border-slate-200 rounded-[24px] p-16 text-center">
-                    <ListChecks size={32} className="text-slate-200 mx-auto mb-4" />
-                    <h4 className="text-sm font-bold text-slate-900 tracking-tight">Sin Protocolo de Tareas</h4>
-                  </div>
-                )}
-                {woTaskList.map((task: any, idx: number) => (
-                  <motion.div
-                    key={task.id}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: idx * 0.05 }}
-                    className={cn(
-                      'flex items-start gap-4 bg-white border rounded-2xl p-4 transition-all group',
-                      task.completed ? 'bg-slate-50/50 border-slate-100 opacity-70' : 'border-slate-200 shadow-sm hover:border-brand/40'
-                    )}
-                  >
-                    <button
-                      onClick={() => !isCompleted && toggleTask(wo.id, task.id)}
-                      disabled={isCompleted}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-10 items-start">
+                <div className="lg:col-span-2 space-y-3">
+                  {woTaskList.length === 0 && (
+                    <div className="bg-slate-50 border border-dashed border-slate-200 rounded-[24px] p-16 text-center">
+                      <ListChecks size={32} className="text-slate-200 mx-auto mb-4" />
+                      <h4 className="text-sm font-bold text-slate-900 tracking-tight">Sin Protocolo de Tareas</h4>
+                    </div>
+                  )}
+                  {woTaskList.map((task: any, idx: number) => (
+                    <motion.div
+                      key={task.id}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: idx * 0.05 }}
                       className={cn(
-                        'shrink-0 w-6 h-6 rounded-lg flex items-center justify-center transition-all border-2 mt-0.5',
-                        task.completed ? 'bg-brand border-brand text-white shadow-lg shadow-brand/20' : 'border-slate-200 text-transparent hover:border-brand/40'
+                        'flex items-start gap-4 bg-white border rounded-2xl p-4 transition-all group',
+                        task.completed ? 'bg-slate-50/50 border-slate-100 opacity-70' : 'border-slate-200 shadow-sm hover:border-brand/40'
                       )}
                     >
-                      <CheckSquare size={14} />
-                    </button>
-                    <div className="flex-1 min-w-0">
-                      <p className={cn('text-sm font-bold tracking-tight leading-relaxed', task.completed ? 'line-through text-slate-400' : 'text-slate-900')}>
-                        {task.description}
-                      </p>
-                      {task.notes && <p className="text-[11px] font-medium text-slate-500 italic mt-1">{task.notes}</p>}
+                      <button
+                        onClick={() => !isCompleted && toggleTask(wo.id, task.id)}
+                        disabled={isCompleted}
+                        className={cn(
+                          'shrink-0 w-6 h-6 rounded-lg flex items-center justify-center transition-all border-2 mt-0.5',
+                          task.completed ? 'bg-brand border-brand text-white shadow-lg shadow-brand/20' : 'border-slate-200 text-transparent hover:border-brand/40'
+                        )}
+                      >
+                        <CheckSquare size={14} />
+                      </button>
+                      <div className="flex-1 min-w-0">
+                        <p className={cn('text-sm font-bold tracking-tight leading-relaxed', task.completed ? 'line-through text-slate-400' : 'text-slate-900')}>
+                          {task.description}
+                        </p>
+                        {task.notes && <p className="text-[11px] font-medium text-slate-500 italic mt-1">{task.notes}</p>}
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+
+                {/* Sidebar: Especificaciones y Reporte */}
+                <aside className="space-y-6">
+                  {wo.description && (
+                    <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 shadow-sm">
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="w-6 h-6 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400">
+                          <FileText size={12} />
+                        </div>
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Especificaciones</span>
+                      </div>
+                      <p className="text-xs font-medium text-slate-600 leading-relaxed italic">"{wo.description}"</p>
                     </div>
-                  </motion.div>
-                ))}
+                  )}
+
+                  {isCompleted && (wo.resolution || wo.rootCause || wo.failureCode) && (
+                    <div className="bg-emerald-50/40 border border-emerald-100/60 rounded-2xl p-5 space-y-5 shadow-sm">
+                      <div className="flex items-center gap-2 text-emerald-800">
+                        <ShieldCheck size={14} />
+                        <span className="text-[10px] font-bold uppercase tracking-widest">Reporte de Servicio</span>
+                      </div>
+                      
+                      {wo.resolution && (
+                        <div>
+                          <p className="text-[9px] font-bold text-emerald-600/70 uppercase tracking-tight mb-1.5 flex items-center gap-1.5">
+                            <CheckCircle size={10} /> Protocolo de Resolución
+                          </p>
+                          <p className="text-[11px] font-medium text-slate-700 leading-relaxed italic border-l-2 border-emerald-200 pl-3 ml-1">
+                            "{wo.resolution}"
+                          </p>
+                        </div>
+                      )}
+
+                      {wo.rootCause && (
+                        <div className="pt-4 border-t border-emerald-100/40">
+                          <p className="text-[9px] font-bold text-amber-600 uppercase tracking-tight mb-1.5 flex items-center gap-1.5">
+                            <Layers size={10} /> Causa Raíz
+                          </p>
+                          <p className="text-[11px] font-medium text-slate-700 leading-relaxed italic border-l-2 border-amber-200 pl-3 ml-1">
+                            "{wo.rootCause}"
+                          </p>
+                        </div>
+                      )}
+
+                      {wo.failureCode && (
+                        <div className="pt-3 border-t border-emerald-100/40">
+                          <div className="flex items-center gap-2">
+                            <div className="w-4 h-4 rounded bg-emerald-600 text-white flex items-center justify-center">
+                              <AlertTriangle size={8} />
+                            </div>
+                            <span className="text-[10px] font-bold text-slate-900 uppercase">
+                              {FAILURE_CODE_LABELS[wo.failureCode] || wo.failureCode}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </aside>
               </div>
             )}
 

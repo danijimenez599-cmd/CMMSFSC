@@ -12,8 +12,10 @@ export interface WoSlice {
   vendors: Vendor[];
   selectedWoId: string | null;
   woLoading: boolean;
+  assetHistory: WorkOrder[];
 
   fetchWorkOrders: () => Promise<void>;
+  fetchAssetHistory: (assetId: string) => Promise<void>;
   fetchVendors: () => Promise<void>;
   saveVendor: (vendor: Partial<Vendor>) => Promise<void>;
   deleteVendor: (id: string) => Promise<void>;
@@ -43,14 +45,10 @@ export const createWoSlice: StateCreator<WoSlice & { currentUser?: any; inventor
   vendors: [],
   selectedWoId: null,
   woLoading: false,
+  assetHistory: [],
 
   fetchWorkOrders: async () => {
     set({ woLoading: true });
-
-    // Only fetch active WOs + last 90 days of closed ones to avoid unbounded growth (Fix 5.1)
-    const cutoff = new Date();
-    cutoff.setDate(cutoff.getDate() - 90);
-    const cutoffIso = cutoff.toISOString();
 
     const [activeRes, historicRes, vendorRes] = await Promise.all([
       supabase.from('work_orders')
@@ -60,9 +58,8 @@ export const createWoSlice: StateCreator<WoSlice & { currentUser?: any; inventor
       supabase.from('work_orders')
         .select('*')
         .in('status', ['completed', 'cancelled'])
-        .or(`completed_at.gte.${cutoffIso},completed_at.is.null`)
         .order('completed_at', { ascending: false, nullsFirst: false })
-        .limit(200),
+        .limit(50), // Standard limit for the general list
       supabase.from('vendors').select('*').order('name'),
     ]);
 
@@ -163,6 +160,122 @@ export const createWoSlice: StateCreator<WoSlice & { currentUser?: any; inventor
         addedAt: u.added_at,
       })),
       vendors,
+      woLoading: false 
+    });
+  },
+
+  fetchAssetHistory: async (assetId: string) => {
+    set({ woLoading: true });
+    const { data: woData, error } = await supabase
+      .from('work_orders')
+      .select('*')
+      .eq('asset_id', assetId)
+      .in('status', ['completed', 'cancelled'])
+      .order('completed_at', { ascending: false, nullsFirst: false })
+      .limit(200);
+
+    if (error) {
+      console.error('Error fetching asset history:', error);
+      set({ woLoading: false });
+      return;
+    }
+
+    const allWoData = woData || [];
+    const woIds = allWoData.map(w => w.id);
+
+    // Fetch related data for these specific historical WOs
+    const [taskRes, commentRes, usageRes] = await Promise.all([
+      woIds.length > 0
+        ? supabase.from('wo_tasks').select('*').in('work_order_id', woIds).order('sort_order')
+        : Promise.resolve({ data: [], error: null }),
+      woIds.length > 0
+        ? supabase.from('wo_comments').select('*').in('work_order_id', woIds).order('created_at')
+        : Promise.resolve({ data: [], error: null }),
+      woIds.length > 0
+        ? supabase.from('part_usages').select('*').in('work_order_id', woIds).order('added_at')
+        : Promise.resolve({ data: [], error: null }),
+    ]);
+
+    const history: WorkOrder[] = allWoData.map(w => ({
+      id: w.id,
+      assetId: w.asset_id,
+      assetPlanId: w.asset_plan_id,
+      woNumber: w.wo_number,
+      title: w.title,
+      description: w.description,
+      woType: w.wo_type,
+      status: w.status,
+      priority: w.priority,
+      assignedTo: w.assigned_to,
+      scheduledDate: w.scheduled_date,
+      dueDate: w.due_date,
+      startedAt: w.started_at,
+      completedAt: w.completed_at,
+      estimatedHours: w.estimated_hours,
+      actualHours: w.actual_hours,
+      failureCode: w.failure_code,
+      rootCause: w.root_cause,
+      resolution: w.resolution,
+      generatedFromPlanId: w.generated_from_plan_id,
+      pmPlanNameSnapshot: w.pm_plan_name_snapshot,
+      assetNameSnapshot: w.asset_name_snapshot,
+      assignedToNameSnapshot: w.assigned_to_name_snapshot,
+      vendorNameSnapshot: w.vendor_name_snapshot,
+      pmCycleIndex: w.pm_cycle_index,
+      sourcePointId: w.source_point_id,
+      vendorId: w.vendor_id,
+      externalServiceCost: w.external_service_cost,
+      externalInvoiceRef: w.external_invoice_ref,
+      createdBy: w.created_by,
+      createdAt: w.created_at,
+      updatedAt: w.updated_at,
+    }));
+
+    // Merge new tasks/comments/usages without duplicating
+    const existingTaskIds = new Set(get().woTasks.map(t => t.id));
+    const newTasks = (taskRes.data || [])
+      .filter(t => !existingTaskIds.has(t.id))
+      .map(t => ({
+        id: t.id,
+        workOrderId: t.work_order_id,
+        sortOrder: t.sort_order,
+        description: t.description,
+        completed: t.completed,
+        completedAt: t.completed_at,
+        completedBy: t.completed_by,
+        notes: t.notes,
+      }));
+
+    const existingCommentIds = new Set(get().woComments.map(c => c.id));
+    const newComments = (commentRes.data || [])
+      .filter(c => !existingCommentIds.has(c.id))
+      .map(c => ({
+        id: c.id,
+        workOrderId: c.work_order_id,
+        authorId: c.author_id,
+        body: c.body,
+        attachmentUrl: c.attachment_url,
+        createdAt: c.created_at,
+      }));
+
+    const existingUsageIds = new Set(get().partUsages.map(u => u.id));
+    const newUsages = (usageRes.data || [])
+      .filter(u => !existingUsageIds.has(u.id))
+      .map(u => ({
+        id: u.id,
+        workOrderId: u.work_order_id,
+        inventoryItemId: u.inventory_item_id,
+        quantity: u.quantity,
+        unitCost: u.unit_cost,
+        addedBy: u.added_by,
+        addedAt: u.added_at,
+      }));
+
+    set({ 
+      assetHistory: history,
+      woTasks: [...get().woTasks, ...newTasks],
+      woComments: [...get().woComments, ...newComments],
+      partUsages: [...get().partUsages, ...newUsages],
       woLoading: false 
     });
   },
