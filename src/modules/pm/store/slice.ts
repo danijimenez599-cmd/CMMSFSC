@@ -460,17 +460,25 @@ export const createPmSlice: StateCreator<StoreState, [], [], PmSlice> = (set, ge
           if (tasksError) console.error('Error persisting tasks:', tasksError);
         }
 
-        // Fix 6.2: If asset_plan had no nextDueDate, persist the computed dueDate so
-        // the scheduler doesn't generate a new WO on every subsequent run
+        // Fix 6.2: If asset_plan had no nextDueDate or nextDueMeter, persist the computed values 
+        // so the scheduler doesn't jump to the next multiple on every subsequent run
         const sourceAp = dbData.assetPlans.find(ap => ap.id === wo.assetPlanId);
-        if (sourceAp && !sourceAp.nextDueDate && wo.dueDate) {
-          await supabase.from('asset_plans').update({
-            next_due_date: wo.dueDate,
-          }).eq('id', wo.assetPlanId);
+        const needsUpdate = (sourceAp && !sourceAp.nextDueDate && wo.dueDate) || 
+                            (sourceAp && sourceAp.nextDueMeter == null && wo.generatedFromMeter);
+        
+        if (sourceAp && needsUpdate) {
+          const updates: any = {};
+          if (!sourceAp.nextDueDate && wo.dueDate) updates.next_due_date = wo.dueDate;
+          if (sourceAp.nextDueMeter == null && wo.generatedFromMeter) updates.next_due_meter = wo.generatedFromMeter;
+          
+          await supabase.from('asset_plans').update(updates).eq('id', wo.assetPlanId);
         }
       }
 
       if ((get() as any).fetchWorkOrders) await (get() as any).fetchWorkOrders();
+      await get().fetchPmData();
+    } else {
+      // Refresh anyway to be safe
       await get().fetchPmData();
     }
 

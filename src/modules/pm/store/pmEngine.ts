@@ -92,18 +92,33 @@ export function computePlanStatus(
 
   // 2. Meter Logic
   if (plan.triggerType === 'meter' || plan.triggerType === 'hybrid') {
-    if (assetPlan.nextDueMeter != null && assetPlan.nextDueMeter > 0) {
-      const current = Number(currentPointValue) || 0;
-      const threshold = Number(assetPlan.nextDueMeter);
-      const interval = Number(plan.meterIntervalValue) || threshold;
-      // Progress relative to current cycle: from (threshold - interval) up to threshold
-      const cycleStart = threshold - interval;
+    const current = Number(currentPointValue) || 0;
+    const interval = Number(plan.meterIntervalValue) || 0;
+
+    // FIX: Alineación Automática para la interfaz visual
+    let targetMeter = assetPlan.nextDueMeter;
+    if (targetMeter == null || targetMeter <= 0) {
+      if (interval > 0) {
+        // FIX: En lugar de saltar al SIGUIENTE múltiplo, apuntamos al múltiplo que 
+        // estamos alcanzando o acabamos de pasar. Así, si pasamos las 100h, 
+        // el sistema se queda "congelado" en 100h (Crítico) hasta que se genere la OT.
+        const currentMultiple = Math.floor(current / interval);
+        targetMeter = Math.max(interval, currentMultiple * interval);
+      }
+    }
+
+    if (targetMeter != null && targetMeter > 0 && interval > 0) {
+      const threshold = Number(targetMeter);
+
+      // Calcular el inicio del ciclo dinámicamente (Ej. Si el target es 6000 y el intervalo 1000, inicia en 5000)
+      const cycleStart = Math.max(0, threshold - interval);
       const elapsed = current - cycleStart;
+
       progress = Math.min(100, Math.max(0, (elapsed / interval) * 100));
 
       if (current >= threshold) {
         isOverdue = true;
-        reasons.push('Umbral de medidor alcanzado');
+        reasons.push(`Umbral de medidor alcanzado (${current}/${threshold})`);
       }
     }
   }
@@ -140,6 +155,7 @@ interface GeneratedWo {
   pmPlanIdSnapshot: string | null;
   pmPlanNameSnapshot: string | null;
   pmCycleIndex: number;
+  generatedFromMeter?: number | null;
   tasks: { id: string; description: string; sortOrder: number }[];
 }
 
@@ -212,14 +228,31 @@ export function runScheduler(
 
     // Meter trigger
     if (!shouldGenerate && (plan.triggerType === 'meter' || plan.triggerType === 'hybrid')) {
-      if (assetPlan.measurementPointId && assetPlan.nextDueMeter !== null) {
+      if (assetPlan.measurementPointId) {
         const point = measurementPoints.find((p: any) => p.id === assetPlan.measurementPointId);
-        if (point && point.currentValue !== null && point.currentValue >= assetPlan.nextDueMeter) {
-          shouldGenerate = true;
-          meterTriggered = true;
-          reason = `Medidor ${point.currentValue} >= Umbral ${assetPlan.nextDueMeter}`;
-        } else if (point) {
-          reason = `Medidor ${point.currentValue} < Umbral ${assetPlan.nextDueMeter}`;
+
+        if (point) {
+          const current = point.currentValue || 0;
+          const interval = plan.meterIntervalValue || 0;
+
+          // FIX: Alineación Inteligente al múltiplo actual/pasado si el objetivo está en blanco
+          let targetMeter = assetPlan.nextDueMeter;
+          if (targetMeter == null || targetMeter <= 0) {
+            if (interval > 0) {
+              const currentMultiple = Math.floor(current / interval);
+              targetMeter = Math.max(interval, currentMultiple * interval);
+            }
+          }
+
+          if (targetMeter != null && targetMeter > 0) {
+            if (current >= targetMeter) {
+              shouldGenerate = true;
+              meterTriggered = true;
+              reason = `Medidor ${current} >= Umbral Objetivo ${targetMeter}`;
+            } else {
+              reason = `Medidor ${current} < Umbral Objetivo ${targetMeter}`;
+            }
+          }
         }
       }
     }
@@ -301,6 +334,7 @@ export function runScheduler(
       pmPlanIdSnapshot: plan.id,
       pmPlanNameSnapshot: plan.name,
       pmCycleIndex: currentCycle,
+      generatedFromMeter: meterTriggered ? (assetPlan.nextDueMeter || (Math.floor((measurementPoints.find((p: any) => p.id === assetPlan.measurementPointId)?.currentValue || 0) / (plan.meterIntervalValue || 1)) + 1) * (plan.meterIntervalValue || 0)) : null,
       tasks: planTasks,
     });
   }
