@@ -4,7 +4,6 @@ import { useStore } from '../../store';
 import { ConfirmDialog } from '../../shared/components';
 import AssetTreePanel from './components/AssetTreePanel';
 import AssetDetailPanel from './components/AssetDetailPanel';
-import AssetSidePanel from './components/AssetSidePanel';
 import AssetForm from './components/AssetForm';
 import AuditListPanel from './components/AuditListPanel';
 import AuditDetailPanel from './components/AuditDetailPanel';
@@ -130,7 +129,7 @@ export default function AssetRegistryView() {
         />
       </MobilePanelTransition>
 
-      {/* ── Panel 2: Detalle normal / Lista auditoría ─────────────── */}
+      {/* ── Panel 2: Detalle unificado / Lista auditoría ────────────── */}
       <MobilePanelTransition
         activePanel={mobileView}
         panelKey="detail"
@@ -153,35 +152,26 @@ export default function AssetRegistryView() {
         )}
       </MobilePanelTransition>
 
-      {/* ── Panel 3: Side normal / Detalle auditoría ──────────────── */}
-      <MobilePanelTransition
-        activePanel={mobileView}
-        panelKey="side"
-        className={cn(
-          isAuditMode
-            ? 'flex-1 min-w-0'
-            : selectedAssetId
-              ? 'xl:w-[450px] xl:border-l xl:border-slate-200'
-              : 'w-0 overflow-hidden'
-        )}
-      >
-        {/* Mobile back button */}
-        <div className="xl:hidden flex items-center px-4 py-2 bg-white border-b border-slate-200 shrink-0">
-          <button
-            onClick={() => setMobileView('detail')}
-            className="flex items-center gap-1 text-sm font-bold text-brand"
-          >
-            <ChevronLeft size={18} />
-            {isAuditMode ? 'Historial' : 'Detalle del Activo'}
-          </button>
-        </div>
-
-        {isAuditMode ? (
+      {/* ── Panel 3: Solo para Auditoría ────────────────────────────── */}
+      {isAuditMode && (
+        <MobilePanelTransition
+          activePanel={mobileView}
+          panelKey="side"
+          className="flex-1 min-w-0"
+        >
+          {/* Mobile back button */}
+          <div className="xl:hidden flex items-center px-4 py-2 bg-white border-b border-slate-200 shrink-0">
+            <button
+              onClick={() => setMobileView('detail')}
+              className="flex items-center gap-1 text-sm font-bold text-brand"
+            >
+              <ChevronLeft size={18} />
+              Historial
+            </button>
+          </div>
           <AuditDetailPanel />
-        ) : (
-          selectedAssetId ? <AssetSidePanel /> : null
-        )}
-      </MobilePanelTransition>
+        </MobilePanelTransition>
+      )}
 
       <AssetForm
         isOpen={formOpen}
