@@ -114,6 +114,7 @@ export const createWoSlice: StateCreator<WoSlice & { currentUser?: any; inventor
       vendorId: w.vendor_id,
       externalServiceCost: w.external_service_cost,
       externalInvoiceRef: w.external_invoice_ref,
+      completedMeterValue: w.completed_meter_value ?? null,
       createdBy: w.created_by,
       createdAt: w.created_at,
       updatedAt: w.updated_at,
@@ -226,6 +227,7 @@ export const createWoSlice: StateCreator<WoSlice & { currentUser?: any; inventor
       vendorId: w.vendor_id,
       externalServiceCost: w.external_service_cost,
       externalInvoiceRef: w.external_invoice_ref,
+      completedMeterValue: w.completed_meter_value ?? null,
       createdBy: w.created_by,
       createdAt: w.created_at,
       updatedAt: w.updated_at,
@@ -448,6 +450,9 @@ export const createWoSlice: StateCreator<WoSlice & { currentUser?: any; inventor
       assigned_to_name_snapshot: assignedProfile?.fullName  || wo.assignedToNameSnapshot || null,
       vendor_name_snapshot:      assignedVendor?.name       || wo.vendorNameSnapshot     || null,
       asset_name_snapshot:       assignedAsset?.name        || wo.assetNameSnapshot      || null,
+      // Meter snapshot: real horómetro reading entered by the technician at closure.
+      // Stored as an immutable fact — survives plan unlinking and sensor reconfiguration.
+      completed_meter_value:     meterValue ?? null,
     };
 
     const { error } = await supabase.from('work_orders').update(updates).eq('id', id);

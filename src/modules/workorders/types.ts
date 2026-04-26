@@ -45,6 +45,8 @@ export interface WorkOrder {
   vendorId: string | null;
   externalServiceCost: number | null;
   externalInvoiceRef: string | null;
+  /** Snapshot: horómetro real registrado por el técnico al momento de cerrar la OT. */
+  completedMeterValue: number | null;
   createdBy: string | null;
   createdAt: string;
   updatedAt: string;

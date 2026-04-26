@@ -2,7 +2,7 @@ import { StateCreator } from 'zustand';
 import { StoreState } from '../../../store';
 import { PmPlan, AssetPlan, MeasurementPoint, MeterReading, PmTask, MeasurementConfig } from '../types';
 import { WorkOrder } from '../../workorders/types';
-import { runScheduler, calcNextDueDate } from './pmEngine';
+import { runScheduler, calcNextDueDate, SupersededAction } from './pmEngine';
 import { generateId } from '../../../shared/utils/utils';
 import { supabase } from '../../../lib/supabase';
 
@@ -393,7 +393,6 @@ export const createPmSlice: StateCreator<StoreState, [], [], PmSlice> = (set, ge
   },
 
   runPmScheduler: async (horizonDays) => {
-    console.warn('>> ENTRANDO AL MOTOR PM (Slice)');
     const state = get();
     const dbData = {
       pmPlans: state.pmPlans,
@@ -403,24 +402,20 @@ export const createPmSlice: StateCreator<StoreState, [], [], PmSlice> = (set, ge
       workOrders: state.workOrders,
     };
 
-    console.log('Ejecutando motor PM con horizonte:', horizonDays);
-    console.log('Datos de entrada:', { 
-      planes: dbData.pmPlans.length, 
-      asignaciones: dbData.assetPlans.length,
-      activas: dbData.assetPlans.filter(ap => ap.active).length,
-      userId: get().currentUser?.id || 'NO_USER'
-    });
+    const { generated, superseded } = runScheduler(dbData, horizonDays);
 
-    const { generated } = runScheduler(dbData, horizonDays);
-    console.log('Motor PM terminó. Generadas:', generated.length);
+    const bestUser = get().currentUser?.id ||
+                     get().users.find(u => u.role === 'admin')?.id ||
+                     get().users[0]?.id ||
+                     null;
 
+    // ── Phase 1: Supersession — cancel absorbed WOs before inserting new ones ──
+    if (superseded.length > 0) {
+      await _applySupersessions(superseded, bestUser);
+    }
+
+    // ── Phase 2: Persist generated Work Orders ────────────────────────────────
     if (generated.length > 0) {
-      // Find the best user for audit: current user, or the first admin in the list
-      const bestUser = get().currentUser?.id || 
-                       get().users.find(u => u.role === 'admin')?.id || 
-                       get().users[0]?.id ||
-                       null;
-
       for (const woWithTasks of generated) {
         const { tasks, ...wo } = woWithTasks;
 
@@ -442,7 +437,6 @@ export const createPmSlice: StateCreator<StoreState, [], [], PmSlice> = (set, ge
         });
 
         if (woError) {
-          console.error('Error persisting WO:', woError);
           if (woError.code === '23503') {
             throw new Error(`Fallo de Auditoría: Tu usuario no existe en la tabla de perfiles. Por favor, re-ejecuta el SQL con el Backfill.`);
           }
@@ -460,27 +454,22 @@ export const createPmSlice: StateCreator<StoreState, [], [], PmSlice> = (set, ge
           if (tasksError) console.error('Error persisting tasks:', tasksError);
         }
 
-        // Fix 6.2: If asset_plan had no nextDueDate or nextDueMeter, persist the computed values 
-        // so the scheduler doesn't jump to the next multiple on every subsequent run
+        // If asset_plan had no nextDueDate or nextDueMeter, persist the computed values
+        // so the scheduler doesn't re-trigger on the same threshold on every run.
         const sourceAp = dbData.assetPlans.find(ap => ap.id === wo.assetPlanId);
-        const needsUpdate = (sourceAp && !sourceAp.nextDueDate && wo.dueDate) || 
-                            (sourceAp && sourceAp.nextDueMeter == null && wo.generatedFromMeter);
-        
-        if (sourceAp && needsUpdate) {
-          const updates: any = {};
+        if (sourceAp) {
+          const updates: Record<string, unknown> = {};
           if (!sourceAp.nextDueDate && wo.dueDate) updates.next_due_date = wo.dueDate;
           if (sourceAp.nextDueMeter == null && wo.generatedFromMeter) updates.next_due_meter = wo.generatedFromMeter;
-          
-          await supabase.from('asset_plans').update(updates).eq('id', wo.assetPlanId);
+          if (Object.keys(updates).length > 0) {
+            await supabase.from('asset_plans').update(updates).eq('id', wo.assetPlanId);
+          }
         }
       }
-
-      if ((get() as any).fetchWorkOrders) await (get() as any).fetchWorkOrders();
-      await get().fetchPmData();
-    } else {
-      // Refresh anyway to be safe
-      await get().fetchPmData();
     }
+
+    if ((get() as any).fetchWorkOrders) await (get() as any).fetchWorkOrders();
+    await get().fetchPmData();
 
     return {
       generatedCount: generated.length,
@@ -544,9 +533,8 @@ export const createPmSlice: StateCreator<StoreState, [], [], PmSlice> = (set, ge
     if (error) throw error;
     await get().fetchPmData();
 
-    // Catch-up: if the meter already exceeds the new threshold (common in FIXED mode
-    // when the WO was overdue at close time), fire the scheduler immediately so
-    // the next WO is created without requiring the user to manually enter another reading.
+    // Meter catch-up: if the current reading already exceeds the new threshold (common
+    // in FIXED mode when the WO was overdue at close), fire the scheduler immediately.
     if (updates.next_due_meter != null && assetPlan.measurementPointId) {
       const point = get().measurementPoints.find(p => p.id === assetPlan.measurementPointId);
       if (point && point.currentValue != null && point.currentValue >= updates.next_due_meter) {
@@ -558,8 +546,71 @@ export const createPmSlice: StateCreator<StoreState, [], [], PmSlice> = (set, ge
         }
       }
     }
+
+    // Calendar auto-trigger: run the scheduler with a horizon that spans the full
+    // interval so the next due date is always inside the generation window.
+    // This removes the need to click "Ejecutar motor" for calendar and hybrid plans.
+    if (
+      (plan.triggerType === 'calendar' || plan.triggerType === 'hybrid') &&
+      updates.next_due_date
+    ) {
+      const hasOpenWo = get().workOrders.some(
+        (w: any) => w.assetPlanId === assetPlanId && !['completed', 'cancelled'].includes(w.status)
+      );
+      if (!hasOpenWo) {
+        const horizonDays =
+          _intervalToDays(plan.intervalValue ?? 1, plan.intervalUnit ?? 'months') +
+          (plan.leadDays ?? 0);
+        await get().runPmScheduler(horizonDays);
+      }
+    }
   },
 });
+
+function _intervalToDays(value: number, unit: string): number {
+  switch (unit) {
+    case 'days':   return value;
+    case 'weeks':  return value * 7;
+    case 'months': return Math.ceil(value * 31);
+    case 'years':  return Math.ceil(value * 366);
+    default:       return 30;
+  }
+}
+
+/**
+ * Applies supersession actions: marks each absorbed open WO as 'cancelled' and
+ * writes an audit comment explaining which higher-weight cycle replaced it.
+ *
+ * Uses 'cancelled' status (existing DB value) so no schema migration is required.
+ * The audit comment provides the full trace for compliance reviews.
+ */
+async function _applySupersessions(
+  actions: SupersededAction[],
+  authorId: string | null,
+): Promise<void> {
+  const systemAuthor = authorId ?? '00000000-0000-4000-a000-000000000000';
+
+  for (const action of actions) {
+    // Mark absorbed WO as cancelled
+    const { error: cancelError } = await supabase
+      .from('work_orders')
+      .update({ status: 'cancelled' })
+      .eq('id', action.oldWoId);
+
+    if (cancelError) {
+      console.error(`[Engine] Error al cancelar OT absorbida ${action.oldWoId}:`, cancelError);
+      continue;
+    }
+
+    // Write audit comment for compliance trail
+    await supabase.from('wo_comments').insert({
+      id: generateId(),
+      work_order_id: action.oldWoId,
+      author_id: systemAuthor,
+      body: `SISTEMA — Supersesión por mantenimiento mayor: ${action.auditNote}`,
+    });
+  }
+}
 
 /**
  * After fetching measurement points, generate alerts for non-cumulative

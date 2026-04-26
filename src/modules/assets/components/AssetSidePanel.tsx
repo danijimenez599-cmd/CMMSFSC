@@ -129,6 +129,19 @@ export default function AssetSidePanel() {
     } catch (e) { return null; }
   }).filter(Boolean);
 
+  // ── Validation state ────────────────────────────────────────────────────
+  const selectedPoint = cumulativeAssetPoints.find((mp: any) => mp.id === selectedPointId);
+  const pointHasReading = selectedPoint != null &&
+    selectedPoint.currentValue != null &&
+    selectedPoint.currentValue > 0;
+
+  // Each field is required if the plan type demands it.
+  // The Vincular button stays disabled until all conditions are met.
+  const canLink = !!selectedPlanId && (
+    (!needsDate || !!customStartDate) &&
+    (!needsMeter || (!!selectedPointId && pointHasReading && !!customStartMeter))
+  );
+
   const handleAssignPlan = async () => {
     if (!selectedPlanId) return;
     const plan = pmPlans.find((p: any) => p.id === selectedPlanId);
@@ -136,17 +149,37 @@ export default function AssetSidePanel() {
     const planIsMeterOnly = plan.triggerType === 'meter';
     const planIsHybrid = plan.triggerType === 'hybrid';
     const planNeedsMeter = planIsMeterOnly || planIsHybrid;
+
+    // Guard: meter instrument required
     if (planNeedsMeter && !selectedPointId) {
-      showToast({ type: 'error', title: 'Requerido', message: 'Selecciona el instrumento acumulador para este plan.' });
+      showToast({ type: 'error', title: 'Instrumento requerido', message: 'Selecciona el instrumento acumulador para este plan.' });
       return;
     }
+
+    // Guard: selected instrument must have at least one reading
+    if (planNeedsMeter && selectedPoint && !pointHasReading) {
+      showToast({ type: 'error', title: 'Sin lectura base', message: `"${selectedPoint.name}" no tiene ninguna lectura registrada. Ingresa al menos una lectura antes de vincular este plan.` });
+      return;
+    }
+
+    // Guard: start date required for calendar/hybrid plans
+    if (!planIsMeterOnly && !customStartDate) {
+      showToast({ type: 'error', title: 'Fecha de inicio requerida', message: 'Define desde cuándo arranca el plan calendario.' });
+      return;
+    }
+
+    // Guard: start meter threshold required for meter/hybrid plans
+    if (planNeedsMeter && !customStartMeter) {
+      showToast({ type: 'error', title: 'Umbral de inicio requerido', message: 'Define el umbral de acumulador en el que debe disparar la primera OT.' });
+      return;
+    }
+
     try {
       const today = new Date().toISOString();
       const nextDueDate = planIsMeterOnly
         ? null
-        : customStartDate
-          ? new Date(customStartDate).toISOString().split('T')[0]
-          : calcNextDueDate(plan, { nextDueDate: null } as any, today);
+        : new Date(customStartDate).toISOString().split('T')[0];
+
       await saveAssetPlan({
         id: generateId(), assetId: selectedAssetId, pmPlanId: selectedPlanId,
         measurementPointId: planNeedsMeter ? (selectedPointId || null) : null,
@@ -257,7 +290,7 @@ export default function AssetSidePanel() {
         )}
       </div>
 
-      <Modal isOpen={showAssignModal} onClose={() => setShowAssignModal(false)} title="Vincular Estrategia" size="sm" footer={<div className="flex gap-4 w-full"><Button variant="ghost" onClick={() => setShowAssignModal(false)} className="flex-1">Cancelar</Button><Button variant="primary" onClick={handleAssignPlan} disabled={!selectedPlanId} className="flex-1 bg-slate-900 hover:bg-brand">Vincular</Button></div>}>
+      <Modal isOpen={showAssignModal} onClose={() => setShowAssignModal(false)} title="Vincular Estrategia" size="sm" footer={<div className="flex gap-4 w-full"><Button variant="ghost" onClick={() => setShowAssignModal(false)} className="flex-1">Cancelar</Button><Button variant="primary" onClick={handleAssignPlan} disabled={!canLink} className="flex-1 bg-slate-900 hover:bg-brand disabled:opacity-40 disabled:cursor-not-allowed">Vincular</Button></div>}>
         <div className="space-y-5 py-4">
           <FormField label="Plan Maestro">
             <Select value={selectedPlanId} onChange={e => { setSelectedPlanId(e.target.value); setSelectedPointId(''); setCustomStartDate(''); setCustomStartMeter(''); }}>
@@ -268,40 +301,80 @@ export default function AssetSidePanel() {
 
           {selectedPlan && (
             <div className="bg-slate-50 p-5 rounded-[24px] border border-slate-100 space-y-4">
-              {/* Date field: calendar and hybrid only */}
+              {/* Date field: calendar and hybrid — required */}
               {needsDate && (
-                <FormField label="Fecha de Inicio">
-                  <input type="date" className="w-full h-12 px-4 text-xs font-bold border border-slate-200 rounded-xl outline-none bg-white" value={customStartDate} onChange={e => setCustomStartDate(e.target.value)} />
+                <FormField label={<span>Fecha de primera OT <span className="text-red-500">*</span></span>}>
+                  <input
+                    type="date"
+                    className={`w-full h-12 px-4 text-xs font-bold border rounded-xl outline-none bg-white ${!customStartDate ? 'border-red-300 focus:border-red-500' : 'border-slate-200'}`}
+                    value={customStartDate}
+                    onChange={e => setCustomStartDate(e.target.value)}
+                  />
+                  {!customStartDate && (
+                    <p className="text-[10px] text-red-500 font-bold mt-1">Define la fecha en que debe generarse la primera OT de este plan.</p>
+                  )}
                 </FormField>
               )}
 
-              {/* Meter fields: meter-only and hybrid */}
+              {/* Meter fields: meter-only and hybrid — required */}
               {needsMeter && (
                 <>
-                  <FormField label="Instrumento Acumulador">
+                  <FormField label={<span>Instrumento Acumulador <span className="text-red-500">*</span></span>}>
                     {cumulativeAssetPoints.length === 0 ? (
                       <p className="text-xs text-amber-600 font-bold py-2">Este activo no tiene instrumentos acumuladores. Créalos en la pestaña Medidores primero.</p>
                     ) : (
-                      <select
-                        className="w-full h-12 px-4 text-xs font-bold border border-slate-200 rounded-xl outline-none bg-white"
-                        value={selectedPointId}
-                        onChange={e => setSelectedPointId(e.target.value)}
-                      >
-                        <option value="">Seleccionar instrumento...</option>
-                        {cumulativeAssetPoints.map((mp: any) => (
-                          <option key={mp.id} value={mp.id}>{mp.name} — actual: {Number(mp.currentValue || 0).toLocaleString()} {mp.unit}</option>
-                        ))}
-                      </select>
+                      <>
+                        <select
+                          className={`w-full h-12 px-4 text-xs font-bold border rounded-xl outline-none bg-white ${!selectedPointId ? 'border-red-300' : !pointHasReading ? 'border-amber-400' : 'border-slate-200'}`}
+                          value={selectedPointId}
+                          onChange={e => {
+                            const newPointId = e.target.value;
+                            setSelectedPointId(newPointId);
+                            // Auto-suggest the next interval threshold based on the current reading
+                            if (newPointId && selectedPlan?.meterIntervalValue) {
+                              const pt = cumulativeAssetPoints.find((mp: any) => mp.id === newPointId);
+                              if (pt?.currentValue != null && pt.currentValue > 0) {
+                                const interval = selectedPlan.meterIntervalValue;
+                                const nextMultiple = (Math.floor(pt.currentValue / interval) + 1) * interval;
+                                setCustomStartMeter(String(nextMultiple));
+                              }
+                            }
+                          }}
+                        >
+                          <option value="">Seleccionar instrumento...</option>
+                          {cumulativeAssetPoints.map((mp: any) => (
+                            <option key={mp.id} value={mp.id}>
+                              {mp.name} — {mp.currentValue != null ? `${Number(mp.currentValue).toLocaleString()} ${mp.unit}` : 'sin lectura'}
+                            </option>
+                          ))}
+                        </select>
+                        {selectedPoint && !pointHasReading && (
+                          <p className="text-[10px] text-amber-600 font-bold mt-1">
+                            Este instrumento no tiene ninguna lectura. Registra al menos una lectura antes de vincular.
+                          </p>
+                        )}
+                      </>
                     )}
                   </FormField>
-                  <FormField label="Umbral de inicio (unidades)">
+
+                  <FormField label={<span>Primera OT en (unidades) <span className="text-red-500">*</span></span>}>
                     <input
                       type="number" min="0" step="1"
-                      className="w-full h-12 px-4 text-xs font-bold border border-slate-200 rounded-xl outline-none bg-white"
-                      placeholder="Ej. 5000 (deja vacío para calcular automático)"
+                      className={`w-full h-12 px-4 text-xs font-bold border rounded-xl outline-none bg-white ${!customStartMeter ? 'border-red-300 focus:border-red-500' : 'border-slate-200'}`}
+                      placeholder={selectedPoint?.currentValue != null
+                        ? `Ej. ${((Math.floor(selectedPoint.currentValue / (selectedPlan?.meterIntervalValue || 1)) + 1) * (selectedPlan?.meterIntervalValue || 1)).toLocaleString()} ${selectedPoint.unit}`
+                        : 'Umbral de la primera OT'}
                       value={customStartMeter}
                       onChange={e => setCustomStartMeter(e.target.value)}
                     />
+                    {!customStartMeter && (
+                      <p className="text-[10px] text-red-500 font-bold mt-1">Define el umbral acumulado en que debe disparar la primera OT.</p>
+                    )}
+                    {customStartMeter && selectedPoint?.currentValue != null && Number(customStartMeter) <= selectedPoint.currentValue && (
+                      <p className="text-[10px] text-amber-600 font-bold mt-1">
+                        El umbral {Number(customStartMeter).toLocaleString()} ya fue superado (lectura actual: {Number(selectedPoint.currentValue).toLocaleString()}). El motor disparará la OT en la próxima ejecución.
+                      </p>
+                    )}
                   </FormField>
                 </>
               )}

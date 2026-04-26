@@ -1,35 +1,37 @@
 /**
- * APEX CMMS — PM Scheduling Engine
- * Generates Work Orders based on PM Plan triggers.
- * Do NOT modify without updating schema.sql accordingly.
+ * APEX CMMS — PM Scheduling Engine v2
+ *
+ * Redesigned architecture:
+ *  1. Trigger evaluation (calendar + meter independent for hybrid)
+ *  2. Effective cycle calculation — accounts for missed intervals while a WO was open
+ *  3. Modular task filtering — cycle % multiplier == 0
+ *  4. Hierarchical Anti-stacking — weight comparison before blocking or superseding
+ *  5. Supersession — higher-weight cycle absorbs a lower-weight open WO
  */
 
 import {
   addDays, addWeeks, addMonths, addYears,
-  isBefore, isAfter, startOfDay, parseISO, format
+  isBefore, isAfter, differenceInDays,
+  startOfDay, parseISO, format, isValid,
 } from 'date-fns';
 import { PmPlan, AssetPlan } from '../types';
 import { generateId } from '../../../shared/utils/utils';
 
-// ── Helpers ────────────────────────────────────────────────────────────────
+// ── Calendar helper ────────────────────────────────────────────────────────
 
 export function calcNextDueDate(
   plan: PmPlan,
   assetPlan: Pick<AssetPlan, 'nextDueDate' | 'lastCompletedAt'>,
-  completedAt?: string
+  completedAt?: string,
 ): string {
   if (!plan.intervalValue || !plan.intervalUnit) {
     return addDays(new Date(), 30).toISOString();
   }
 
-  // FIXED mode: advance from previous due date to maintain a rigid calendar
-  // FLOATING mode: advance from completion date (adaptive calendar)
   let base: Date;
   if (plan.intervalMode === 'fixed' && assetPlan.nextDueDate) {
     base = new Date(assetPlan.nextDueDate);
-    if (isNaN(base.getTime())) {
-      base = completedAt ? new Date(completedAt) : new Date();
-    }
+    if (isNaN(base.getTime())) base = completedAt ? new Date(completedAt) : new Date();
   } else {
     base = completedAt
       ? new Date(completedAt)
@@ -38,25 +40,20 @@ export function calcNextDueDate(
         : new Date();
   }
 
-  let next: Date;
   switch (plan.intervalUnit) {
-    case 'days': next = addDays(base, plan.intervalValue); break;
-    case 'weeks': next = addWeeks(base, plan.intervalValue); break;
-    case 'months': next = addMonths(base, plan.intervalValue); break;
-    case 'years': next = addYears(base, plan.intervalValue); break;
-    default: next = addMonths(base, 1);
+    case 'days':   return addDays(base, plan.intervalValue).toISOString();
+    case 'weeks':  return addWeeks(base, plan.intervalValue).toISOString();
+    case 'months': return addMonths(base, plan.intervalValue).toISOString();
+    case 'years':  return addYears(base, plan.intervalValue).toISOString();
+    default:       return addMonths(base, 1).toISOString();
   }
-
-  return next.toISOString();
 }
 
-/**
- * Computes the unified status of an asset plan (Overdue, Progress, etc.)
- * Centralizing this prevents UI crashes and logic discrepancies.
- */
+// ── UI status helper ───────────────────────────────────────────────────────
+
 export interface PlanStatus {
   isOverdue: boolean;
-  progress: number; // 0 to 100
+  progress: number;
   reason: string | null;
   label: string;
 }
@@ -64,7 +61,7 @@ export interface PlanStatus {
 export function computePlanStatus(
   plan: PmPlan | undefined | null,
   assetPlan: AssetPlan | undefined | null,
-  currentPointValue: number | null = 0
+  currentPointValue: number | null = 0,
 ): PlanStatus {
   if (!plan || !assetPlan || !assetPlan.active) {
     return { isOverdue: false, progress: 0, reason: null, label: 'Inactivo' };
@@ -72,53 +69,35 @@ export function computePlanStatus(
 
   let isOverdue = false;
   let progress = 0;
-  let reasons: string[] = [];
-
+  const reasons: string[] = [];
   const now = new Date();
 
-  // 1. Calendar Logic
   if (plan.triggerType === 'calendar' || plan.triggerType === 'hybrid') {
     if (assetPlan.nextDueDate) {
       const dueDate = new Date(assetPlan.nextDueDate);
-      if (!isNaN(dueDate.getTime())) {
-        if (dueDate < now) {
-          isOverdue = true;
-          reasons.push('Calendario vencido');
-        }
-        // Simple linear progress for calendar (optional, usually date is enough)
+      if (!isNaN(dueDate.getTime()) && dueDate < now) {
+        isOverdue = true;
+        reasons.push('Calendario vencido');
       }
     }
   }
 
-  // 2. Meter Logic
   if (plan.triggerType === 'meter' || plan.triggerType === 'hybrid') {
     const current = Number(currentPointValue) || 0;
     const interval = Number(plan.meterIntervalValue) || 0;
 
-    // FIX: Alineación Automática para la interfaz visual
     let targetMeter = assetPlan.nextDueMeter;
-    if (targetMeter == null || targetMeter <= 0) {
-      if (interval > 0) {
-        // FIX: En lugar de saltar al SIGUIENTE múltiplo, apuntamos al múltiplo que 
-        // estamos alcanzando o acabamos de pasar. Así, si pasamos las 100h, 
-        // el sistema se queda "congelado" en 100h (Crítico) hasta que se genere la OT.
-        const currentMultiple = Math.floor(current / interval);
-        targetMeter = Math.max(interval, currentMultiple * interval);
-      }
+    if ((targetMeter == null || targetMeter <= 0) && interval > 0) {
+      const currentMultiple = Math.floor(current / interval);
+      targetMeter = Math.max(interval, currentMultiple * interval);
     }
 
     if (targetMeter != null && targetMeter > 0 && interval > 0) {
-      const threshold = Number(targetMeter);
-
-      // Calcular el inicio del ciclo dinámicamente (Ej. Si el target es 6000 y el intervalo 1000, inicia en 5000)
-      const cycleStart = Math.max(0, threshold - interval);
-      const elapsed = current - cycleStart;
-
-      progress = Math.min(100, Math.max(0, (elapsed / interval) * 100));
-
-      if (current >= threshold) {
+      const cycleStart = Math.max(0, targetMeter - interval);
+      progress = Math.min(100, Math.max(0, ((current - cycleStart) / interval) * 100));
+      if (current >= targetMeter) {
         isOverdue = true;
-        reasons.push(`Umbral de medidor alcanzado (${current}/${threshold})`);
+        reasons.push(`Umbral de medidor alcanzado (${current}/${targetMeter})`);
       }
     }
   }
@@ -127,11 +106,92 @@ export function computePlanStatus(
     isOverdue,
     progress,
     reason: reasons.join(' | ') || null,
-    label: isOverdue ? 'Crítico' : progress >= 80 ? 'Próximo' : 'Al día'
+    label: isOverdue ? 'Crítico' : progress >= 80 ? 'Próximo' : 'Al día',
   };
 }
 
-// ── Main Scheduler ─────────────────────────────────────────────────────────
+// ── Cycle weight ───────────────────────────────────────────────────────────
+
+/**
+ * The "weight" of a cycle is the highest frequency_multiplier among the tasks
+ * that fire at that cycle index.  A cycle-12 annual (max multiplier = 12) is
+ * heavier than a cycle-1 routine (max multiplier = 1).
+ */
+function calcCycleWeight(planTasks: any[], cycleIndex: number): number {
+  const multipliers = planTasks
+    .filter(t => cycleIndex % (t.frequencyMultiplier || 1) === 0)
+    .map(t => t.frequencyMultiplier || 1);
+  return multipliers.length > 0 ? Math.max(...multipliers) : 0;
+}
+
+// ── Effective cycle calculation ────────────────────────────────────────────
+
+/**
+ * Returns the cycle index the engine should use for WO generation, accounting
+ * for intervals that elapsed while a previous WO was left open.
+ *
+ * Example (meter plan, interval = 500 h):
+ *   currentCycleIndex = 1, nextDueMeter = 500, currentMeter = 6000
+ *   overshoot = 6000 - 500 = 5500 → extraCycles = floor(5500/500) = 11
+ *   effectiveCycle = 1 + 11 = 12  → annual maintenance fires
+ *
+ * Example (calendar plan, interval = 1 month):
+ *   currentCycleIndex = 1, nextDueDate = 2025-01-01, today = 2026-01-01
+ *   daysPast = 365 → extraCycles = floor(365/30.44) = 11 → effectiveCycle = 12
+ */
+function calcEffectiveCycleIndex(
+  assetPlan: AssetPlan,
+  plan: PmPlan,
+  today: Date,
+  currentMeterValue: number,
+): number {
+  const base = assetPlan.currentCycleIndex || 1;
+
+  // Meter dimension (takes precedence for meter and hybrid plans)
+  if (
+    (plan.triggerType === 'meter' || plan.triggerType === 'hybrid') &&
+    assetPlan.nextDueMeter != null &&
+    plan.meterIntervalValue &&
+    plan.meterIntervalValue > 0
+  ) {
+    const overshoot = currentMeterValue - assetPlan.nextDueMeter;
+    if (overshoot > 0) {
+      return base + Math.floor(overshoot / plan.meterIntervalValue);
+    }
+    return base;
+  }
+
+  // Calendar dimension (calendar-only plans)
+  if (
+    plan.triggerType === 'calendar' &&
+    assetPlan.nextDueDate &&
+    plan.intervalValue &&
+    plan.intervalUnit
+  ) {
+    const nextDue = parseISO(assetPlan.nextDueDate);
+    if (isValid(nextDue) && isBefore(nextDue, today)) {
+      const daysPast = differenceInDays(today, nextDue);
+      const intervalDays = intervalToDays(plan.intervalValue, plan.intervalUnit);
+      if (intervalDays > 0) {
+        return base + Math.floor(daysPast / intervalDays);
+      }
+    }
+  }
+
+  return base;
+}
+
+function intervalToDays(value: number, unit: string): number {
+  switch (unit) {
+    case 'days':   return value;
+    case 'weeks':  return value * 7;
+    case 'months': return value * 30.44;
+    case 'years':  return value * 365.25;
+    default:       return 30;
+  }
+}
+
+// ── Scheduler types ────────────────────────────────────────────────────────
 
 interface SchedulerInput {
   pmPlans: PmPlan[];
@@ -141,7 +201,7 @@ interface SchedulerInput {
   workOrders: any[];
 }
 
-interface GeneratedWo {
+export interface GeneratedWo {
   id: string;
   assetId: string;
   assetPlanId: string;
@@ -155,124 +215,83 @@ interface GeneratedWo {
   pmPlanIdSnapshot: string | null;
   pmPlanNameSnapshot: string | null;
   pmCycleIndex: number;
-  generatedFromMeter?: number | null;
+  generatedFromMeter: number | null;
   tasks: { id: string; description: string; sortOrder: number }[];
 }
 
-interface SchedulerResult {
+export interface SupersededAction {
+  oldWoId: string;
+  assetPlanId: string;
+  oldCycleIndex: number;
+  newCycleIndex: number;
+  auditNote: string;
+}
+
+export interface SchedulerResult {
   generated: GeneratedWo[];
   skipped: string[];
+  superseded: SupersededAction[];
 }
+
+// ── Terminal statuses ──────────────────────────────────────────────────────
+
+const TERMINAL_STATUSES = ['completed', 'cancelled', 'cancelled_superseded'];
+
+// ── Main scheduler ─────────────────────────────────────────────────────────
 
 export function runScheduler(
   { pmPlans, assetPlans, measurementPoints, pmTasks, workOrders }: SchedulerInput,
-  horizonDays: number
+  horizonDays: number,
 ): SchedulerResult {
   const generated: GeneratedWo[] = [];
   const skipped: string[] = [];
+  const superseded: SupersededAction[] = [];
+
   const today = startOfDay(new Date());
   const horizon = addDays(today, horizonDays);
 
-  const activeAssetPlans = assetPlans.filter(ap => ap.active);
-
-  for (const assetPlan of activeAssetPlans) {
+  for (const assetPlan of assetPlans.filter(ap => ap.active)) {
     const plan = pmPlans.find(p => p.id === assetPlan.pmPlanId);
     if (!plan) {
-      console.log(`[Engine] Saltando AP ${assetPlan.id}: Plan no encontrado`);
       skipped.push(assetPlan.id);
       continue;
     }
 
-    // Check for existing open WO for this asset plan
-    const existingOpenWo = workOrders.find(
-      (w: any) => w.assetPlanId === assetPlan.id && !['completed', 'cancelled'].includes(w.status)
-    );
-    if (existingOpenWo) {
-      console.log(`[Engine] Saltando AP ${assetPlan.id}: Ya tiene OT abierta (${existingOpenWo.woNumber})`);
-      skipped.push(assetPlan.id);
-      continue;
-    }
+    const point = assetPlan.measurementPointId
+      ? measurementPoints.find((p: any) => p.id === assetPlan.measurementPointId)
+      : null;
+    const currentMeterValue: number = point?.currentValue ?? 0;
 
-    let shouldGenerate = false;
-    let reason = '';
-    let meterTriggered = false;
+    // ── Step 1: Trigger evaluation ───────────────────────────────────────
+    // Calendar and meter are evaluated independently so hybrid fires on either.
 
-    // Calendar trigger
+    let calendarFires = false;
+    let meterFires = false;
+
     if (plan.triggerType === 'calendar' || plan.triggerType === 'hybrid') {
-      if (assetPlan.nextDueDate) {
-        const nextDue = parseISO(assetPlan.nextDueDate);
-        if (isNaN(nextDue.getTime())) {
-          reason = 'Fecha de vencimiento inválida';
-        } else if (isBefore(nextDue, today)) {
-          shouldGenerate = true;
-          reason = `Vencida desde ${assetPlan.nextDueDate}`;
-        } else {
-          // Lead days cannot exceed the horizon to prevent premature generation
-          const effectiveLeadDays = Math.min(plan.leadDays || 0, horizonDays);
-          const leadDate = addDays(nextDue, -effectiveLeadDays);
-          if (!isAfter(leadDate, today)) {
-            shouldGenerate = true;
-            reason = `Vencimiento ${assetPlan.nextDueDate} con lead ${effectiveLeadDays}d — en ventana de generación`;
-          } else if (!isAfter(nextDue, horizon)) {
-            shouldGenerate = true;
-            reason = `Vencimiento ${assetPlan.nextDueDate} dentro del horizonte de ${horizonDays}d`;
-          } else {
-            reason = `Vencimiento ${assetPlan.nextDueDate} fuera del horizonte`;
-          }
-        }
-      } else {
-        shouldGenerate = true; // No due date = generate now
-        reason = 'Sin fecha de vencimiento previa';
-      }
+      calendarFires = evalCalendarTrigger(assetPlan, plan, today, horizon);
     }
 
-    // Meter trigger
-    if (!shouldGenerate && (plan.triggerType === 'meter' || plan.triggerType === 'hybrid')) {
-      if (assetPlan.measurementPointId) {
-        const point = measurementPoints.find((p: any) => p.id === assetPlan.measurementPointId);
-
-        if (point) {
-          const current = point.currentValue || 0;
-          const interval = plan.meterIntervalValue || 0;
-
-          // FIX: Alineación Inteligente al múltiplo actual/pasado si el objetivo está en blanco
-          let targetMeter = assetPlan.nextDueMeter;
-          if (targetMeter == null || targetMeter <= 0) {
-            if (interval > 0) {
-              const currentMultiple = Math.floor(current / interval);
-              targetMeter = Math.max(interval, currentMultiple * interval);
-            }
-          }
-
-          if (targetMeter != null && targetMeter > 0) {
-            if (current >= targetMeter) {
-              shouldGenerate = true;
-              meterTriggered = true;
-              reason = `Medidor ${current} >= Umbral Objetivo ${targetMeter}`;
-            } else {
-              reason = `Medidor ${current} < Umbral Objetivo ${targetMeter}`;
-            }
-          }
-        }
-      }
+    if (plan.triggerType === 'meter' || plan.triggerType === 'hybrid') {
+      meterFires = evalMeterTrigger(assetPlan, plan, currentMeterValue);
     }
+
+    const shouldGenerate = calendarFires || meterFires;
+    // For hybrid: meter wins the due-date calculation if it fires before calendar
+    const meterTriggered = meterFires && plan.triggerType === 'hybrid';
 
     if (!shouldGenerate) {
-      console.log(`[Engine] Saltando AP ${assetPlan.id} (${plan.name}): No cumple criterios. Razón: ${reason}`);
       skipped.push(assetPlan.id);
       continue;
     }
 
-    console.log(`[Engine] GENERANDO OT para AP ${assetPlan.id} (${plan.name}). Razón: ${reason}`);
+    // ── Step 2: Effective cycle index ────────────────────────────────────
+    const effectiveCycle = calcEffectiveCycleIndex(assetPlan, plan, today, currentMeterValue);
 
-    // Build WO tasks based on cycle multiplier
-    const currentCycle = assetPlan.currentCycleIndex || 1;
-    const planTasks = pmTasks
-      .filter((t: any) => {
-        if (t.pmPlanId !== plan.id) return false;
-        // Logic: Include task if (Current Cycle % Multiplier == 0)
-        return currentCycle % (t.frequencyMultiplier || 1) === 0;
-      })
+    // ── Step 3: Task list for this cycle (modular arithmetic) ────────────
+    const planTasks = pmTasks.filter((t: any) => t.pmPlanId === plan.id);
+    const candidateTasks = planTasks
+      .filter((t: any) => effectiveCycle % (t.frequencyMultiplier || 1) === 0)
       .sort((a: any, b: any) => a.sortOrder - b.sortOrder)
       .map((t: any, idx: number) => ({
         id: generateId(),
@@ -280,45 +299,52 @@ export function runScheduler(
         sortOrder: idx,
       }));
 
-    // If no tasks match this cycle (rare but possible), we still generate the WO 
-    // or we could skip. Industrial preference: Always have at least the x1 tasks.
-    if (planTasks.length === 0) {
-      console.log(`[Engine] Saltando AP ${assetPlan.id}: No hay tareas para el ciclo ${currentCycle}`);
+    if (candidateTasks.length === 0) {
       skipped.push(assetPlan.id);
       continue;
     }
 
-    // Priority based on criticality
-    const priorityMap: Record<string, string> = {
-      critical: 'critical',
-      high: 'high',
-      medium: 'medium',
-      low: 'low',
-    };
+    // ── Step 4: Hierarchical anti-stacking ───────────────────────────────
+    const existingOpenWo = workOrders.find(
+      (w: any) =>
+        w.assetPlanId === assetPlan.id &&
+        !TERMINAL_STATUSES.includes(w.status),
+    );
 
-    const priority = priorityMap[plan.criticality] || 'medium';
+    if (existingOpenWo) {
+      const existingCycle = existingOpenWo.pmCycleIndex ?? (assetPlan.currentCycleIndex || 1);
+      const existingWeight = calcCycleWeight(planTasks, existingCycle);
+      const newWeight = calcCycleWeight(planTasks, effectiveCycle);
 
-    // When meter triggered a hybrid plan, use today as both scheduled and due date
-    // (meter exceeded NOW — don't show the calendar date which could be months away)
-    const scheduledDate = (meterTriggered && plan.triggerType === 'hybrid')
-      ? format(today, 'yyyy-MM-dd')
-      : assetPlan.nextDueDate
-        ? format(addDays(parseISO(assetPlan.nextDueDate), -(plan.leadDays || 0)), 'yyyy-MM-dd')
-        : format(today, 'yyyy-MM-dd');
+      if (newWeight <= existingWeight) {
+        // Same or lower maintenance scope — block as pure duplicate
+        skipped.push(assetPlan.id);
+        continue;
+      }
 
-    let dueDate: string | null;
-    if (meterTriggered && plan.triggerType === 'hybrid') {
-      // Meter triggered: due today, not at the future calendar date
-      dueDate = format(today, 'yyyy-MM-dd');
-    } else if (assetPlan.nextDueMeter && !assetPlan.nextDueDate) {
-      // Pure meter plan: no calendar due date
-      dueDate = null;
-    } else if (assetPlan.nextDueDate) {
-      dueDate = assetPlan.nextDueDate;
-    } else {
-      const computedNext = calcNextDueDate(plan, assetPlan, format(today, "yyyy-MM-dd'T'HH:mm:ss"));
-      dueDate = format(new Date(computedNext), 'yyyy-MM-dd');
+      // New cycle is heavier — supersede the open WO and generate the critical one
+      superseded.push({
+        oldWoId: existingOpenWo.id,
+        assetPlanId: assetPlan.id,
+        oldCycleIndex: existingCycle,
+        newCycleIndex: effectiveCycle,
+        auditNote:
+          `Ciclo ${effectiveCycle} (peso ${newWeight}) absorbió Ciclo ${existingCycle} ` +
+          `(peso ${existingWeight}). Mantenimiento mayor generado automáticamente.`,
+      });
+      // Fall through — generate the higher-weight WO below
     }
+
+    // ── Step 5: Build Work Order ─────────────────────────────────────────
+    const priority = (
+      { critical: 'critical', high: 'high', medium: 'medium', low: 'low' } as Record<string, string>
+    )[plan.criticality] ?? 'medium';
+
+    const scheduledDate = buildScheduledDate(assetPlan, plan, today, meterTriggered);
+    const dueDate = buildDueDate(assetPlan, plan, today, meterTriggered);
+    const generatedFromMeter = meterFires
+      ? snapMeterTarget(plan, currentMeterValue, assetPlan.nextDueMeter)
+      : null;
 
     generated.push({
       id: generateId(),
@@ -333,11 +359,92 @@ export function runScheduler(
       dueDate,
       pmPlanIdSnapshot: plan.id,
       pmPlanNameSnapshot: plan.name,
-      pmCycleIndex: currentCycle,
-      generatedFromMeter: meterTriggered ? (assetPlan.nextDueMeter || (Math.floor((measurementPoints.find((p: any) => p.id === assetPlan.measurementPointId)?.currentValue || 0) / (plan.meterIntervalValue || 1)) + 1) * (plan.meterIntervalValue || 0)) : null,
-      tasks: planTasks,
+      pmCycleIndex: effectiveCycle,
+      generatedFromMeter,
+      tasks: candidateTasks,
     });
   }
 
-  return { generated, skipped: skipped };
+  return { generated, skipped, superseded };
+}
+
+// ── Trigger evaluators ─────────────────────────────────────────────────────
+
+function evalCalendarTrigger(
+  assetPlan: AssetPlan,
+  plan: PmPlan,
+  today: Date,
+  horizon: Date,
+): boolean {
+  if (!assetPlan.nextDueDate) return true; // No date set → generate immediately
+
+  const nextDue = parseISO(assetPlan.nextDueDate);
+  if (!isValid(nextDue)) return false;
+  if (isBefore(nextDue, today)) return true; // Already overdue
+
+  const effectiveLeadDays = Math.min(plan.leadDays || 0, differenceInDays(horizon, today));
+  const leadDate = addDays(nextDue, -effectiveLeadDays);
+  return !isAfter(leadDate, today) || !isAfter(nextDue, horizon);
+}
+
+function evalMeterTrigger(
+  assetPlan: AssetPlan,
+  plan: PmPlan,
+  currentValue: number,
+): boolean {
+  if (!assetPlan.measurementPointId) return false;
+
+  const interval = plan.meterIntervalValue || 0;
+  if (interval <= 0) return false;
+
+  let target = assetPlan.nextDueMeter;
+  if (target == null || target <= 0) {
+    const multiple = Math.floor(currentValue / interval);
+    target = Math.max(interval, multiple * interval);
+  }
+
+  return currentValue >= target;
+}
+
+// ── Date builders ──────────────────────────────────────────────────────────
+
+function buildScheduledDate(
+  assetPlan: AssetPlan,
+  plan: PmPlan,
+  today: Date,
+  meterTriggeredHybrid: boolean,
+): string {
+  if (meterTriggeredHybrid) return format(today, 'yyyy-MM-dd');
+
+  if (assetPlan.nextDueDate) {
+    const nextDue = parseISO(assetPlan.nextDueDate);
+    if (isValid(nextDue)) {
+      return format(addDays(nextDue, -(plan.leadDays || 0)), 'yyyy-MM-dd');
+    }
+  }
+
+  return format(today, 'yyyy-MM-dd');
+}
+
+function buildDueDate(
+  assetPlan: AssetPlan,
+  plan: PmPlan,
+  today: Date,
+  meterTriggeredHybrid: boolean,
+): string | null {
+  if (meterTriggeredHybrid) return format(today, 'yyyy-MM-dd');
+  if (plan.triggerType === 'meter' && !assetPlan.nextDueDate) return null;
+  return assetPlan.nextDueDate ?? format(today, 'yyyy-MM-dd');
+}
+
+function snapMeterTarget(
+  plan: PmPlan,
+  currentValue: number,
+  storedTarget: number | null,
+): number | null {
+  if (storedTarget != null && storedTarget > 0) return storedTarget;
+  const interval = plan.meterIntervalValue;
+  if (!interval || interval <= 0) return null;
+  const multiple = Math.floor(currentValue / interval);
+  return Math.max(interval, multiple * interval);
 }

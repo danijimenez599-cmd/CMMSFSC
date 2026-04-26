@@ -308,20 +308,26 @@ export default function WoListPanel({ onSelect, onNewWo, customWorkOrders, title
                       <Calendar size={10} className="text-brand" />
                       {wo.pmCycleIndex && (
                         <span className="text-[9px] font-black text-brand bg-brand/5 px-1.5 py-0.5 rounded border border-brand/10">
-                          C{wo.pmCycleIndex} 
+                          C{wo.pmCycleIndex}
                           {(() => {
+                            // Completed: show the real horómetro snapshot at closure.
+                            if (wo.status === 'completed' && wo.completedMeterValue != null) {
+                              const ap = assetPlans.find((p: any) => p.id === wo.assetPlanId);
+                              const plan = pmPlans.find((p: any) => p.id === (ap?.pmPlanId || wo.generatedFromPlanId));
+                              const unit = plan?.meterIntervalUnit?.toUpperCase() ?? '';
+                              return ` • ${wo.completedMeterValue.toLocaleString()}${unit ? ' ' + unit : ''}`.trimEnd();
+                            }
+                            // Open: theoretical threshold.
                             const ap = assetPlans.find((p: any) => p.id === wo.assetPlanId);
                             const plan = pmPlans.find((p: any) => p.id === (ap?.pmPlanId || wo.generatedFromPlanId));
                             if (!plan) return '';
-                            
-                            const val = plan.triggerType === 'meter' 
+                            const val = plan.triggerType === 'meter'
                               ? (plan.meterIntervalValue || 0) * wo.pmCycleIndex
                               : (plan.intervalValue || 0) * wo.pmCycleIndex;
-                            const unit = plan.triggerType === 'meter' 
-                              ? plan.meterIntervalUnit?.toUpperCase() 
+                            const unit = plan.triggerType === 'meter'
+                              ? plan.meterIntervalUnit?.toUpperCase()
                               : (plan.intervalUnit === 'months' ? 'M' : plan.intervalUnit === 'days' ? 'D' : 'W');
-                            
-                            return ` • ${val.toLocaleString()}${unit}`;
+                            return ` • ${val.toLocaleString()}${unit ? ' ' + unit : ''}`;
                           })()}
                         </span>
                       )}

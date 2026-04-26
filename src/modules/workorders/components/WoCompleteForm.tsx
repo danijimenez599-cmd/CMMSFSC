@@ -28,17 +28,20 @@ export default function WoCompleteForm({ wo, onClose }: WoCompleteFormProps) {
     externalInvoiceRef: wo.externalInvoiceRef || null,
   });
 
-  // Find linked asset plan and measurement point
+  // Find linked asset plan, pm plan, and measurement point
   const linkedPlan = wo.assetPlanId
     ? assetPlans.find((ap: any) => ap.id === wo.assetPlanId)
+    : null;
+  const linkedPmPlan = linkedPlan
+    ? store.pmPlans?.find((p: any) => p.id === linkedPlan.pmPlanId)
     : null;
   const linkedPoint = linkedPlan?.measurementPointId
     ? measurementPoints.find((mp: any) => mp.id === linkedPlan.measurementPointId)
     : null;
-  const isMeterBased = linkedPlan && (
-    // Check the pm plan trigger type from store
-    store.pmPlans?.find((p: any) => p.id === linkedPlan.pmPlanId)?.triggerType !== 'calendar'
-  );
+  // Show meter section for any plan that is NOT purely calendar-based.
+  // The section renders even when linkedPoint is null (broken link) so the
+  // reading is never silently dropped.
+  const isMeterBased = !!linkedPlan && linkedPmPlan?.triggerType !== 'calendar';
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -52,6 +55,9 @@ export default function WoCompleteForm({ wo, onClose }: WoCompleteFormProps) {
     const newErrors: Record<string, string> = {};
     if (!formData.resolution || formData.resolution.trim().length < 10) {
       newErrors.resolution = 'El reporte técnico de resolución debe ser más detallado (min. 10 car.).';
+    }
+    if (isMeterBased && !meterValueInput) {
+      newErrors.meterValue = 'Registra la lectura del acumulador al momento del cierre para recalcular el próximo ciclo.';
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -234,38 +240,60 @@ export default function WoCompleteForm({ wo, onClose }: WoCompleteFormProps) {
           <p className="text-[9px] font-medium text-slate-400 mt-2 italic">* Registre el costo de servicios externos. Este monto se sumará al total de repuestos de la OT.</p>
         </div>
 
-        {/* Meter reading at completion (for meter-based PMs) */}
-        {isMeterBased && linkedPoint && (
-          <motion.div 
+        {/* Meter reading at completion — required for meter/hybrid plans */}
+        {isMeterBased && (
+          <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             className="space-y-4 pt-4 border-t border-slate-100"
           >
-            <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 flex gap-4 items-start">
-              <div className="w-10 h-10 rounded-xl bg-blue-500 text-white flex items-center justify-center shrink-0 shadow-lg shadow-blue-500/20">
+            <div className={`rounded-2xl p-4 flex gap-4 items-start ${errors.meterValue ? 'bg-red-50 border border-red-200' : 'bg-blue-50 border border-blue-200'}`}>
+              <div className={`w-10 h-10 rounded-xl text-white flex items-center justify-center shrink-0 shadow-lg ${errors.meterValue ? 'bg-red-500 shadow-red-500/20' : 'bg-blue-500 shadow-blue-500/20'}`}>
                 <Gauge size={20} />
               </div>
               <div>
-                <p className="text-xs font-bold text-blue-900 uppercase tracking-tight">Sincronización de Odómetro / Horómetro</p>
-                <p className="text-[11px] font-medium text-blue-700 mt-1 leading-relaxed">
-                  Esta orden pertenece a un plan basado en uso. Registre la lectura actual de <strong>{linkedPoint.name}</strong> para recalcular el próximo ciclo técnico.
+                <p className={`text-xs font-bold uppercase tracking-tight ${errors.meterValue ? 'text-red-900' : 'text-blue-900'}`}>
+                  Lectura de Acumulador al Cierre <span className="text-red-500">*</span>
                 </p>
+                <p className={`text-[11px] font-medium mt-1 leading-relaxed ${errors.meterValue ? 'text-red-700' : 'text-blue-700'}`}>
+                  {linkedPoint
+                    ? <>Registra la lectura actual de <strong>{linkedPoint.name}</strong> para recalcular el próximo ciclo técnico.</>
+                    : 'Registra la lectura actual del acumulador para recalcular el próximo ciclo técnico.'}
+                </p>
+                {errors.meterValue && (
+                  <p className="text-[10px] font-bold text-red-600 mt-1">{errors.meterValue}</p>
+                )}
               </div>
             </div>
 
             <div className="bg-slate-900 rounded-2xl p-6 flex flex-col sm:flex-row items-center gap-6">
               <div className="flex-1 text-center sm:text-left">
                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Última Lectura Registrada</p>
-                <p className="text-lg font-mono font-bold text-white tracking-tight">{linkedPoint.currentValue} <span className="text-slate-500 text-xs">{linkedPoint.unit}</span></p>
+                {linkedPoint ? (
+                  <p className="text-lg font-mono font-bold text-white tracking-tight">
+                    {Number(linkedPoint.currentValue ?? 0).toLocaleString()} <span className="text-slate-500 text-xs">{linkedPoint.unit}</span>
+                  </p>
+                ) : (
+                  <p className="text-sm font-bold text-slate-500 italic">Sin lectura previa</p>
+                )}
               </div>
               <div className="w-full sm:w-48">
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 pl-1">Lectura de Cierre</p>
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 pl-1">
+                  Lectura de Cierre <span className="text-red-400">*</span>
+                </p>
                 <Input
                   type="number"
                   value={meterValueInput}
-                  onChange={e => setMeterValueInput(e.target.value)}
-                  placeholder="0.00"
-                  className="bg-white/10 border-white/10 text-white font-mono font-bold text-center text-lg h-12 focus:ring-white/20 focus:border-white/40"
+                  onChange={e => {
+                    setMeterValueInput(e.target.value);
+                    if (errors.meterValue) setErrors(prev => ({ ...prev, meterValue: '' }));
+                  }}
+                  placeholder={linkedPoint?.currentValue != null ? String(linkedPoint.currentValue) : '0.00'}
+                  className={`font-mono font-bold text-center text-lg h-12 focus:ring-white/20 focus:border-white/40 ${
+                    errors.meterValue
+                      ? 'bg-red-900/20 border-red-500/60 text-red-300'
+                      : 'bg-white/10 border-white/10 text-white'
+                  }`}
                   step="any"
                 />
               </div>

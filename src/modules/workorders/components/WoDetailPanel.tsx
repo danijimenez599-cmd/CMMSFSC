@@ -140,19 +140,25 @@ export default function WoDetailPanel() {
                   <>
                     <span className="text-slate-200">/</span>
                     <span className="text-brand font-black bg-brand/5 px-2 py-0.5 rounded border border-brand/10">
-                      CICLO {wo.pmCycleIndex} 
+                      CICLO {wo.pmCycleIndex}
                       {(() => {
-                        // For completed WOs, skip the live relation — the plan may have been unlinked.
-                        // We still try the live lookup first for open WOs.
+                        // Completed WOs: use the frozen meter snapshot (real horómetro at closure).
+                        if (isCompleted && wo.completedMeterValue != null) {
+                          const ap = store.assetPlans?.find((p: any) => p.id === wo.assetPlanId);
+                          const plan = store.pmPlans?.find((p: any) => p.id === (ap?.pmPlanId || wo.generatedFromPlanId));
+                          const unit = plan?.meterIntervalUnit?.toUpperCase() ?? '';
+                          return ` • ${wo.completedMeterValue.toLocaleString()} ${unit}`.trimEnd();
+                        }
+                        // Open WOs: calculate the theoretical threshold from the live plan.
                         if (!isCompleted) {
                           const ap = store.assetPlans?.find((p: any) => p.id === wo.assetPlanId);
                           const plan = store.pmPlans?.find((p: any) => p.id === (ap?.pmPlanId || wo.generatedFromPlanId));
                           if (plan) {
-                            const val = plan.triggerType === 'meter' 
+                            const val = plan.triggerType === 'meter'
                               ? (plan.meterIntervalValue || 0) * wo.pmCycleIndex
                               : (plan.intervalValue || 0) * wo.pmCycleIndex;
-                            const unitLabel = plan.triggerType === 'meter' 
-                              ? plan.meterIntervalUnit?.toUpperCase() 
+                            const unitLabel = plan.triggerType === 'meter'
+                              ? plan.meterIntervalUnit?.toUpperCase()
                               : (plan.intervalUnit === 'months' ? 'MESES' : plan.intervalUnit === 'days' ? 'DÍAS' : 'SEMANAS');
                             return ` (${val.toLocaleString()} ${unitLabel})`;
                           }
