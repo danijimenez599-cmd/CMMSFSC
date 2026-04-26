@@ -94,7 +94,7 @@ export default function AssetSidePanel() {
   const store = useStore() as any;
   const {
     selectedAssetId, setModule = () => {}, selectWo = () => {}, workOrders = [], pmPlans = [],
-    assetPlans = [], measurementPoints = [], pmTasks = [],
+    assetPlans = [], measurementPoints = [], measurementConfigs = [], pmTasks = [],
     saveAssetPlan = () => {}, unlinkAssetPlan, showToast = () => {},
     projectionMonths
   } = store;
@@ -108,8 +108,15 @@ export default function AssetSidePanel() {
   if (!selectedAssetId) return null;
 
   const assetPoints = measurementPoints.filter((mp: any) => mp.assetId === selectedAssetId);
+  const cumulativeAssetPoints = assetPoints.filter((mp: any) => {
+    const cfg = measurementConfigs.find((c: any) => c.id === mp.configId);
+    return cfg?.isCumulative === true;
+  });
   const selectedPlan = pmPlans.find((p: any) => p.id === selectedPlanId);
-  const isMeterBased = selectedPlan?.triggerType === 'meter' || selectedPlan?.triggerType === 'hybrid';
+  const isMeterOnly = selectedPlan?.triggerType === 'meter';
+  const isHybrid = selectedPlan?.triggerType === 'hybrid';
+  const needsMeter = isMeterOnly || isHybrid;
+  const needsDate = !isMeterOnly; // calendar and hybrid both need a date
   const openWorkOrders = (workOrders || []).filter((wo: any) => wo.assetId === selectedAssetId && !['completed', 'cancelled'].includes(wo.status)).slice(0, 5);
   const activePlans = (assetPlans || []).filter((ap: any) => ap.assetId === selectedAssetId && ap.active);
 
@@ -126,12 +133,30 @@ export default function AssetSidePanel() {
     if (!selectedPlanId) return;
     const plan = pmPlans.find((p: any) => p.id === selectedPlanId);
     if (!plan) return;
+    const planIsMeterOnly = plan.triggerType === 'meter';
+    const planIsHybrid = plan.triggerType === 'hybrid';
+    const planNeedsMeter = planIsMeterOnly || planIsHybrid;
+    if (planNeedsMeter && !selectedPointId) {
+      showToast({ type: 'error', title: 'Requerido', message: 'Selecciona el instrumento acumulador para este plan.' });
+      return;
+    }
     try {
       const today = new Date().toISOString();
-      const firstDueDate = customStartDate ? new Date(customStartDate).toISOString().split('T')[0] : calcNextDueDate(plan, { nextDueDate: null } as any, today);
-      await saveAssetPlan({ id: generateId(), assetId: selectedAssetId, pmPlanId: selectedPlanId, measurementPointId: selectedPointId || null, nextDueDate: firstDueDate, nextDueMeter: customStartMeter ? Number(customStartMeter) : null, lastCompletedAt: null, woCount: 0, currentCycleIndex: 1, active: true, createdAt: today });
+      const nextDueDate = planIsMeterOnly
+        ? null
+        : customStartDate
+          ? new Date(customStartDate).toISOString().split('T')[0]
+          : calcNextDueDate(plan, { nextDueDate: null } as any, today);
+      await saveAssetPlan({
+        id: generateId(), assetId: selectedAssetId, pmPlanId: selectedPlanId,
+        measurementPointId: planNeedsMeter ? (selectedPointId || null) : null,
+        nextDueDate,
+        nextDueMeter: customStartMeter ? Number(customStartMeter) : null,
+        lastCompletedAt: null, woCount: 0, currentCycleIndex: 1, active: true, createdAt: today,
+      });
       showToast({ type: 'success', title: 'Plan vinculado', message: `${plan.name} activado.` });
       setShowAssignModal(false);
+      setSelectedPlanId(''); setSelectedPointId(''); setCustomStartDate(''); setCustomStartMeter('');
     } catch (err: any) { showToast({ type: 'error', title: 'Error', message: err.message }); }
   };
 
@@ -234,10 +259,54 @@ export default function AssetSidePanel() {
 
       <Modal isOpen={showAssignModal} onClose={() => setShowAssignModal(false)} title="Vincular Estrategia" size="sm" footer={<div className="flex gap-4 w-full"><Button variant="ghost" onClick={() => setShowAssignModal(false)} className="flex-1">Cancelar</Button><Button variant="primary" onClick={handleAssignPlan} disabled={!selectedPlanId} className="flex-1 bg-slate-900 hover:bg-brand">Vincular</Button></div>}>
         <div className="space-y-5 py-4">
-          <FormField label="Plan Maestro"><Select value={selectedPlanId} onChange={e => setSelectedPlanId(e.target.value)}><option value="">Elegir estrategia...</option>{pmPlans.map((p: any) => <option key={p.id} value={p.id}>{p.name}</option>)}</Select></FormField>
-          <div className="bg-slate-50 p-5 rounded-[24px] border border-slate-100 space-y-4">
-            <FormField label="Fecha de Inicio"><input type="date" className="w-full h-12 px-4 text-xs font-bold border border-slate-200 rounded-xl outline-none" value={customStartDate} onChange={e => setCustomStartDate(e.target.value)} /></FormField>
-          </div>
+          <FormField label="Plan Maestro">
+            <Select value={selectedPlanId} onChange={e => { setSelectedPlanId(e.target.value); setSelectedPointId(''); setCustomStartDate(''); setCustomStartMeter(''); }}>
+              <option value="">Elegir estrategia...</option>
+              {pmPlans.map((p: any) => <option key={p.id} value={p.id}>{p.name} — {p.triggerType === 'meter' ? 'Por horas' : p.triggerType === 'hybrid' ? 'Híbrido' : 'Por fecha'}</option>)}
+            </Select>
+          </FormField>
+
+          {selectedPlan && (
+            <div className="bg-slate-50 p-5 rounded-[24px] border border-slate-100 space-y-4">
+              {/* Date field: calendar and hybrid only */}
+              {needsDate && (
+                <FormField label="Fecha de Inicio">
+                  <input type="date" className="w-full h-12 px-4 text-xs font-bold border border-slate-200 rounded-xl outline-none bg-white" value={customStartDate} onChange={e => setCustomStartDate(e.target.value)} />
+                </FormField>
+              )}
+
+              {/* Meter fields: meter-only and hybrid */}
+              {needsMeter && (
+                <>
+                  <FormField label="Instrumento Acumulador">
+                    {cumulativeAssetPoints.length === 0 ? (
+                      <p className="text-xs text-amber-600 font-bold py-2">Este activo no tiene instrumentos acumuladores. Créalos en la pestaña Medidores primero.</p>
+                    ) : (
+                      <select
+                        className="w-full h-12 px-4 text-xs font-bold border border-slate-200 rounded-xl outline-none bg-white"
+                        value={selectedPointId}
+                        onChange={e => setSelectedPointId(e.target.value)}
+                      >
+                        <option value="">Seleccionar instrumento...</option>
+                        {cumulativeAssetPoints.map((mp: any) => (
+                          <option key={mp.id} value={mp.id}>{mp.name} — actual: {Number(mp.currentValue || 0).toLocaleString()} {mp.unit}</option>
+                        ))}
+                      </select>
+                    )}
+                  </FormField>
+                  <FormField label="Umbral de inicio (unidades)">
+                    <input
+                      type="number" min="0" step="1"
+                      className="w-full h-12 px-4 text-xs font-bold border border-slate-200 rounded-xl outline-none bg-white"
+                      placeholder="Ej. 5000 (deja vacío para calcular automático)"
+                      value={customStartMeter}
+                      onChange={e => setCustomStartMeter(e.target.value)}
+                    />
+                  </FormField>
+                </>
+              )}
+            </div>
+          )}
         </div>
       </Modal>
     </div>

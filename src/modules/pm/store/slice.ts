@@ -482,8 +482,16 @@ export const createPmSlice: StateCreator<StoreState, [], [], PmSlice> = (set, ge
 
   /**
    * Recalculates next due date/meter after a WO is completed.
-   * For cumulative meters: resets threshold to currentValue + interval
-   * (i.e., keeps accumulating — does NOT reset to zero).
+   *
+   * FIXED mode  (intervalMode = 'fixed'):
+   *   nextDueMeter = prevThreshold + interval
+   *   Maintains rigid 100/200/300h schedule regardless of when maintenance was done.
+   *   If the meter already exceeded the new threshold when the WO is closed,
+   *   the scheduler fires immediately (catch-up).
+   *
+   * FLOATING mode (intervalMode = 'floating' or unset):
+   *   nextDueMeter = actualReadingAtCompletion + interval
+   *   Schedule drifts to always be X hours after the last service.
    */
   recalcNextDue: async (assetPlanId, completedAt, meterValue) => {
     const assetPlan = get().assetPlans.find(ap => ap.id === assetPlanId);
@@ -495,24 +503,31 @@ export const createPmSlice: StateCreator<StoreState, [], [], PmSlice> = (set, ge
     const updates: any = {
       last_completed_at: completedAt,
       wo_count: assetPlan.woCount + 1,
-      current_cycle_index: (assetPlan.currentCycleIndex || 1) + 1, // Incremento de ciclo
+      current_cycle_index: (assetPlan.currentCycleIndex || 1) + 1,
     };
 
-    // Calendar trigger: advance next due date
+    // Calendar trigger: advance next due date (fixed/floating handled inside calcNextDueDate)
     if (plan.triggerType === 'calendar' || plan.triggerType === 'hybrid') {
       updates.next_due_date = calcNextDueDate(plan, assetPlan, completedAt);
     }
 
-    // Meter trigger: set next threshold = current reading + interval
-    // This is the KEY fix: we don't reset to 0, we advance the threshold
+    // Meter trigger
     if (plan.triggerType === 'meter' || plan.triggerType === 'hybrid') {
-      if (meterValue !== undefined && plan.meterIntervalValue) {
-        updates.next_due_meter = meterValue + plan.meterIntervalValue;
-      } else if (assetPlan.measurementPointId && plan.meterIntervalValue) {
-        // Fallback: get current value from state
-        const point = get().measurementPoints.find(p => p.id === assetPlan.measurementPointId);
-        if (point) {
-          updates.next_due_meter = (point.currentValue || 0) + plan.meterIntervalValue;
+      if (plan.meterIntervalValue) {
+        const isFixed = plan.intervalMode === 'fixed';
+
+        if (isFixed && assetPlan.nextDueMeter != null) {
+          // FIXED: advance from the previous scheduled threshold, not from actual completion value.
+          // Keeps the 100/200/300h cadence rigid.
+          updates.next_due_meter = assetPlan.nextDueMeter + plan.meterIntervalValue;
+        } else {
+          // FLOATING: advance from the actual reading at completion.
+          // Falls back to point's current value when no explicit reading is provided.
+          const completionValue =
+            meterValue !== undefined
+              ? meterValue
+              : (get().measurementPoints.find(p => p.id === assetPlan.measurementPointId)?.currentValue || 0);
+          updates.next_due_meter = completionValue + plan.meterIntervalValue;
         }
       }
     }
@@ -520,6 +535,21 @@ export const createPmSlice: StateCreator<StoreState, [], [], PmSlice> = (set, ge
     const { error } = await supabase.from('asset_plans').update(updates).eq('id', assetPlanId);
     if (error) throw error;
     await get().fetchPmData();
+
+    // Catch-up: if the meter already exceeds the new threshold (common in FIXED mode
+    // when the WO was overdue at close time), fire the scheduler immediately so
+    // the next WO is created without requiring the user to manually enter another reading.
+    if (updates.next_due_meter != null && assetPlan.measurementPointId) {
+      const point = get().measurementPoints.find(p => p.id === assetPlan.measurementPointId);
+      if (point && point.currentValue != null && point.currentValue >= updates.next_due_meter) {
+        const hasOpenWo = get().workOrders.some(
+          (w: any) => w.assetPlanId === assetPlanId && !['completed', 'cancelled'].includes(w.status)
+        );
+        if (!hasOpenWo) {
+          await get().runPmScheduler(0);
+        }
+      }
+    }
   },
 });
 

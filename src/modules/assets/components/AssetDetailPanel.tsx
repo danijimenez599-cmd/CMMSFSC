@@ -317,7 +317,7 @@ export default function AssetDetailPanel({ onEdit }: AssetDetailPanelProps) {
             )}
 
             {tab === 'medidores' && (
-              <div className="w-full">
+              <div className="w-full bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
                 <MeasurementPointsPanel assetId={asset.id} />
               </div>
             )}

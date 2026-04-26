@@ -116,9 +116,9 @@ export default function MeasurementPointsPanel({ assetId }: MeasurementPointsPan
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
-          <div>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-4 sm:gap-6 min-w-0">
+          <div className="min-w-0">
             <h3 className="font-display font-black text-slate-900 flex items-center gap-2 text-base tracking-tight">
               <Gauge size={20} className="text-brand" />
               Instrumentación
@@ -127,15 +127,15 @@ export default function MeasurementPointsPanel({ assetId }: MeasurementPointsPan
               Control de Condición y Tendencias
             </p>
           </div>
-          <div className="h-8 w-px bg-slate-200 hidden sm:block" />
-          <div className="flex bg-slate-100 p-1 rounded-xl w-fit">
-            <button 
+          <div className="h-8 w-px bg-slate-200 hidden sm:block shrink-0" />
+          <div className="flex bg-slate-100 p-1 rounded-xl w-fit shrink-0">
+            <button
               onClick={() => setViewMode('cards')}
               className={cn("px-4 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all", viewMode === 'cards' ? "bg-white text-slate-900 shadow-sm" : "text-slate-400 hover:text-slate-600")}
             >
               Tablero
             </button>
-            <button 
+            <button
               onClick={() => setViewMode('trends')}
               className={cn("px-4 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all", viewMode === 'trends' ? "bg-white text-slate-900 shadow-sm" : "text-slate-400 hover:text-slate-600")}
             >
@@ -147,11 +147,10 @@ export default function MeasurementPointsPanel({ assetId }: MeasurementPointsPan
           <Button
             variant="primary"
             size="sm"
-            className="rounded-full font-bold text-[10px] uppercase tracking-widest px-6 w-full sm:w-auto"
+            className="rounded-full font-bold text-[10px] uppercase tracking-widest px-6 shrink-0"
             icon={<Plus size={14} />}
             onClick={() => {
               if (measurementConfigs.length === 0) {
-                // MODULE 4.8: Catalog empty — show empty state instead of broken form
                 setShowCatalogEmpty(true);
               } else {
                 setShowAddPoint(true);
