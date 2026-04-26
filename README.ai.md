@@ -1,7 +1,7 @@
 # README.ai.md — APEX CMMS: Documento Base de Contexto para Agentes de IA
 
 > **ESTE ARCHIVO ES PARA AGENTES DE IA, NO PARA HUMANOS.**
-> Si eres un agente de IA o LLM que ha recibido acceso a este repositorio, lee este documento completo **antes** de inspeccionar cualquier otro archivo. Contiene las decisiones de diseño críticas y las reglas que gobiernan la integridad del sistema. Ignorar este documento resultará en regresiones de datos irreversibles.
+> Si eres un agente de IA o LLM que has recibido acceso a este repositorio, lee este documento completo **antes** de inspeccionar cualquier otro archivo. Contiene las decisiones de diseño críticas y las reglas que gobiernan la integridad del sistema. Ignorar este documento resultará en regresiones de datos irreversibles.
 
 ---
 
@@ -30,6 +30,7 @@ Usa exactamente este vocabulario al generar código, comentarios y migraciones:
 | **Movimiento de Stock** | `stock_movements` | Trazabilidad completa de entradas/salidas del almacén. Tipo: `in`, `out`, `return`, `adjustment`. |
 | **Snapshot** | `*_name_snapshot` | Texto plano congelado al cerrar una OT. El nombre del técnico/activo/proveedor en ese momento exacto. |
 | **Soft Delete** | `active=false` / `status='decommissioned'` | Desactivación lógica. La entidad deja de aparecer en la UI pero su historial permanece intacto. |
+| **Modo Auditoría** | `isAuditMode` (UiSlice) | Modo especial en el árbol de activos que reemplaza los paneles 2 y 3 con componentes de solo lectura para revisar el historial completo de OTs de un equipo. |
 
 ---
 
@@ -124,21 +125,25 @@ EXECUTE FUNCTION public.prevent_closed_wo_updates();
 
 **Implicación para el código:** Si necesitas mostrar datos de una OT cerrada (ej. el `pmPlanNameSnapshot`), léelos directamente de las columnas `_snapshot`. **No intentes actualizar una OT cerrada bajo ninguna circunstancia**, ni siquiera para "corregir" un dato.
 
-En `WoDetailPanel.tsx`, el display de OTs cerradas prioriza el snapshot:
-```typescript
-// ✅ CORRECTO: mostrar snapshot para OTs completed/cancelled
-const displayPmPlan = wo.status === 'completed'
-  ? wo.pmPlanNameSnapshot
-  : assetPlans.find(ap => ap.id === wo.assetPlanId)?.name;
-```
+---
+
+### REGLA 5: Modo Auditoría es Estrictamente de Solo Lectura
+
+El Modo Auditoría (`isAuditMode` en UiSlice) activa `AuditListPanel` y `AuditDetailPanel` en el módulo de activos. **Estos componentes nunca deben exponer controles de edición, botones de acción, ni llamadas de escritura al store.** Son ventanas de inspección, no de operación.
+
+- `AuditListPanel` lee de `store.assetHistory` (poblado por `fetchAssetHistory`)
+- `AuditDetailPanel` lee de `store.assetHistory` + `woTasks` + `woComments` + `partUsages`
+- Ninguno de los dos llama a `updateWoStatus`, `assignWo`, `toggleTask`, `addComment`, ni `addPartUsage`
+
+**No reutilices `WoListPanel` ni `WoDetailPanel` del módulo de OTs en contexto de auditoría.** Estos componentes tienen lógica de edición integrada y ancho fijo que genera conflictos de layout en la vista de 3 paneles. Usa exclusivamente los componentes `Audit*`.
 
 ---
 
-### REGLA 5: Diseño Responsive y Mobile-First
+### REGLA 6: Diseño Responsive y Mobile-First
 
 El sistema está diseñado para operar en tablets y dispositivos móviles industriales.
 - El Sidebar es colapsable y se convierte en menú hamburguesa en pantallas pequeñas (< 1024px).
-- Usa el estado reactivo del store para adaptar layouts complejos (ej. paneles laterales).
+- La navegación entre paneles en móvil usa `MobilePanelTransition` con estado `mobileView: 'tree' | 'detail' | 'side'`.
 - Los modales deben ocupar el 100% del ancho en mobile.
 
 ---
@@ -154,56 +159,74 @@ apex-cmms/
 ├── seed_data.sql               ← Datos de prueba. Incluye jerarquía de activos.
 │
 └── src/
-    ├── App.tsx                 ← Shell principal: sidebar, routing por activeModule (Dashboard, Assets, Work Orders, Inventory, PM, Scheduler, Settings, Help).
+    ├── App.tsx                 ← Shell principal: sidebar, routing por activeModule
+    │                              (Dashboard, Assets, Work Orders, Inventory, PM, Settings, Help).
     ├── store/
     │   ├── index.ts            ← Combinación de todos los slices de Zustand en un store unificado.
-    │   ├── uiSlice.ts          ← Estado de UI: módulo activo (AppModule), sidebar, toasts, responsive state.
-    │   ├── authSlice.ts        ← Autenticación Supabase, usuario actual, perfiles.
-    │   └── alertSlice.ts       ← Alertas CBM en memoria (no persisten en DB).
+    │   ├── uiSlice.ts          ← activeModule, sidebarOpen, toast, isAuditMode / setAuditMode.
+    │   ├── authSlice.ts        ← Autenticación Supabase OTP, currentUser, users[], perfiles.
+    │   └── alertSlice.ts       ← Alertas CBM en memoria (NO persisten en DB — solo sesión).
     │
     └── modules/
         │
         ├── assets/             ← Módulo de Activos
-        │   ├── store/slice.ts  ← fetchAssets (soporta includeDecommissioned), saveAsset,
-        │   │                      decommissionAsset (soft delete)
-        │   ├── types.ts        ← Asset, AssetType, Criticality, AssetStatus
+        │   ├── store/slice.ts  ← fetchAssets (soporta includeDecommissioned), createAsset,
+        │   │                      updateAsset, deleteAsset→decommissionAsset (soft delete), selectAsset
+        │   ├── types.ts        ← Asset, AssetType, Criticality, AssetStatus, AssetTreeNode
         │   └── components/
-        │       ├── AssetTreePanel.tsx      ← Árbol jerárquico + toggle "Modo Archivo"
-        │       ├── AssetDetailPanel.tsx    ← Ficha técnica, tabs de datos de ingeniería
-        │       └── AssetSidePanel.tsx      ← PM Plans vinculados + botón "Desvincular"
+        │       ├── AssetTreePanel.tsx      ← Árbol jerárquico + toggle "Modo Archivo" + botón "Auditoría de Histórico"
+        │       ├── AssetDetailPanel.tsx    ← Ficha técnica, tabs de datos de ingeniería (modo normal)
+        │       ├── AssetSidePanel.tsx      ← PM Plans vinculados + botón "Desvincular" (modo normal)
+        │       ├── AuditListPanel.tsx      ← Lista de OTs históricas del activo (modo auditoría, solo lectura)
+        │       └── AuditDetailPanel.tsx    ← Detalle de OT seleccionada (modo auditoría, solo lectura)
         │
         ├── workorders/         ← Módulo de Órdenes de Trabajo
-        │   ├── store/slice.ts  ← completeWo (captura snapshots), updateWoStatus, createWo
-        │   ├── types.ts        ← WorkOrder, WoStatus, WoType, WoPriority
+        │   ├── store/slice.ts  ← completeWo (captura snapshots), updateWoStatus, createWo,
+        │   │                      fetchAssetHistory (hasta 200 OTs cerradas por asset_id),
+        │   │                      assetHistory[] (array separado de workOrders[])
+        │   ├── types.ts        ← WorkOrder, WoStatus, WoType, WoPriority, Vendor
         │   └── components/
-        │       ├── WoListPanel.tsx         ← Filtro jerárquico por Plant/Area (recursivo)
-        │       ├── WoDetailPanel.tsx       ← Muestra pmPlanNameSnapshot para OTs completadas
-        │       ├── WoCompleteForm.tsx      ← Formulario de cierre: horas, resolución, costos
+        │       ├── WoListPanel.tsx         ← Filtro jerárquico por Plant/Area (recursivo). SOLO para módulo OTs.
+        │       ├── WoDetailPanel.tsx       ← Panel de operación completo. SOLO para módulo OTs.
+        │       ├── WoCompleteForm.tsx      ← Formulario de cierre: horas, resolución, costos, snapshots
         │       └── VendorsPanel.tsx        ← CRUD de proveedores externos
         │
         ├── inventory/          ← Módulo de Inventario
-        │   ├── store/slice.ts  ← saveItem, softDeleteItem (.update({active:false})), addMovement
+        │   ├── store/slice.ts  ← fetchInventory, saveItem, softDeleteItem (.update({active:false})),
+        │   │                      adjustStock, fetchMovements
         │   ├── types.ts        ← InventoryItem, StockMovement, PartUsage
-        │   └── components/InventoryView.tsx
+        │   └── components/
+        │       ├── InventoryTable.tsx          ← Lista de ítems con búsqueda y filtros
+        │       ├── InventoryItemForm.tsx        ← Alta/edición de ítems
+        │       ├── InventoryDetailPanel.tsx     ← Ficha del ítem + historial de movimientos
+        │       └── StockAdjustForm.tsx          ← Ajuste manual de stock con razón
         │
-        ├── pm/                 ← Módulo de Mantenimiento Preventivo (Planes + Scheduler)
+        ├── pm/                 ← Módulo de Mantenimiento Preventivo (Planes + Scheduler + CBM)
         │   ├── store/
-        │   │   ├── slice.ts    ← savePlan, unlinkAssetPlan (soft delete), runPmScheduler,
-        │   │   │                  addMeterReading (CBM trigger), projectionMonths
-        │   │   └── pmEngine.ts ← Scheduling: calcula nextDueDate, genera WOs
+        │   │   ├── slice.ts    ← savePlan, unlinkAssetPlan (soft delete → active=false),
+        │   │   │                  runPmScheduler, addMeterReading (disparo CBM),
+        │   │   │                  recalcNextDue (post-cierre de OT), projectionMonths
+        │   │   └── pmEngine.ts ← calcNextDueDate, runScheduler — lógica pura de scheduling
         │   ├── utils/
         │   │   └── projections.ts ← calculateProjections(assetPlan, pmPlan, horizonMonths)
         │   ├── types.ts        ← PmPlan, PmTask, AssetPlan, MeasurementPoint, MeterReading
         │   └── components/
-        │       ├── PmCalendarView.tsx          ← Calendario: OTs reales (negro) + ghost (azul)
-        │       ├── PmSchedulerPanel.tsx         ← Motor de generación manual
+        │       ├── PmCalendarView.tsx          ← Calendario: OTs reales (negro) + proyecciones ghost (azul)
+        │       ├── PmSchedulerPanel.tsx         ← Motor de generación manual de OTs preventivas
+        │       ├── PlansView.tsx                ← CRUD de planes maestros + vinculación a activos
         │       ├── PmSettingsView.tsx           ← Tabs: Magnitudes, Proveedores, Motor PM
-        │       └── MeasurementPointsPanel.tsx   ← Instrumentos CBM
+        │       ├── PmPlanForm.tsx               ← Formulario de plan maestro con tareas
+        │       └── MeasurementPointsPanel.tsx   ← Instrumentos CBM + historial de lecturas
         │
         ├── dashboard/          ← KPIs y métricas agregadas (solo lectura)
-        ├── settings/           ← Wrapper de PmSettingsView
+        │   └── components/
+        │       ├── WoTrendChart.tsx        ← Gráfica de tendencia de OTs (Recharts)
+        │       ├── CriticalWoTable.tsx     ← Tabla de OTs críticas y vencidas
+        │       └── PmGauge.tsx             ← Gauge de cumplimiento PM
+        │
+        ├── settings/           ← Wrapper delegado de PmSettingsView
         └── help/               ← PURAMENTE PRESENTACIONAL. Sin store. Sin Supabase.
-            └── HelpView.tsx    ← Trainer interactivo de 8 módulos para usuarios finales
+            └── HelpView.tsx    ← Trainer interactivo de módulos para usuarios finales
 ```
 
 ### Arquitectura del State Management (Zustand)
@@ -215,6 +238,19 @@ useStore() → StoreState = UiSlice & AuthSlice & AssetSlice & WoSlice & Invento
 - Cada módulo tiene su `slice.ts` con interfaz tipada y función creadora.
 - Se combinan en `src/store/index.ts`.
 - **No existe React Query ni SWR.** Todo el estado del servidor reside en Zustand y se sincroniza manualmente con Supabase en los métodos del slice.
+- Los slices se cruzan: `WoSlice.completeWo` llama a `PmSlice.recalcNextDue`; `WoSlice.addPartUsage` llama a `InventorySlice.adjustStock`.
+
+### Estado relevante del WoSlice (separación workOrders vs assetHistory)
+
+```typescript
+// workOrders[]  — OTs activas + últimas 50 completadas/canceladas (carga general)
+// assetHistory[] — Hasta 200 OTs completadas/canceladas de UN activo específico (carga bajo demanda)
+
+fetchWorkOrders()      // carga general para módulo OTs
+fetchAssetHistory(id)  // carga dirigida para Modo Auditoría — sobrescribe assetHistory[]
+```
+
+`assetHistory` se limpia implícitamente cada vez que `fetchAssetHistory` es llamado con un nuevo `assetId`. Al cambiar de activo en Modo Auditoría, el index de activos llama `selectWo(null)` antes de recargar el historial.
 
 ---
 
@@ -226,7 +262,7 @@ Antes de escribir código, localiza tu tarea en esta tabla.
 |---|---|---|
 | **Filtro UI en lista de OTs** | `WoListPanel.tsx` (estado local + `useMemo`) | Que el filtro no borre datos, solo filtre el array en memoria |
 | **Nuevo campo en una OT** | `schema.sql` + `workorders/types.ts` + `WoCompleteForm.tsx` + payload `.update()` en `slice.ts` | El campo no puede modificarse si la OT está `completed`/`cancelled` (trigger) |
-| **Nuevo campo en Activos** | `schema.sql` + `assets/types.ts` + `AssetDetailPanel.tsx` + `saveAsset()` | Que `fetchAssets` incluya el campo en el SELECT |
+| **Nuevo campo en Activos** | `schema.sql` + `assets/types.ts` + `AssetDetailPanel.tsx` + mapeo en `fetchAssets()` | Que `fetchAssets` incluya el campo en el SELECT y lo mapee al tipo |
 | **Eliminar un vínculo PM** | `unlinkAssetPlan(id)` → `.update({ active: false })` | NUNCA `.delete()` en `asset_plans` |
 | **Eliminar un activo** | `.update({ status: 'decommissioned' })` | RESTRICT bloqueará el DELETE si tiene OTs |
 | **Eliminar un repuesto** | `.update({ active: false })` | RESTRICT bloqueará el DELETE si tiene `part_usages` |
@@ -236,6 +272,8 @@ Antes de escribir código, localiza tu tarea en esta tabla.
 | **Agregar disparo CBM** | `addMeterReading()` en `pm/store/slice.ts` (bloque CBM LOGIC) | OT predictiva debe tener `due_date` = hoy + 3 días (SLA) |
 | **Modificar el cierre de OT** | `completeWo()` en `workorders/store/slice.ts` | Los 4 campos `*_name_snapshot` se escriben ANTES del update de status |
 | **Agregar módulo de navegación** | `AppModule` en `shared/types/index.ts` + `App.tsx` | Módulos presentacionales NO deben importar `useStore` |
+| **Extender Modo Auditoría** | `AuditListPanel.tsx` + `AuditDetailPanel.tsx` | Mantener solo lectura. No exponer acciones de escritura. |
+| **Cambiar layout de paneles en Assets** | `assets/index.tsx` | Panel 2 audit: `w-80 xl:w-96 shrink-0`. Panel 3 audit: `flex-1 min-w-0`. No reutilizar `WoListPanel`/`WoDetailPanel`. |
 | **Resetear el schema** | `schema.sql` completo en SQL Editor (solo DEV) | En producción: migraciones incrementales. NUNCA `DROP SCHEMA` |
 | **Modificar el Trainer / Ayuda** | `modules/help/HelpView.tsx` | Es puramente presentacional, no debe tocar stores |
 
@@ -300,6 +338,31 @@ await supabase.from('work_orders').insert({
 });
 ```
 
+### Patrón E: Activación del Modo Auditoría
+
+```typescript
+// En AssetTreePanel.tsx — al activar el modo:
+store.selectWo(null);               // Limpiar OT seleccionada antes de cambiar contexto
+store.fetchAssetHistory(assetId);   // Cargar hasta 200 OTs del activo
+store.setAuditMode(true);
+
+// En assets/index.tsx — cleanup al salir del módulo:
+useEffect(() => {
+  return () => {
+    setAuditMode(false);
+    selectWo(null);
+  };
+}, []);
+
+// Al cambiar de activo en modo auditoría:
+useEffect(() => {
+  if (isAuditMode && selectedAssetId) {
+    selectWo(null);                         // Reset antes de recargar
+    fetchAssetHistory(selectedAssetId);
+  }
+}, [selectedAssetId, isAuditMode]);
+```
+
 ---
 
 ## 6. ANTI-PATRONES PROHIBIDOS
@@ -316,6 +379,9 @@ await supabase.from('work_orders').insert({
 | `calculateProjections(ap, plan, 24)` hardcodeado | Ignora la configuración global `projectionMonths` del usuario |
 | `ON DELETE CASCADE` hacia `work_orders` o `part_usages` | Destruiría el historial completo al borrar un activo o repuesto |
 | `import { useStore }` en `help/HelpView.tsx` | El módulo de ayuda debe permanecer sin lógica de datos |
+| Usar `<WoListPanel>` o `<WoDetailPanel>` en modo auditoría | Estas tienen lógica de edición y ancho fijo que rompe el layout de 3 paneles |
+| Llamar a `updateWoStatus`, `toggleTask`, `addComment` desde `AuditListPanel` o `AuditDetailPanel` | El modo auditoría es estrictamente de solo lectura |
+| Llamar `fetchAssetHistory` sin `selectWo(null)` previo | El panel 3 puede mostrar detalles de la OT anterior antes de que la lista se actualice |
 | **Z-index ad-hoc** | Usa las clases de utilidad o el sistema de capas de Framer Motion |
 
 > [!NOTE]
@@ -323,21 +389,35 @@ await supabase.from('work_orders').insert({
 
 ---
 
-## 7. ENTORNO Y DEPENDENCIAS (v2.5.0)
+## 7. LIMITACIONES CONOCIDAS DEL SISTEMA (Estado Actual)
 
-| Tecnología | Notas |
+| Limitación | Detalle |
 |---|---|
-| **React 18** | JSX, functional components, hooks |
-| **TypeScript** | Strict mode activo |
-| **Zustand** | Store unificado. Slices combinados en `store/index.ts`. |
-| **Supabase JS v2** | Cliente singleton en `src/lib/supabase.ts` |
-| **PostgreSQL** | Supabase managed. Triggers activos en producción. |
-| **Framer Motion** | Animaciones UI premium y transiciones de módulos. |
-| **date-fns** | Toda manipulación de fechas. Locale `es`. |
-| **Recharts** | Gráficas en Instrumentación y Dashboard. |
-| **Lucide React** | Iconografía exclusiva del proyecto. |
-| **Vite** | Build tool. Dev: `npm run dev`. |
+| **Sin routing de URL** | La navegación es por `activeModule` en el store. El botón Atrás del browser y el refresh devuelven al Dashboard. No hay URLs por módulo ni por entidad. |
+| **Alertas CBM sin persistencia** | `alertSlice` vive solo en memoria de sesión. Las alertas de medidor se pierden al refrescar. |
+| **Auth solo OTP** | El sistema de autenticación usa magic link / OTP de Supabase. No hay recuperación de contraseña ni registro propio. |
+| **Mobile parcialmente implementado** | `MobilePanelTransition` funciona en Assets y Work Orders. Otros módulos no tienen vista mobile optimizada. |
+| **Settings incompletas** | La sección "Notificaciones" en Settings es un placeholder sin lógica. |
+| **Sin offline** | Toda operación requiere conexión activa a Supabase. No hay caché ni modo offline. |
 
 ---
 
-*Documento actualizado: 25 de Abril, 2026. Versión del Sistema: 2.5.0 Premium Enterprise. Soft Deletes + Snapshots + RESTRICT FKs + Trigger de Inmutabilidad.*
+## 8. ENTORNO Y DEPENDENCIAS
+
+| Tecnología | Versión | Notas |
+|---|---|---|
+| **React** | 18.2 | JSX, functional components, hooks |
+| **TypeScript** | 5.2 | Strict mode activo |
+| **Zustand** | 4.5.2 | Store unificado. Slices combinados en `store/index.ts`. |
+| **Supabase JS** | 2.39.7 | Cliente singleton en `src/lib/supabase.ts` |
+| **PostgreSQL** | Supabase managed | Triggers activos en producción |
+| **Framer Motion** | 12.38 | Animaciones UI y transiciones de módulos |
+| **date-fns** | 3.3.1 | Toda manipulación de fechas. Locale `es`. |
+| **Recharts** | 2.12.3 | Gráficas en Dashboard e Instrumentación |
+| **Lucide React** | — | Iconografía exclusiva del proyecto |
+| **Tailwind CSS** | 3.4 | Design system con tokens custom (`brand`, `ok`, `warn`, `danger`, `info`) |
+| **Vite** | 5.2 | Build tool. Dev: `npm run dev`. Chunks manuales: vendor / supabase / zustand / charts / dates |
+
+---
+
+*Documento actualizado: 25 de Abril, 2026. Versión del Sistema: 2.6.0 — Soft Deletes + Snapshots + RESTRICT FKs + Trigger de Inmutabilidad + Modo Auditoría de Historial.*

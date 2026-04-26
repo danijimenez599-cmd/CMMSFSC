@@ -23,8 +23,10 @@ interface AssetDetailPanelProps {
 }
 
 export default function AssetDetailPanel({ onEdit }: AssetDetailPanelProps) {
-  const { assets, selectedAssetId, workOrders, setModule } = useStore() as any;
+  const { assets, selectedAssetId, workOrders, setModule, selectWo, updateAsset, showToast } = useStore() as any;
   const [tab, setTab] = useState<TabId>('info');
+  const [editingSpecs, setEditingSpecs] = useState(false);
+  const [specsDraft, setSpecsDraft] = useState<{ key: string; value: string }[]>([]);
 
   const [expandedAssets] = useState(() => {
     try {
@@ -75,6 +77,23 @@ export default function AssetDetailPanel({ onEdit }: AssetDetailPanelProps) {
   const completedWos = assetWos.filter((w: any) => w.status === 'completed');
 
   const specsEntries = Object.entries(asset.specs || {});
+
+  const startEditingSpecs = () => {
+    setSpecsDraft(specsEntries.map(([key, value]) => ({ key, value: String(value) })));
+    setEditingSpecs(true);
+  };
+
+  const saveSpecs = async () => {
+    const specs: Record<string, string> = {};
+    specsDraft.forEach(({ key, value }) => { if (key.trim()) specs[key.trim()] = value; });
+    try {
+      await updateAsset(asset.id, { specs });
+      setEditingSpecs(false);
+      showToast?.({ type: 'success', title: 'Ficha técnica actualizada' });
+    } catch (e: any) {
+      showToast?.({ type: 'error', title: 'Error al guardar', message: e.message });
+    }
+  };
 
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden bg-white">
@@ -247,6 +266,7 @@ export default function AssetDetailPanel({ onEdit }: AssetDetailPanelProps) {
                           className="bg-white/60 border border-slate-200 rounded-xl p-3.5 shadow-sm hover:border-brand/30 hover:shadow-md transition-all cursor-pointer group"
                           onClick={(e) => {
                             e.stopPropagation();
+                            selectWo(wo.id);
                             setModule('workorders');
                           }}
                         >
@@ -297,18 +317,61 @@ export default function AssetDetailPanel({ onEdit }: AssetDetailPanelProps) {
             )}
 
             {tab === 'medidores' && (
-              <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+              <div className="w-full">
                 <MeasurementPointsPanel assetId={asset.id} />
               </div>
             )}
 
             {tab === 'specs' && (
-              <div className="max-w-3xl">
-                {specsEntries.length > 0 ? (
-                  <div className="w-full overflow-x-auto overflow-y-hidden whitespace-nowrap pb-2 border border-slate-200 rounded-2xl shadow-sm">
-                    <div className="bg-slate-50 px-6 py-4 border-b border-slate-200">
-                      <p className="text-[10px] font-bold text-slate-900 uppercase tracking-widest">Ficha Técnica de Ingeniería</p>
+              <div className="max-w-3xl space-y-4">
+                {/* Toolbar */}
+                <div className="flex items-center justify-between">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Ficha Técnica de Ingeniería</p>
+                  {!editingSpecs ? (
+                    <Button size="sm" variant="ghost" onClick={startEditingSpecs} icon={<Settings size={13} />}>
+                      Editar
+                    </Button>
+                  ) : (
+                    <div className="flex gap-2">
+                      <Button size="sm" variant="ghost" onClick={() => setEditingSpecs(false)}>Cancelar</Button>
+                      <Button size="sm" variant="primary" onClick={saveSpecs}>Guardar</Button>
                     </div>
+                  )}
+                </div>
+
+                {editingSpecs ? (
+                  <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+                    <div className="divide-y divide-slate-100">
+                      {specsDraft.map((row, idx) => (
+                        <div key={idx} className="flex items-center gap-2 px-4 py-2">
+                          <input
+                            className="w-1/3 text-[11px] font-bold text-slate-600 uppercase bg-transparent border-b border-slate-200 focus:border-brand outline-none py-1"
+                            placeholder="Parámetro"
+                            value={row.key}
+                            onChange={e => setSpecsDraft(d => d.map((r, i) => i === idx ? { ...r, key: e.target.value } : r))}
+                          />
+                          <input
+                            className="flex-1 text-xs font-mono text-slate-900 bg-transparent border-b border-slate-200 focus:border-brand outline-none py-1"
+                            placeholder="Valor"
+                            value={row.value}
+                            onChange={e => setSpecsDraft(d => d.map((r, i) => i === idx ? { ...r, value: e.target.value } : r))}
+                          />
+                          <button
+                            onClick={() => setSpecsDraft(d => d.filter((_, i) => i !== idx))}
+                            className="text-slate-300 hover:text-red-500 transition-colors text-sm px-1"
+                          >✕</button>
+                        </div>
+                      ))}
+                    </div>
+                    <button
+                      onClick={() => setSpecsDraft(d => [...d, { key: '', value: '' }])}
+                      className="w-full py-3 text-[10px] font-black text-brand uppercase tracking-widest border-t border-dashed border-slate-200 hover:bg-slate-50 transition-colors"
+                    >
+                      + Añadir parámetro
+                    </button>
+                  </div>
+                ) : specsEntries.length > 0 ? (
+                  <div className="w-full border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
                     <table className="w-full text-sm">
                       <tbody className="divide-y divide-slate-100">
                         {specsEntries.map(([key, val]) => (
@@ -326,7 +389,7 @@ export default function AssetDetailPanel({ onEdit }: AssetDetailPanelProps) {
                       <Settings size={32} className="text-slate-200" />
                     </div>
                     <h4 className="text-sm font-bold text-slate-900 tracking-tight">Sin Datos Técnicos</h4>
-                    <p className="text-xs text-slate-500 mt-2">No se han registrado parámetros de ingeniería para este activo.</p>
+                    <p className="text-xs text-slate-500 mt-2">Haz clic en <strong>Editar</strong> para añadir parámetros de ingeniería.</p>
                   </div>
                 )}
               </div>

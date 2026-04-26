@@ -298,6 +298,25 @@ export const createPmSlice: StateCreator<StoreState, [], [], PmSlice> = (set, ge
     const point = get().measurementPoints.find(p => p.id === readingData.measurementPointId);
     const config = point ? get().measurementConfigs.find(c => c.id === point.configId) : null;
 
+    // PM trigger for cumulative meters (horometro): check if any linked asset_plan has exceeded nextDueMeter
+    if (point && config && config.isCumulative) {
+      const linkedPlans = get().assetPlans.filter(
+        ap => ap.active && ap.measurementPointId === point.id && ap.nextDueMeter !== null
+      );
+      for (const ap of linkedPlans) {
+        if (readingData.value >= ap.nextDueMeter!) {
+          // Only trigger scheduler if there's no open WO for this plan already
+          const hasOpenWo = get().workOrders.some(
+            (w: any) => w.assetPlanId === ap.id && !['completed', 'cancelled'].includes(w.status)
+          );
+          if (!hasOpenWo) {
+            await get().runPmScheduler(0);
+            break;
+          }
+        }
+      }
+    }
+
     if (point && config && !config.isCumulative) {
       const isLow = point.minThreshold !== null && readingData.value < point.minThreshold;
       const isHigh = point.maxThreshold !== null && readingData.value > point.maxThreshold;

@@ -174,9 +174,52 @@ export default function InventoryTable({ onSelect, onNew, onEdit, onAdjust }: In
         )}
       </div>
 
-      {/* Table */}
-      <div className="flex-1 overflow-x-auto w-full pb-2">
-        <div className="min-w-[800px]">
+      {/* Mobile card list (shown only on small screens) */}
+      <div className="sm:hidden flex-1 overflow-y-auto divide-y divide-border">
+        {paginatedData.length === 0 ? (
+          <p className="p-8 text-center text-tx-4 italic text-sm">Sin artículos con los filtros actuales.</p>
+        ) : paginatedData.map((item: any) => (
+          <div
+            key={item.id}
+            onClick={() => onSelect(item.id)}
+            className={cn(
+              'p-4 cursor-pointer active:bg-bg-3 transition-colors',
+              selectedItemId === item.id ? 'bg-brand/5 border-l-4 border-l-brand' : ''
+            )}
+          >
+            <div className="flex items-start justify-between gap-3 mb-2">
+              <div className="min-w-0">
+                <p className="font-semibold text-tx text-sm leading-tight truncate">{item.name}</p>
+                {item.partNumber && (
+                  <p className="text-[10px] font-mono font-bold text-tx-4 uppercase mt-0.5">{item.partNumber}</p>
+                )}
+              </div>
+              {getStockBadge(item.stockCurrent, item.stockMin)}
+            </div>
+            <div className="flex items-center justify-between text-xs text-tx-3">
+              <span>{item.category || '—'}</span>
+              <span className="font-mono">{item.unitCost ? formatCurrency(item.unitCost) : '—'}</span>
+            </div>
+            <div className="flex gap-2 mt-3">
+              <Button variant="secondary" size="xs" className="flex-1" onClick={e => { e.stopPropagation(); onAdjust(item.id); }}>
+                Ajustar stock
+              </Button>
+              <Button variant="ghost" size="xs" onClick={e => { e.stopPropagation(); onEdit(item.id); }}>
+                Editar
+              </Button>
+            </div>
+          </div>
+        ))}
+        {/* Mobile total footer */}
+        <div className="p-4 bg-bg-3 border-t-2 border-border flex items-center justify-between">
+          <span className="text-[10px] font-bold text-tx-4 uppercase tracking-wider">Valor total</span>
+          <span className="font-display font-semibold text-brand">{formatCurrency(totalValue)}</span>
+        </div>
+      </div>
+
+      {/* Desktop table (hidden on mobile) */}
+      <div className="hidden sm:flex flex-1 overflow-x-auto w-full pb-2 flex-col">
+        <div className="min-w-[700px] flex-1">
           <table className="w-full text-left border-collapse text-sm">
             <thead className="bg-bg-3 text-[10px] text-tx-4 uppercase font-bold tracking-wider sticky top-0 z-10">
               <tr>
@@ -193,7 +236,7 @@ export default function InventoryTable({ onSelect, onNew, onEdit, onAdjust }: In
                   Stock {sortCol === 'stockCurrent' && <ArrowUpDown size={10} className="inline ml-0.5" />}
                 </th>
                 <th className="px-4 py-3 hidden lg:table-cell">Ubicación</th>
-                <th className="px-4 py-3 cursor-pointer hover:text-tx select-none hidden sm:table-cell" onClick={() => handleSort('unitCost')}>
+                <th className="px-4 py-3 cursor-pointer hover:text-tx select-none hidden md:table-cell" onClick={() => handleSort('unitCost')}>
                   Costo
                 </th>
                 <th className="px-4 py-3 text-right">Acciones</th>
@@ -221,56 +264,32 @@ export default function InventoryTable({ onSelect, onNew, onEdit, onAdjust }: In
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
                       {getStockBadge(item.stockCurrent, item.stockMin)}
-                      <span className="text-[10px] text-tx-4 hidden sm:inline whitespace-nowrap">
-                        / {item.stockMin} mín
-                      </span>
+                      <span className="text-[10px] text-tx-4 whitespace-nowrap">/ {item.stockMin} mín</span>
                     </div>
                   </td>
                   <td className="px-4 py-3 text-tx-3 hidden lg:table-cell truncate max-w-[100px]">
                     {item.locationBin || '—'}
                   </td>
-                  <td className="px-4 py-3 font-mono text-xs text-tx-3 hidden sm:table-cell whitespace-nowrap">
+                  <td className="px-4 py-3 font-mono text-xs text-tx-3 hidden md:table-cell whitespace-nowrap">
                     {item.unitCost ? formatCurrency(item.unitCost) : '—'}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button variant="ghost" size="xs" onClick={e => { e.stopPropagation(); onAdjust(item.id); }}>
-                        Ajustar
-                      </Button>
-                      <Button variant="ghost" size="xs" onClick={e => { e.stopPropagation(); onEdit(item.id); }}>
-                        Editar
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="xs"
-                        className="text-danger hover:bg-danger-bg"
-                        onClick={e => { e.stopPropagation(); setDeletingId(item.id); }}
-                      >
-                        Borrar
-                      </Button>
+                      <Button variant="ghost" size="xs" onClick={e => { e.stopPropagation(); onAdjust(item.id); }}>Ajustar</Button>
+                      <Button variant="ghost" size="xs" onClick={e => { e.stopPropagation(); onEdit(item.id); }}>Editar</Button>
+                      <Button variant="ghost" size="xs" className="text-danger hover:bg-danger-bg" onClick={e => { e.stopPropagation(); setDeletingId(item.id); }}>Borrar</Button>
                     </div>
                   </td>
                 </tr>
               ))}
-
               {paginatedData.length === 0 && (
-                <tr>
-                  <td colSpan={7} className="px-4 py-12 text-center text-tx-4 italic text-sm">
-                    Sin artículos con los filtros actuales.
-                  </td>
-                </tr>
+                <tr><td colSpan={7} className="px-4 py-12 text-center text-tx-4 italic text-sm">Sin artículos con los filtros actuales.</td></tr>
               )}
             </tbody>
-
-            {/* Footer totals */}
             <tfoot className="bg-bg-3 border-t-2 border-border sticky bottom-0 z-10">
               <tr>
-                <td colSpan={4} className="px-4 py-3 text-right text-[10px] font-bold text-tx-4 uppercase tracking-wider">
-                  Valor total (filtrado):
-                </td>
-                <td colSpan={3} className="px-4 py-3 font-display font-semibold text-brand text-base">
-                  {formatCurrency(totalValue)}
-                </td>
+                <td colSpan={4} className="px-4 py-3 text-right text-[10px] font-bold text-tx-4 uppercase tracking-wider">Valor total (filtrado):</td>
+                <td colSpan={3} className="px-4 py-3 font-display font-semibold text-brand text-base">{formatCurrency(totalValue)}</td>
               </tr>
             </tfoot>
           </table>

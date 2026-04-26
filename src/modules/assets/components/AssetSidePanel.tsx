@@ -51,7 +51,11 @@ const ProjectionCard = ({ proj }: { proj: any }) => {
         <button onClick={() => setIsExpanded(!isExpanded)} className="flex items-center justify-between p-5 text-left w-full group/btn">
           <div className="space-y-1">
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
-              {proj.date instanceof Date && isValid(proj.date) ? format(proj.date, 'EEEE, dd MMMM', { locale: safeLocale }) : 'Fecha Pendiente'}
+              {proj.date instanceof Date && isValid(proj.date)
+                ? format(proj.date, 'EEEE, dd MMMM', { locale: safeLocale })
+                : proj.meterValue != null
+                  ? `A las ${Number(proj.meterValue).toLocaleString()} unidades`
+                  : 'Pendiente'}
             </p>
             <div className="flex items-center gap-3">
               <h4 className="text-sm font-black text-slate-900 tracking-tight uppercase">{proj.label}</h4>
@@ -89,7 +93,7 @@ const ProjectionCard = ({ proj }: { proj: any }) => {
 export default function AssetSidePanel() {
   const store = useStore() as any;
   const {
-    selectedAssetId, setModule = () => {}, workOrders = [], pmPlans = [],
+    selectedAssetId, setModule = () => {}, selectWo = () => {}, workOrders = [], pmPlans = [],
     assetPlans = [], measurementPoints = [], pmTasks = [],
     saveAssetPlan = () => {}, unlinkAssetPlan, showToast = () => {},
     projectionMonths
@@ -151,7 +155,7 @@ export default function AssetSidePanel() {
               {openWorkOrders.length > 0 ? (
                 <div className="space-y-3">
                   {openWorkOrders.map((wo: any) => (
-                    <motion.div key={wo.id} whileHover={{ scale: 1.01, x: 4 }} className="bg-white border border-slate-200 rounded-[24px] p-5 shadow-sm hover:border-brand/30 transition-all cursor-pointer group" onClick={() => setModule('workorders')}>
+                    <motion.div key={wo.id} whileHover={{ scale: 1.01, x: 4 }} className="bg-white border border-slate-200 rounded-[24px] p-5 shadow-sm hover:border-brand/30 transition-all cursor-pointer group" onClick={() => { selectWo(wo.id); setModule('workorders'); }}>
                       <div className="flex items-center justify-between mb-3"><span className="font-mono text-[10px] font-black text-brand bg-brand/5 px-2.5 py-1 rounded-xl border border-brand/10">#{wo.woNumber}</span><Badge variant={wo.status as any} className="text-[8px] px-2">{wo.status}</Badge></div>
                       <p className="text-xs font-black text-slate-900 group-hover:text-brand transition-colors">{wo.title}</p>
                     </motion.div>

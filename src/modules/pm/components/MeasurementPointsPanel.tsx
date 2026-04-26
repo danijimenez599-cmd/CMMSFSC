@@ -158,7 +158,7 @@ export default function MeasurementPointsPanel({ assetId }: MeasurementPointsPan
               }
             }}
           >
-            Nuevo Punto
+            Nuevo Instrumento
           </Button>
         )}
       </div>

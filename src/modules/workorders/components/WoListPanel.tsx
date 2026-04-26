@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Plus, X, Filter, ListChecks, Calendar, User, LayoutGrid, Building2 } from 'lucide-react';
 import { useStore } from '../../../store';
@@ -16,10 +16,18 @@ interface WoListPanelProps {
 }
 
 export default function WoListPanel({ onSelect, onNewWo, customWorkOrders, title, hideNewButton }: WoListPanelProps) {
-  const { workOrders, selectedWoId, selectWo, assets, users, pmPlans, assetPlans } = useStore() as any;
+  const { workOrders, selectedWoId, selectWo, assets, users, pmPlans, assetPlans, pendingWoFilter, setPendingWoFilter } = useStore() as any;
 
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('active');
+
+  // Apply and consume any filter requested by the dashboard or other modules
+  useEffect(() => {
+    if (pendingWoFilter) {
+      setStatusFilter(pendingWoFilter);
+      setPendingWoFilter?.(null);
+    }
+  }, [pendingWoFilter]);
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
   const [locationFilter, setLocationFilter] = useState<string>('all');
   const [showFilters, setShowFilters] = useState(false);
@@ -52,6 +60,8 @@ export default function WoListPanel({ onSelect, onNewWo, customWorkOrders, title
 
     if (statusFilter === 'active') {
       result = result.filter(wo => !['completed', 'cancelled'].includes(wo.status));
+    } else if (statusFilter === 'overdue') {
+      result = result.filter(wo => isOverdue(wo));
     } else if (statusFilter !== 'all') {
       result = result.filter(wo => wo.status === statusFilter);
     }
@@ -90,7 +100,7 @@ export default function WoListPanel({ onSelect, onNewWo, customWorkOrders, title
   }, [workOrders, statusFilter, priorityFilter, locationFilter, search, assets, getDescendantIds]);
 
   const activeFilterCount =
-    (statusFilter !== 'active' ? 1 : 0) +
+    (!['active', 'all'].includes(statusFilter) ? 1 : 0) +
     (priorityFilter !== 'all' ? 1 : 0) +
     (locationFilter !== 'all' ? 1 : 0) +
     (search ? 1 : 0);
@@ -161,18 +171,24 @@ export default function WoListPanel({ onSelect, onNewWo, customWorkOrders, title
 
           {/* Quick status pills */}
           <div className="flex bg-slate-100 p-0.5 rounded-lg border border-slate-200/60 shadow-inner">
-            {['active', 'completed'].map(s => (
+            {[
+              { key: 'active', label: 'Abiertas' },
+              { key: 'overdue', label: 'Vencidas' },
+              { key: 'completed', label: 'Cerradas' },
+            ].map(({ key, label }) => (
               <button
-                key={s}
-                onClick={() => setStatusFilter(statusFilter === s ? 'all' : s)}
+                key={key}
+                onClick={() => setStatusFilter(statusFilter === key ? 'all' : key)}
                 className={cn(
                   'px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all',
-                  statusFilter === s
-                    ? 'bg-white text-slate-900 shadow-sm'
+                  statusFilter === key
+                    ? key === 'overdue'
+                      ? 'bg-red-600 text-white shadow-sm'
+                      : 'bg-white text-slate-900 shadow-sm'
                     : 'text-slate-400 hover:text-slate-600'
                 )}
               >
-                {s === 'active' ? 'Abiertas' : 'Cerradas'}
+                {label}
               </button>
             ))}
           </div>

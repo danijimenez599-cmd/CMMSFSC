@@ -268,7 +268,7 @@ export default function HelpView() {
   return (
     <div className="flex-1 h-full overflow-y-auto bg-slate-50/50 scrollbar-thin">
       {/* Hero Section */}
-      <div className="relative bg-slate-900 py-20 px-10 overflow-hidden">
+      <div className="relative bg-slate-900 py-12 sm:py-20 px-5 sm:px-10 overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden opacity-10">
           <div className="absolute -top-24 -left-24 w-96 h-96 bg-brand rounded-full blur-[120px]" />
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] border border-white/10 rounded-full" />
@@ -289,7 +289,7 @@ export default function HelpView() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-4xl md:text-5xl font-display font-black text-white tracking-tight mb-6"
+            className="text-3xl sm:text-4xl md:text-5xl font-display font-black text-white tracking-tight mb-6"
           >
             Domine la Gestión de <br />
             <span className="text-brand">Activos Industriales</span>
@@ -307,21 +307,21 @@ export default function HelpView() {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-10 -mt-10 pb-20 relative z-20">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 -mt-6 sm:-mt-10 pb-12 sm:pb-20 relative z-20">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
           
           {/* Main Content: Guided Modules */}
           <div className="lg:col-span-2 space-y-8">
             <div className="bg-white rounded-[32px] border border-slate-200 shadow-xl shadow-slate-200/50 overflow-hidden">
-              <div className="p-1.5 flex flex-wrap gap-1 bg-slate-50 border-b border-slate-100">
+              <div className="p-1.5 flex overflow-x-auto gap-1 bg-slate-50 border-b border-slate-100 no-scrollbar">
                 {(['dashboard', 'assets', 'workorders', 'inventory', 'pm', 'scheduler', 'settings'] as const).map((m) => (
                   <button
                     key={m}
                     onClick={() => setSelectedModule(m)}
                     className={cn(
-                      "flex-1 min-w-[80px] py-2 px-3 rounded-[14px] text-[9px] font-black uppercase tracking-wider transition-all",
-                      selectedModule === m 
-                        ? "bg-white text-slate-900 shadow-md border border-slate-200 font-bold" 
+                      "shrink-0 py-2 px-3 rounded-[14px] text-[9px] font-black uppercase tracking-wider transition-all whitespace-nowrap",
+                      selectedModule === m
+                        ? "bg-white text-slate-900 shadow-md border border-slate-200 font-bold"
                         : "text-slate-500 hover:text-slate-700 hover:bg-white/50"
                     )}
                   >
@@ -330,7 +330,7 @@ export default function HelpView() {
                 ))}
               </div>
 
-              <div className="p-10">
+              <div className="p-5 sm:p-10">
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={selectedModule}
@@ -394,7 +394,7 @@ export default function HelpView() {
             </div>
 
             {/* Advanced Topics Section */}
-            <div className="bg-slate-900 rounded-[32px] border border-slate-800 p-10 overflow-hidden relative group">
+            <div className="bg-slate-900 rounded-[32px] border border-slate-800 p-5 sm:p-10 overflow-hidden relative group">
               <div className="absolute top-0 right-0 w-64 h-64 bg-brand/5 blur-[80px] pointer-events-none" />
               <div className="flex items-center gap-4 mb-8">
                 <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white">
@@ -406,7 +406,7 @@ export default function HelpView() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 {ADVANCED_TOPICS.map((topic) => (
                   <button
                     key={topic.id}
@@ -457,7 +457,7 @@ export default function HelpView() {
             </div>
 
             {/* Emergency Flows Section */}
-            <div className="bg-white border border-red-100 rounded-[32px] p-10 shadow-lg shadow-red-50 relative overflow-hidden group">
+            <div className="bg-white border border-red-100 rounded-[32px] p-5 sm:p-10 shadow-lg shadow-red-50 relative overflow-hidden group">
               <div className="absolute -top-12 -right-12 w-48 h-48 bg-red-50 rounded-full blur-3xl opacity-50" />
               <div className="relative z-10">
                 <div className="flex items-center gap-4 mb-6">
@@ -510,8 +510,8 @@ export default function HelpView() {
           </div>
 
           {/* Sidebar Tips & Stats */}
-          <div className="space-y-8">
-            <div className="bg-slate-900 rounded-[32px] p-8 text-white shadow-2xl relative overflow-hidden">
+          <div className="space-y-6 sm:space-y-8">
+            <div className="bg-slate-900 rounded-[32px] p-6 sm:p-8 text-white shadow-2xl relative overflow-hidden">
               <div className="absolute top-0 right-0 w-32 h-32 bg-brand/20 blur-[60px]" />
               <h3 className="text-lg font-display font-black mb-6 flex items-center gap-2">
                 <Lightbulb size={20} className="text-red-400" />

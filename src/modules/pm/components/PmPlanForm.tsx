@@ -319,21 +319,20 @@ export default function PmPlanForm({ initialPlan, initialTasks = [], onSave, onC
                 <span className="text-[10px] font-mono font-black text-slate-300 w-6">{(idx + 1).toString().padStart(2, '0')}</span>
                 <span className="flex-1 text-sm font-medium text-slate-700">{task.description}</span>
                 
-                {/* Multiplier Selector */}
-                <div className="flex items-center gap-2 bg-slate-50 px-2 py-1 rounded-lg border border-slate-100">
-                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">Freq</span>
-                  <select
+                {/* Multiplier — free integer input */}
+                <div className="flex items-center gap-1.5 bg-slate-50 px-2 py-1 rounded-lg border border-slate-100">
+                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">x</span>
+                  <input
+                    type="number"
+                    min={1}
+                    step={1}
                     value={task.frequencyMultiplier || 1}
                     onChange={(e) => {
-                      const val = parseInt(e.target.value);
+                      const val = Math.max(1, parseInt(e.target.value) || 1);
                       setTasks(prev => prev.map(t => t.id === task.id ? { ...t, frequencyMultiplier: val } : t));
                     }}
-                    className="bg-transparent text-[10px] font-black text-brand focus:outline-none cursor-pointer"
-                  >
-                    {[1, 2, 3, 4, 6, 12, 24].map(m => (
-                      <option key={m} value={m}>x{m}</option>
-                    ))}
-                  </select>
+                    className="w-10 bg-transparent text-[10px] font-black text-brand focus:outline-none text-center"
+                  />
                 </div>
 
                 <button

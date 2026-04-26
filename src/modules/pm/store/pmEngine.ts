@@ -95,9 +95,12 @@ export function computePlanStatus(
     if (assetPlan.nextDueMeter != null && assetPlan.nextDueMeter > 0) {
       const current = Number(currentPointValue) || 0;
       const threshold = Number(assetPlan.nextDueMeter);
-      
-      progress = Math.min(100, Math.max(0, (current / threshold) * 100));
-      
+      const interval = Number(plan.meterIntervalValue) || threshold;
+      // Progress relative to current cycle: from (threshold - interval) up to threshold
+      const cycleStart = threshold - interval;
+      const elapsed = current - cycleStart;
+      progress = Math.min(100, Math.max(0, (elapsed / interval) * 100));
+
       if (current >= threshold) {
         isOverdue = true;
         reasons.push('Umbral de medidor alcanzado');
@@ -176,6 +179,7 @@ export function runScheduler(
 
     let shouldGenerate = false;
     let reason = '';
+    let meterTriggered = false;
 
     // Calendar trigger
     if (plan.triggerType === 'calendar' || plan.triggerType === 'hybrid') {
@@ -212,6 +216,7 @@ export function runScheduler(
         const point = measurementPoints.find((p: any) => p.id === assetPlan.measurementPointId);
         if (point && point.currentValue !== null && point.currentValue >= assetPlan.nextDueMeter) {
           shouldGenerate = true;
+          meterTriggered = true;
           reason = `Medidor ${point.currentValue} >= Umbral ${assetPlan.nextDueMeter}`;
         } else if (point) {
           reason = `Medidor ${point.currentValue} < Umbral ${assetPlan.nextDueMeter}`;
@@ -260,14 +265,20 @@ export function runScheduler(
 
     const priority = priorityMap[plan.criticality] || 'medium';
 
-    const scheduledDate = assetPlan.nextDueDate
-      ? format(addDays(parseISO(assetPlan.nextDueDate), -(plan.leadDays || 0)), 'yyyy-MM-dd')
-      : format(today, 'yyyy-MM-dd');
+    // When meter triggered a hybrid plan, use today as both scheduled and due date
+    // (meter exceeded NOW — don't show the calendar date which could be months away)
+    const scheduledDate = (meterTriggered && plan.triggerType === 'hybrid')
+      ? format(today, 'yyyy-MM-dd')
+      : assetPlan.nextDueDate
+        ? format(addDays(parseISO(assetPlan.nextDueDate), -(plan.leadDays || 0)), 'yyyy-MM-dd')
+        : format(today, 'yyyy-MM-dd');
 
-    // If no nextDueDate and not purely meter-based, calculate first due date to
-    // prevent the scheduler from generating a new WO on every run (Fix 6.2)
     let dueDate: string | null;
-    if (assetPlan.nextDueMeter && !assetPlan.nextDueDate) {
+    if (meterTriggered && plan.triggerType === 'hybrid') {
+      // Meter triggered: due today, not at the future calendar date
+      dueDate = format(today, 'yyyy-MM-dd');
+    } else if (assetPlan.nextDueMeter && !assetPlan.nextDueDate) {
+      // Pure meter plan: no calendar due date
       dueDate = null;
     } else if (assetPlan.nextDueDate) {
       dueDate = assetPlan.nextDueDate;

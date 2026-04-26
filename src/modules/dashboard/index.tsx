@@ -46,7 +46,7 @@ export default function DashboardView() {
 
   const metrics = useDashboardMetrics();
   const store = useStore() as any;
-  const { fetchAssets, fetchWorkOrders, fetchInventory, fetchPmData, setModule } = store;
+  const { fetchAssets, fetchWorkOrders, fetchInventory, fetchPmData, setModule, setPendingWoFilter } = store;
   const workOrders = store.workOrders || [];
 
   useEffect(() => {
@@ -114,7 +114,7 @@ export default function DashboardView() {
             description={`${metrics.wos_in_progress} en ejecución`}
             icon={<AlertCircle />}
             variant="info"
-            onClick={() => setModule('workorders')}
+            onClick={() => { setPendingWoFilter('active'); setModule('workorders'); }}
           />
           <StatCard
             title="OTs Vencidas"
@@ -122,7 +122,7 @@ export default function DashboardView() {
             description="Atención inmediata"
             icon={<AlertTriangle />}
             variant={metrics.wos_overdue > 0 ? 'danger' : 'default'}
-            onClick={() => setModule('workorders')}
+            onClick={() => { setPendingWoFilter('overdue'); setModule('workorders'); }}
           />
           <StatCard
             title="Completadas (Mes)"
@@ -161,7 +161,7 @@ export default function DashboardView() {
             description="Pendientes de generar"
             icon={<Clock />}
             variant={metrics.pm_backlog > 0 ? 'danger' : 'ok'}
-            onClick={() => setModule('pm')}
+            onClick={() => { setPendingWoFilter('active'); setModule('workorders'); }}
           />
           <StatCard
             title="Carga de Trabajo"

@@ -180,7 +180,7 @@ export default function PmCalendarView() {
           const hasWo = (workOrders || []).some((wo: any) => {
             if (!wo.dueDate || wo.assetPlanId !== ap.id) return false;
             const d = parseISO(wo.dueDate);
-            return isValid(d) && isSameDay(d, proj.date);
+            return isValid(d) && isSameDay(d, proj.date!);
           });
           if (!hasWo) {
             evs.push({ id: `${ap.id}-${proj.cycleIndex}`, type: 'projection', date: proj.date, title: `${basePlan.name || 'PM'} - ${proj.label}`, assetName: asset?.name || 'Activo', assetCode: asset?.code || 'S/T', tasksNames: proj.tasksNames, isMajor: proj.isMajor, cycleIndex: proj.cycleIndex });

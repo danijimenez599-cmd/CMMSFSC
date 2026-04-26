@@ -297,17 +297,15 @@ export default function PlansView() {
                         const isCalendar = selectedPlan.triggerType === 'calendar' || selectedPlan.triggerType === 'hybrid';
                         const isMeter = selectedPlan.triggerType === 'meter' || selectedPlan.triggerType === 'hybrid';
                         
-                        let absoluteInterval = '';
-                        if (isCalendar && selectedPlan.intervalValue) {
-                          const total = selectedPlan.intervalValue * multiplier;
-                          const units: Record<string, string> = { 
-                            days: 'Días', weeks: 'Semanas', months: 'Meses', years: 'Años' 
-                          };
-                          absoluteInterval = `Cada ${total} ${units[selectedPlan.intervalUnit || 'months']}`;
-                        } else if (isMeter && selectedPlan.meterIntervalValue) {
-                          const total = selectedPlan.meterIntervalValue * multiplier;
-                          absoluteInterval = `Cada ${total.toLocaleString()} ${selectedPlan.meterIntervalUnit?.toUpperCase()}`;
-                        }
+                        const units: Record<string, string> = { days: 'Días', weeks: 'Semanas', months: 'Meses', years: 'Años' };
+                        const calPart = isCalendar && selectedPlan.intervalValue
+                          ? `${selectedPlan.intervalValue * multiplier} ${units[selectedPlan.intervalUnit || 'months']}`
+                          : null;
+                        const meterPart = isMeter && selectedPlan.meterIntervalValue
+                          ? `${(selectedPlan.meterIntervalValue * multiplier).toLocaleString()} ${selectedPlan.meterIntervalUnit?.toUpperCase() || 'UNID'}`
+                          : null;
+                        // Hybrid: show both triggers separated by "/"
+                        const absoluteInterval = [calPart, meterPart].filter(Boolean).join(' / ');
 
                         return (
                           <div key={multiplier} className="bg-white">
@@ -377,7 +375,7 @@ export default function PlansView() {
                               </div>
                             </div>
                             <Badge variant={ap.active ? 'ok' : 'neutral'} className="text-[9px] px-2">
-                              {ap.active ? 'OK' : 'PAUSA'}
+                              {ap.active ? 'LIGADO' : 'DESLIGADO'}
                             </Badge>
                           </div>
                         );
@@ -448,7 +446,7 @@ export default function PlansView() {
                       </div>
                       <div className="flex items-center justify-between mt-4 pt-3 border-t border-slate-50">
                         <Badge variant={ap.active ? 'ok' : 'neutral'} className="text-[9px] px-1.5 border-none bg-slate-50">
-                          {ap.active ? 'OPERATIVO' : 'EN PAUSA'}
+                          {ap.active ? 'LIGADO' : 'DESLIGADO'}
                         </Badge>
                         <span className="text-[9px] font-black text-slate-300 group-hover:text-slate-900 transition-colors">{ap.woCount} OTs</span>
                       </div>

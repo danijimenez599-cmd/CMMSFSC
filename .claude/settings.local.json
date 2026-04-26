@@ -3,7 +3,8 @@
     "allow": [
       "Bash(npx tsc *)",
       "Bash(xargs grep *)",
-      "Bash(xargs sed *)"
+      "Bash(xargs sed *)",
+      "Bash(dir /b \"D:\\\\Apex development\\\\apex-cmms\")"
     ]
   }
 }

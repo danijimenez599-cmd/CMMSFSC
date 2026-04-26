@@ -274,10 +274,10 @@ export default function WoDetailPanel() {
             </div>
           </div>
 
-          <div className="flex flex-col justify-center gap-2">
+          <div className="flex flex-col justify-center gap-3">
             {!isCompleted && !isCancelled ? (
               <>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap gap-2">
                   {nextStatuses.map((status: string) => {
                     const theme = WO_ACTION_THEME[status as WoStatus] || { variant: 'outline', icon: 'ArrowRight' };
                     return (
@@ -285,7 +285,7 @@ export default function WoDetailPanel() {
                         key={status}
                         size="sm"
                         variant={status === 'completed' ? 'success' : theme.variant as any}
-                        className="flex-1"
+                        className="min-w-[110px] flex-1"
                         onClick={() => status === 'completed' ? setShowComplete(true) : handleStatusChange(status)}
                       >
                         {WO_ACTION_LABELS[status as WoStatus]}
@@ -294,7 +294,7 @@ export default function WoDetailPanel() {
                   })}
                 </div>
                 {(currentUser?.role === 'admin' || currentUser?.role === 'supervisor') && (
-                  <Button variant="ghost" size="xs" className="text-slate-400 hover:text-brand" onClick={() => setShowAssign(true)} icon={<UserPlus size={14} />}>
+                  <Button variant="ghost" size="xs" className="self-start text-slate-400 hover:text-brand" onClick={() => setShowAssign(true)} icon={<UserPlus size={14} />}>
                     Reasignar Personal
                   </Button>
                 )}
