@@ -273,7 +273,7 @@ function EventDetailPanel({ event, today, onClose, onAction }: any) {
 
 function Legend() {
   return (
-    <div className="flex items-center gap-4 flex-wrap">
+    <div className="flex items-center gap-3 md:gap-4 overflow-x-auto no-scrollbar pb-1 md:pb-0 w-full md:w-auto shrink-0">
       {[
         { color: 'bg-amber-400', label: 'Correctiva' },
         { color: 'bg-blue-500', label: 'Preventiva' },
@@ -281,7 +281,7 @@ function Legend() {
         { color: 'bg-violet-400', label: 'Proyección' },
         { color: 'bg-red-500', label: 'Vencida' },
       ].map(({ color, label }) => (
-        <div key={label} className="flex items-center gap-1.5">
+        <div key={label} className="flex items-center gap-1.5 shrink-0">
           <div className={cn('w-2.5 h-2.5 rounded-full', color)} />
           <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{label}</span>
         </div>
@@ -308,10 +308,8 @@ function FilterBar({
   const hasFilters = filterPlant || filterArea || typeFilter !== 'all';
 
   return (
-    <div className="flex items-center gap-2 flex-wrap">
-      <Filter size={14} className="text-slate-400 shrink-0" />
-
-      <div className="flex items-center gap-1 border-r border-slate-200 pr-2 mr-1">
+    <div className="flex items-center gap-2 overflow-x-auto no-scrollbar w-full pb-1 md:pb-0 shrink-0">
+      <div className="flex items-center gap-1 border-r border-slate-200 pr-2 mr-1 shrink-0">
         <input
           type="date"
           value={startDate}
@@ -331,7 +329,7 @@ function FilterBar({
         <select
           value={filterPlant}
           onChange={e => { onPlant(e.target.value); onArea(''); }}
-          className={selectClass}
+          className={cn(selectClass, "shrink-0")}
         >
           <option value="">Todas las plantas</option>
           {plants.map((p: any) => <option key={p.id} value={p.id}>{p.name}</option>)}
@@ -342,7 +340,7 @@ function FilterBar({
         <select
           value={filterArea}
           onChange={e => onArea(e.target.value)}
-          className={cn(selectClass, !filterPlant && areas.length === 0 && 'opacity-40')}
+          className={cn(selectClass, "shrink-0", !filterPlant && areas.length === 0 && 'opacity-40')}
           disabled={!filterPlant && areas.length === 0}
         >
           <option value="">Todas las áreas</option>
@@ -353,7 +351,7 @@ function FilterBar({
       <select
         value={typeFilter}
         onChange={e => onTypeFilter(e.target.value as TypeFilter)}
-        className={selectClass}
+        className={cn(selectClass, "shrink-0")}
       >
         <option value="all">Todos los tipos</option>
         <option value="corrective">Correctivos</option>
@@ -364,7 +362,7 @@ function FilterBar({
       {hasFilters && (
         <button
           onClick={() => { onPlant(''); onArea(''); onTypeFilter('all'); }}
-          className="text-[9px] font-black text-slate-400 hover:text-danger uppercase tracking-widest transition-colors"
+          className="text-[9px] font-black text-slate-400 hover:text-danger uppercase tracking-widest transition-colors shrink-0 ml-1"
         >
           ✕ Limpiar
         </button>
@@ -392,6 +390,7 @@ export default function PmKanbanView() {
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
   const [startDate, setStartDate] = useState(() => format(startOfMonth(new Date()), 'yyyy-MM-dd'));
   const [endDate, setEndDate] = useState(() => format(endOfMonth(new Date()), 'yyyy-MM-dd'));
+  const [showFilters, setShowFilters] = useState(false);
 
   const plants = useMemo(
     () => assets.filter((a: any) => a.assetType === 'plant'),
@@ -646,19 +645,60 @@ export default function PmKanbanView() {
   return (
     <div className="flex flex-col h-full bg-slate-50 overflow-hidden relative">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between px-4 sm:px-6 py-4 border-b border-slate-100 bg-white shrink-0 gap-4 flex-wrap">
-        <h2 className="text-xl font-black text-slate-900 capitalize tracking-tighter flex items-center gap-2">
-          <Target size={20} className="text-brand" /> Kanban
-        </h2>
-        <FilterBar
-          plants={plants} areas={areas}
-          filterPlant={filterPlant} filterArea={filterArea}
-          onPlant={setFilterPlant} onArea={setFilterArea}
-          startDate={startDate} endDate={endDate}
-          onStartDate={setStartDate} onEndDate={setEndDate}
-          typeFilter={typeFilter} onTypeFilter={setTypeFilter}
-        />
-        <Legend />
+      <div className="flex flex-col px-4 sm:px-6 py-3 border-b border-slate-100 bg-white shrink-0">
+        <div className="flex items-center justify-between w-full">
+          <h2 className="text-xl font-black text-slate-900 capitalize tracking-tighter flex items-center gap-2">
+            <Target size={20} className="text-brand" /> Kanban
+          </h2>
+          
+          <div className="flex items-center gap-3">
+            <div className="hidden md:block">
+              <Legend />
+            </div>
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={cn(
+                "flex items-center gap-2 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border",
+                showFilters 
+                  ? "bg-slate-900 text-white border-slate-900 shadow-md" 
+                  : ((filterPlant || filterArea || typeFilter !== 'all') 
+                      ? "bg-brand/10 text-brand border-brand/20 shadow-sm" 
+                      : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50")
+              )}
+            >
+              <Filter size={14} />
+              <span className="hidden sm:inline">Filtros</span>
+              {(filterPlant || filterArea || typeFilter !== 'all') && (
+                <span className="w-2 h-2 rounded-full bg-brand" />
+              )}
+            </button>
+          </div>
+        </div>
+
+        <AnimatePresence>
+          {showFilters && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden"
+            >
+              <div className="pt-4 mt-4 border-t border-slate-100 flex flex-col md:flex-row md:items-center gap-4 justify-between">
+                <FilterBar
+                  plants={plants} areas={areas}
+                  filterPlant={filterPlant} filterArea={filterArea}
+                  onPlant={setFilterPlant} onArea={setFilterArea}
+                  startDate={startDate} endDate={endDate}
+                  onStartDate={setStartDate} onEndDate={setEndDate}
+                  typeFilter={typeFilter} onTypeFilter={setTypeFilter}
+                />
+                <div className="md:hidden pt-3 border-t border-slate-50">
+                  <Legend />
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Board */}

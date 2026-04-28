@@ -83,17 +83,23 @@ export default function SettingsModule() {
           panelKey="content" 
           className="flex-1 overflow-y-auto"
         >
-          {/* Mobile Back Button */}
-          <div className="lg:hidden flex items-center px-4 py-3 bg-white border-b border-border shrink-0">
+          {/* Mobile Back Button (Header) */}
+          <div className="lg:hidden flex items-center gap-3 px-4 py-3 bg-white border-b border-border shrink-0 sticky top-0 z-10">
             <button
               onClick={() => setMobileView('menu')}
-              className="flex items-center gap-1 text-sm font-bold text-brand"
+              className="w-10 h-10 -ml-2 flex items-center justify-center rounded-full text-tx-2 hover:bg-bg-3 transition-colors shrink-0"
             >
-              <ChevronLeft size={18} /> Volver a Ajustes
+              <ChevronLeft size={24} />
             </button>
+            <div className="min-w-0">
+              <h2 className="font-display font-bold text-tx text-lg leading-tight truncate">
+                {TABS.find(t => t.id === activeTab)?.label || 'Ajustes'}
+              </h2>
+              <p className="text-[10px] text-tx-4 uppercase tracking-widest font-bold">Configuración</p>
+            </div>
           </div>
 
-          <div className="h-full overflow-y-auto">
+          <div className="flex-1 overflow-y-auto">
             {activeTab === 'magnitudes' ? (
               <PmSettingsView />
             ) : (
