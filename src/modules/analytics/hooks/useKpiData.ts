@@ -3,8 +3,9 @@ import { useStore } from '../../../store';
 import {
   startOfDay, differenceInHours, differenceInCalendarDays,
   parseISO, isValid, format, subDays, startOfMonth, endOfMonth,
-  eachWeekOfInterval, startOfWeek, endOfWeek, isWithinInterval,
+  eachWeekOfInterval, startOfWeek, endOfWeek, endOfDay
 } from 'date-fns';
+import { getDescendantIds } from '../../assets/utils/assetHelpers';
 
 export type Period = '7d' | '30d' | '90d' | 'month' | 'custom';
 
@@ -16,14 +17,22 @@ function safeParse(d: string | null | undefined): Date | null {
 
 function periodRange(period: Period, custom?: { from: string; to: string }): { from: Date; to: Date } {
   const today = startOfDay(new Date());
-  if (period === '7d')    return { from: subDays(today, 6), to: today };
-  if (period === '30d')   return { from: subDays(today, 29), to: today };
-  if (period === '90d')   return { from: subDays(today, 89), to: today };
+  const nowEnd = endOfDay(new Date());
+  
+  if (period === '7d')    return { from: subDays(today, 6), to: nowEnd };
+  if (period === '30d')   return { from: subDays(today, 29), to: nowEnd };
+  if (period === '90d')   return { from: subDays(today, 89), to: nowEnd };
   if (period === 'month') return { from: startOfMonth(today), to: endOfMonth(today) };
   if (period === 'custom' && custom) {
-    return { from: startOfDay(parseISO(custom.from)), to: startOfDay(parseISO(custom.to)) };
+    const cFrom = safeParse(custom.from);
+    const cTo = safeParse(custom.to);
+    if (cFrom && cTo) {
+      const fromD = startOfDay(cFrom);
+      const toD = endOfDay(cTo);
+      return fromD <= toD ? { from: fromD, to: toD } : { from: startOfDay(cTo), to: endOfDay(cFrom) };
+    }
   }
-  return { from: subDays(today, 29), to: today };
+  return { from: subDays(today, 29), to: nowEnd };
 }
 
 export function useKpiData(
@@ -40,16 +49,13 @@ export function useKpiData(
   // Filtered asset ids based on plant/area selection
   const filteredAssetIds = useMemo(() => {
     if (!filterPlant && !filterArea) return null; // null = no filter
-    return new Set(
-      assets
-        .filter((a: any) => {
-          if (filterPlant && filterArea) return a.plantId === filterPlant && a.areaId === filterArea;
-          if (filterPlant) return a.plantId === filterPlant || a.id === filterPlant;
-          if (filterArea)  return a.areaId  === filterArea  || a.id === filterArea;
-          return true;
-        })
-        .map((a: any) => a.id)
-    );
+    const rootId = filterArea || filterPlant;
+    if (!rootId) return null;
+    
+    // Get root + all descendants
+    const subtreeIds = new Set(getDescendantIds(rootId, assets));
+    subtreeIds.add(rootId);
+    return subtreeIds;
   }, [assets, filterPlant, filterArea]);
 
   // Filter WOs within period (use createdAt as anchor)
@@ -103,19 +109,30 @@ export function useKpiData(
     // Costs
     const externalCost = completedWos.reduce((s: number, w: any) => s + (w.externalServiceCost || 0), 0);
 
-    // MTBF (time between corrective failures on same asset)
-    const correctiveDates = correctives
-      .map((w: any) => safeParse(w.createdAt))
-      .filter(Boolean)
-      .sort((a: any, b: any) => a.getTime() - b.getTime());
-    let mtbf = 0;
-    if (correctiveDates.length > 1) {
-      let totalGap = 0;
-      for (let i = 1; i < correctiveDates.length; i++) {
-        totalGap += differenceInHours(correctiveDates[i] as Date, correctiveDates[i - 1] as Date);
+    // MTBF (time between corrective failures on SAME asset)
+    const correctivesByAsset: Record<string, Date[]> = {};
+    correctives.forEach((w: any) => {
+      const d = safeParse(w.createdAt);
+      if (d) {
+        if (!correctivesByAsset[w.assetId]) correctivesByAsset[w.assetId] = [];
+        correctivesByAsset[w.assetId].push(d);
       }
-      mtbf = Math.round(totalGap / (correctiveDates.length - 1));
-    }
+    });
+
+    let totalGapsHours = 0;
+    let gapCount = 0;
+
+    Object.values(correctivesByAsset).forEach(dates => {
+      if (dates.length > 1) {
+        dates.sort((a, b) => a.getTime() - b.getTime());
+        for (let i = 1; i < dates.length; i++) {
+          totalGapsHours += differenceInHours(dates[i], dates[i - 1]);
+          gapCount++;
+        }
+      }
+    });
+
+    const mtbf = gapCount > 0 ? Math.round(totalGapsHours / gapCount) : 0;
 
     const stockCritical = inventoryItems.filter((i: any) => i.stockCurrent <= i.stockMin && i.active).length;
 
@@ -161,27 +178,35 @@ export function useKpiData(
 
   // ── WO STATUS DONUT ───────────────────────────────────────────
   const woStatusDonut = useMemo(() => {
-    const all = workOrders; // all WOs not filtered by period for current status picture
     const statuses = ['open', 'assigned', 'in_progress', 'on_hold', 'completed', 'cancelled'];
     return statuses.map(s => ({
       name: { open: 'Abierta', assigned: 'Asignada', in_progress: 'En Progreso', on_hold: 'En Espera', completed: 'Completada', cancelled: 'Cancelada' }[s],
-      value: all.filter((w: any) => w.status === s).length,
+      value: periodWos.filter((w: any) => w.status === s).length,
       color: { open: '#94a3b8', assigned: '#3b82f6', in_progress: '#f59e0b', on_hold: '#8b5cf6', completed: '#10b981', cancelled: '#ef4444' }[s],
     })).filter(s => s.value > 0);
-  }, [workOrders]);
+  }, [periodWos]);
 
   // ── PM COMPLIANCE per plan ────────────────────────────────────
   const pmComplianceByPlan = useMemo(() => {
     return assetPlans
-      .filter((ap: any) => ap.active)
+      .filter((ap: any) => {
+        if (!ap.active) return false;
+        if (filteredAssetIds && !filteredAssetIds.has(ap.assetId)) return false;
+        return true;
+      })
       .map((ap: any) => {
         const plan = pmPlans.find((p: any) => p.id === ap.pmPlanId);
         const asset = assets.find((a: any) => a.id === ap.assetId);
-        const wos = workOrders.filter((w: any) => w.assetPlanId === ap.id);
-        const completedInPeriod = wos.filter((w: any) => {
-          const d = safeParse(w.completedAt);
-          return d && d >= range.from && d <= range.to && w.status === 'completed';
-        }).length;
+        
+        // Only WOs for this plan created within the period
+        const wosInPeriod = workOrders.filter((w: any) => {
+          if (w.assetPlanId !== ap.id) return false;
+          const d = safeParse(w.createdAt);
+          return d && d >= range.from && d <= range.to;
+        });
+        
+        const completedInPeriod = wosInPeriod.filter((w: any) => w.status === 'completed').length;
+        
         const today = new Date();
         const due = safeParse(ap.nextDueDate);
         const daysUntilDue = due ? differenceInCalendarDays(due, today) : null;
@@ -198,7 +223,7 @@ export function useKpiData(
           nextDueDate: ap.nextDueDate,
           daysUntilDue,
           completedInPeriod,
-          totalWos: wos.length,
+          totalWos: wosInPeriod.length,
           state,
         };
       })
