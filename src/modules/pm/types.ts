@@ -71,3 +71,9 @@ export interface MeterReading {
   readingAt: string;
   recordedBy: string | null;
 }
+
+export interface MeterTolerance {
+  criticality: Criticality;
+  scheduledOffsetDays: number;
+  dueOffsetDays: number;
+}

@@ -1,12 +1,27 @@
 /**
  * APEX CMMS — PM Scheduling Engine v2
  *
- * Redesigned architecture:
- *  1. Trigger evaluation (calendar + meter independent for hybrid)
- *  2. Effective cycle calculation — accounts for missed intervals while a WO was open
- *  3. Modular task filtering — cycle % multiplier == 0
- *  4. Hierarchical Anti-stacking — weight comparison before blocking or superseding
- *  5. Supersession — higher-weight cycle absorbs a lower-weight open WO
+ * Architecture:
+ *  1. Trigger evaluation   — calendar and meter dimensions are independent; hybrid fires on either.
+ *  2. Effective cycle      — scans missed intervals to find the heaviest pending cycle.
+ *  3. Modular task filter  — cycleIndex % frequencyMultiplier === 0 selects which tasks fire.
+ *  4. Anti-stacking        — blocks duplicate WOs; compares weights before blocking.
+ *  5. Supersession         — higher-weight cycle absorbs an open lower-weight WO.
+ *  6. Date assignment      — calendar plans use nextDueDate; meter/hybrid plans use a
+ *                            configurable tolerance window (pm_meter_tolerance table).
+ *                            Trigger logic (cycle index, threshold) is never affected by dates.
+ *
+ * ── Date contract ──────────────────────────────────────────────────────────────
+ *  scheduledDate  When the technician should start the work.
+ *                 Calendar: nextDueDate − leadDays.
+ *                 Meter:    triggerDay + scheduledOffsetDays (default 0 = same day).
+ *
+ *  dueDate        Hard deadline for the maintenance manager.
+ *                 Calendar: nextDueDate.
+ *                 Meter:    triggerDay + dueOffsetDays (per criticality, configurable).
+ *
+ * ── Tolerance defaults (overridable via pm_meter_tolerance) ────────────────────
+ *  critical → due in 2 days   high → 5 days   medium → 14 days   low → 30 days
  */
 
 import {
@@ -14,11 +29,20 @@ import {
   isBefore, isAfter, differenceInDays,
   startOfDay, parseISO, format, isValid,
 } from 'date-fns';
-import { PmPlan, AssetPlan } from '../types';
+import { PmPlan, AssetPlan, MeterTolerance } from '../types';
 import { generateId } from '../../../shared/utils/utils';
 
 // ── Calendar helper ────────────────────────────────────────────────────────
 
+/**
+ * Advances the next-due date for a calendar (or hybrid) plan after a WO is completed.
+ *
+ * - fixed mode:    strides forward from the existing `nextDueDate`, ignoring completion time.
+ * - floating mode: strides forward from the actual `completedAt` timestamp.
+ * - `cyclesConsumed > 1`: multi-stride catch-up when several missed cycles are consolidated.
+ *
+ * Not used by pure meter plans — their meter threshold is advanced in the store slice.
+ */
 export function calcNextDueDate(
   plan: PmPlan,
   assetPlan: Pick<AssetPlan, 'nextDueDate' | 'lastCompletedAt'>,
@@ -54,6 +78,15 @@ export function calcNextDueDate(
 
 // ── UI status helper ───────────────────────────────────────────────────────
 
+/**
+ * Derives read-only UI status for an asset plan: overdue badge, progress bar, human label.
+ * Pure computation — never mutates plan state or triggers scheduling.
+ *
+ * - Calendar:  overdue when nextDueDate < now.
+ * - Meter:     progress % = (current − cycleStart) / interval × 100;
+ *              overdue when currentValue ≥ nextDueMeter.
+ * - Hybrid:    either dimension can independently set isOverdue = true.
+ */
 export interface PlanStatus {
   isOverdue: boolean;
   progress: number;
@@ -226,12 +259,15 @@ function intervalToDays(value: number, unit: string): number {
 
 // ── Scheduler types ────────────────────────────────────────────────────────
 
+/** All data the scheduler needs for one evaluation pass. */
 interface SchedulerInput {
   pmPlans: PmPlan[];
   assetPlans: AssetPlan[];
   measurementPoints: any[];
   pmTasks: any[];
   workOrders: any[];
+  /** Rows from pm_meter_tolerance. Absent or empty → hardcoded safe defaults apply. */
+  meterTolerances?: MeterTolerance[];
 }
 
 export interface GeneratedWo {
@@ -272,8 +308,24 @@ const TERMINAL_STATUSES = ['completed', 'cancelled', 'cancelled_superseded'];
 
 // ── Main scheduler ─────────────────────────────────────────────────────────
 
+/**
+ * Evaluates all active asset plans and generates Work Orders for those that have fired.
+ *
+ * Per-plan pipeline:
+ *  1. Trigger evaluation  — calendar window and meter threshold checked independently.
+ *  2. Task list build     — fetched upfront so cycle-weight scans have full task data.
+ *  3. Effective cycle     — heaviest missed cycle in the elapsed range (skip-safe).
+ *  4. Candidate tasks     — filtered by cycleIndex % frequencyMultiplier === 0.
+ *  5. Anti-stacking       — blocks duplicate WO; supersedes open WO if new cycle is heavier.
+ *  6. Date assignment     — calendar → nextDueDate; meter/hybrid-meter → today + tolerance.
+ *                           Cycle index and threshold logic are never affected by dates.
+ *
+ * @param input        Plans, asset plans, measurement points, tasks, open WOs, and
+ *                     optional pm_meter_tolerance rows for configurable grace windows.
+ * @param horizonDays  Look-ahead window for calendar trigger evaluation (meter fires immediately).
+ */
 export function runScheduler(
-  { pmPlans, assetPlans, measurementPoints, pmTasks, workOrders }: SchedulerInput,
+  { pmPlans, assetPlans, measurementPoints, pmTasks, workOrders, meterTolerances = [] }: SchedulerInput,
   horizonDays: number,
 ): SchedulerResult {
   const generated: GeneratedWo[] = [];
@@ -282,6 +334,20 @@ export function runScheduler(
 
   const today = startOfDay(new Date());
   const horizon = addDays(today, horizonDays);
+
+  // Build a quick lookup: criticality → tolerance row (fallback to safe defaults)
+  const toleranceMap: Record<string, { scheduledOffset: number; dueOffset: number }> = {
+    critical: { scheduledOffset: 0, dueOffset: 2 },
+    high:     { scheduledOffset: 0, dueOffset: 5 },
+    medium:   { scheduledOffset: 0, dueOffset: 14 },
+    low:      { scheduledOffset: 0, dueOffset: 30 },
+  };
+  for (const t of meterTolerances) {
+    toleranceMap[t.criticality] = {
+      scheduledOffset: t.scheduledOffsetDays,
+      dueOffset: t.dueOffsetDays,
+    };
+  }
 
   for (const assetPlan of assetPlans.filter(ap => ap.active)) {
     const plan = pmPlans.find(p => p.id === assetPlan.pmPlanId);
@@ -377,8 +443,9 @@ export function runScheduler(
       { critical: 'critical', high: 'high', medium: 'medium', low: 'low' } as Record<string, string>
     )[plan.criticality] ?? 'medium';
 
-    const scheduledDate = buildScheduledDate(assetPlan, plan, today, meterTriggered);
-    const dueDate = buildDueDate(assetPlan, plan, today, meterTriggered);
+    const tol = toleranceMap[plan.criticality] ?? toleranceMap['medium'];
+    const scheduledDate = buildScheduledDate(assetPlan, plan, today, meterTriggered, tol.scheduledOffset);
+    const dueDate = buildDueDate(assetPlan, plan, today, meterTriggered, tol.dueOffset);
     const generatedFromMeter = meterFires
       ? snapMeterTarget(plan, currentMeterValue, assetPlan.nextDueMeter)
       : null;
@@ -445,14 +512,30 @@ function evalMeterTrigger(
 
 // ── Date builders ──────────────────────────────────────────────────────────
 
+/**
+ * Returns the ISO-formatted scheduled start date for a WO (when the technician should begin).
+ *
+ * Calendar / calendar-dimension of hybrid:
+ *   nextDueDate − leadDays  (technician preparation window before the hard deadline)
+ *
+ * Meter-only / hybrid where meter fired first:
+ *   today + meterScheduledOffset  (0 = start on the trigger day; configurable per criticality)
+ *
+ * The offset comes from the pm_meter_tolerance row for the plan's criticality.
+ */
 function buildScheduledDate(
   assetPlan: AssetPlan,
   plan: PmPlan,
   today: Date,
   meterTriggeredHybrid: boolean,
+  meterScheduledOffset: number = 0,
 ): string {
-  if (meterTriggeredHybrid) return format(today, 'yyyy-MM-dd');
+  // Meter-only or hybrid where meter fired: anchor to today + configured offset
+  if (plan.triggerType === 'meter' || meterTriggeredHybrid) {
+    return format(addDays(today, meterScheduledOffset), 'yyyy-MM-dd');
+  }
 
+  // Calendar plan: start work leadDays before the due date
   if (assetPlan.nextDueDate) {
     const nextDue = parseISO(assetPlan.nextDueDate);
     if (isValid(nextDue)) {
@@ -463,14 +546,31 @@ function buildScheduledDate(
   return format(today, 'yyyy-MM-dd');
 }
 
+/**
+ * Returns the ISO-formatted hard deadline date for a WO (the manager's SLA).
+ *
+ * Calendar / calendar-dimension of hybrid:
+ *   nextDueDate  (the plan's contractual maintenance date)
+ *
+ * Meter-only / hybrid where meter fired first:
+ *   today + meterDueOffset  (grace window per criticality from pm_meter_tolerance)
+ *   Defaults — critical: 2 d · high: 5 d · medium: 14 d · low: 30 d
+ *
+ * Always returns a non-null string so Kanban and Calendar can always display the WO.
+ */
 function buildDueDate(
   assetPlan: AssetPlan,
   plan: PmPlan,
   today: Date,
   meterTriggeredHybrid: boolean,
-): string | null {
-  if (meterTriggeredHybrid) return format(today, 'yyyy-MM-dd');
-  if (plan.triggerType === 'meter' && !assetPlan.nextDueDate) return null;
+  meterDueOffset: number = 14,
+): string {
+  // Meter-only or hybrid where meter fired: due = today + tolerance window
+  if (plan.triggerType === 'meter' || meterTriggeredHybrid) {
+    return format(addDays(today, meterDueOffset), 'yyyy-MM-dd');
+  }
+
+  // Calendar plan: due date is the nextDueDate itself
   return assetPlan.nextDueDate ?? format(today, 'yyyy-MM-dd');
 }
 

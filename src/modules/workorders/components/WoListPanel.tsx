@@ -303,12 +303,14 @@ export default function WoListPanel({ onSelect, onNewWo, customWorkOrders, title
                   <span className="font-mono text-[9px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded uppercase tracking-wider">
                     #{wo.woNumber}
                   </span>
-                  {wo.woType === 'preventive' && (
+                  <span className={cn("text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded", wo.woType === 'corrective' ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700')}>
+                    {wo.woType === 'corrective' ? 'CORREC' : 'PREV'}
+                  </span>
+                  {wo.woType !== 'corrective' && wo.pmCycleIndex != null && (
                     <div className="flex items-center gap-1.5">
                       <Calendar size={10} className="text-brand" />
-                      {wo.pmCycleIndex && (
-                        <span className="text-[9px] font-black text-brand bg-brand/5 px-1.5 py-0.5 rounded border border-brand/10">
-                          C{wo.pmCycleIndex}
+                      <span className="text-[9px] font-black text-brand bg-brand/5 px-1.5 py-0.5 rounded border border-brand/10">
+                        C{wo.pmCycleIndex}
                           {(() => {
                             // Completed: show the real horómetro snapshot at closure.
                             if (wo.status === 'completed' && wo.completedMeterValue != null) {
@@ -330,7 +332,6 @@ export default function WoListPanel({ onSelect, onNewWo, customWorkOrders, title
                             return ` • ${val.toLocaleString()}${unit ? ' ' + unit : ''}`;
                           })()}
                         </span>
-                      )}
                     </div>
                   )}
                 </div>

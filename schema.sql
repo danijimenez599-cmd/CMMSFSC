@@ -114,6 +114,23 @@ CREATE TABLE public.meter_readings (
   created_at  TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- ── pm_meter_tolerance ─────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS public.pm_meter_tolerance (
+  criticality           TEXT PRIMARY KEY
+                          CHECK (criticality IN ('critical','high','medium','low')),
+  scheduled_offset_days INTEGER NOT NULL DEFAULT 0 CHECK (scheduled_offset_days >= 0),
+  due_offset_days       INTEGER NOT NULL DEFAULT 7  CHECK (due_offset_days >= 1),
+  updated_at            TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+INSERT INTO public.pm_meter_tolerance (criticality, scheduled_offset_days, due_offset_days)
+VALUES
+  ('critical', 0,  2),
+  ('high',     0,  5),
+  ('medium',   0, 14),
+  ('low',      0, 30)
+ON CONFLICT (criticality) DO NOTHING;
+
 -- ========================================================
 -- 6. PM PLANS
 -- ========================================================
@@ -408,6 +425,7 @@ ALTER TABLE public.inventory_items     DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.measurement_configs DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.measurement_points  DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.meter_readings      DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.pm_meter_tolerance  DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.part_usages         DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.stock_movements     DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.vendors             DISABLE ROW LEVEL SECURITY;

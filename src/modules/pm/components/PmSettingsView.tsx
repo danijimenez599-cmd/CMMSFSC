@@ -1,14 +1,23 @@
 import React, { useState } from 'react';
 import { useStore } from '../../../store';
 import { Button, Input, Badge, AlertBanner } from '../../../shared/components';
-import { Gauge, Plus, Trash2, CheckCircle2, AlertCircle, Truck, Settings2, CalendarClock, Sliders } from 'lucide-react';
+import { Gauge, Plus, Trash2, CheckCircle2, AlertCircle, Truck, Settings2, CalendarClock, Sliders, ShieldAlert } from 'lucide-react';
 import { generateId } from '../../../shared/utils/utils';
 import VendorsPanel from '../../workorders/components/VendorsPanel';
 import { cn } from '../../../shared/utils/utils';
 
+const CRITICALITY_LABELS: Record<string, { label: string; color: string }> = {
+  critical: { label: 'Crítico',  color: 'text-red-600 bg-red-50 border-red-200' },
+  high:     { label: 'Alto',     color: 'text-orange-600 bg-orange-50 border-orange-200' },
+  medium:   { label: 'Medio',    color: 'text-yellow-600 bg-yellow-50 border-yellow-200' },
+  low:      { label: 'Bajo',     color: 'text-green-600 bg-green-50 border-green-200' },
+};
+
 export default function PmSettingsView() {
-  const [activeTab, setActiveTab] = useState<'magnitudes' | 'vendors' | 'motor'>('magnitudes');
-  const { measurementConfigs, saveMeasurementConfig, deleteMeasurementConfig, showToast, projectionMonths, setProjectionMonths } = useStore() as any;
+  const [activeTab, setActiveTab] = useState<'magnitudes' | 'vendors' | 'motor' | 'tolerances'>('magnitudes');
+  const { measurementConfigs, saveMeasurementConfig, deleteMeasurementConfig, showToast,
+    projectionMonths, setProjectionMonths, meterProjectionCycles, setMeterProjectionCycles,
+    meterTolerances, saveMeterTolerance } = useStore() as any;
   const [showAdd, setShowAdd] = useState(false);
   const [name, setName] = useState('');
   const [unit, setUnit] = useState('');
@@ -73,7 +82,19 @@ export default function PmSettingsView() {
           )}
         >
           <Sliders size={16} />
-          Motor PM
+          Proyecciones
+        </button>
+        <button
+          onClick={() => setActiveTab('tolerances')}
+          className={cn(
+            "flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all",
+            activeTab === 'tolerances'
+              ? "bg-white text-brand shadow-sm"
+              : "text-tx-4 hover:text-tx hover:bg-white/50"
+          )}
+        >
+          <ShieldAlert size={16} />
+          Tolerancias
         </button>
       </div>
 
@@ -219,12 +240,12 @@ export default function PmSettingsView() {
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
           <VendorsPanel />
         </div>
-      ) : (
+      ) : activeTab === 'motor' ? (
         /* ── Motor PM Tab ─────────────────────────────────────────────── */
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
           <div>
-            <h2 className="font-display text-xl font-bold text-tx tracking-tight">Parámetros del Motor PM</h2>
-            <p className="text-sm text-tx-4 mt-0.5">Configura el comportamiento global del motor de programación preventiva.</p>
+            <h2 className="font-display text-xl font-bold text-tx tracking-tight">Parámetros de Proyección</h2>
+            <p className="text-sm text-tx-4 mt-0.5">Configura el horizonte visual del calendario y las vistas predictivas.</p>
           </div>
 
           <AlertBanner
@@ -278,8 +299,136 @@ export default function PmSettingsView() {
               <strong className="text-tx">Nota:</strong> El cambio es inmediato — recarga la vista del Calendario para ver los nuevos horizontes aplicados.
             </p>
           </div>
+
+          <div className="bg-white border border-border rounded-2xl shadow-card p-6 space-y-6">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-brand/5 border border-brand/20 flex items-center justify-center">
+                <Sliders size={24} className="text-brand" />
+              </div>
+              <div>
+                <p className="font-bold text-tx">Ciclos de Proyección — Medidor</p>
+                <p className="text-xs text-tx-4 mt-0.5">Cuántos ciclos futuros mostrar en planes activados por horómetro</p>
+              </div>
+            </div>
+
+            <div className="flex items-end gap-6">
+              <div className="flex-1 max-w-[220px]">
+                <label className="block text-sm font-medium text-tx-2 mb-1.5">
+                  Ciclos (4 – 24)
+                </label>
+                <input
+                  type="number"
+                  min={4}
+                  max={24}
+                  value={meterProjectionCycles ?? 8}
+                  onChange={e => setMeterProjectionCycles(Number(e.target.value))}
+                  className="w-full h-11 px-4 text-sm font-bold border border-border rounded-xl focus:outline-none focus:border-brand focus:ring-[3px] focus:ring-brand/10 transition-all"
+                />
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center justify-between text-[10px] font-bold text-tx-4 uppercase tracking-widest mb-2">
+                  <span>4</span>
+                  <span className="text-brand">{meterProjectionCycles ?? 8} ciclos activos</span>
+                  <span>24</span>
+                </div>
+                <div className="h-2 bg-bg-3 rounded-full overflow-hidden border border-border">
+                  <div
+                    className="h-full bg-brand rounded-full transition-all duration-500"
+                    style={{ width: `${(((meterProjectionCycles ?? 8) - 4) / 20) * 100}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <p className="text-xs text-tx-4 border-t border-border pt-4">
+              <strong className="text-tx">Nota:</strong> Los planes de calendario usan el horizonte en meses. Los planes por medidor no tienen eje de tiempo, por eso se configura por número de ciclos.
+            </p>
+          </div>
         </div>
-      )}
+      ) : activeTab === 'tolerances' ? (
+        /* ── Tolerancias Tab ──────────────────────────────────────────── */
+        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
+          <div>
+            <h2 className="font-display text-xl font-bold text-tx tracking-tight">Ventana de Tolerancia por Medidor</h2>
+            <p className="text-sm text-tx-4 mt-0.5">
+              Cuando una OT se dispara por acumulador, estas ventanas determinan cuándo debe ser programada y completada.
+            </p>
+          </div>
+
+          <AlertBanner
+            type="info"
+            title="¿Cómo funciona?"
+            message="scheduledDate = día del disparo + offset de programación. dueDate = día del disparo + ventana de tolerancia. Un equipo crítico con offset 0 y tolerancia 2 significa: programar hoy, completar en máximo 2 días."
+          />
+
+          <div className="bg-white border border-border rounded-2xl shadow-card overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="bg-bg-3 border-b border-border">
+                <tr>
+                  <th className="text-left px-6 py-3 text-[10px] font-bold text-tx-4 uppercase tracking-wider">Criticidad</th>
+                  <th className="text-center px-6 py-3 text-[10px] font-bold text-tx-4 uppercase tracking-wider">Offset Programación (días)</th>
+                  <th className="text-center px-6 py-3 text-[10px] font-bold text-tx-4 uppercase tracking-wider">Ventana Tolerancia (días)</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {['critical', 'high', 'medium', 'low'].map(crit => {
+                  const row = (meterTolerances || []).find((t: any) => t.criticality === crit);
+                  const meta = CRITICALITY_LABELS[crit];
+                  const scheduled = row?.scheduledOffsetDays ?? { critical: 0, high: 0, medium: 0, low: 0 }[crit];
+                  const due = row?.dueOffsetDays ?? { critical: 2, high: 5, medium: 14, low: 30 }[crit];
+                  return (
+                    <tr key={crit} className="hover:bg-bg-3/30 transition-colors">
+                      <td className="px-6 py-4">
+                        <span className={cn('text-[11px] font-black px-2.5 py-1 rounded-lg border uppercase tracking-wider', meta.color)}>
+                          {meta.label}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <input
+                          type="number"
+                          min={0}
+                          max={30}
+                          defaultValue={scheduled}
+                          onBlur={async e => {
+                            try {
+                              await saveMeterTolerance({ criticality: crit, scheduledOffsetDays: Number(e.target.value), dueOffsetDays: due });
+                              showToast({ type: 'success', title: 'Guardado', message: `Tolerancia ${meta.label} actualizada.` });
+                            } catch (err: any) {
+                              showToast({ type: 'error', title: 'Error', message: err.message });
+                            }
+                          }}
+                          className="w-20 h-9 text-center text-sm font-bold border border-border rounded-xl mx-auto block focus:outline-none focus:border-brand focus:ring-[3px] focus:ring-brand/10 transition-all"
+                        />
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <input
+                          type="number"
+                          min={1}
+                          max={90}
+                          defaultValue={due}
+                          onBlur={async e => {
+                            try {
+                              await saveMeterTolerance({ criticality: crit, scheduledOffsetDays: scheduled, dueOffsetDays: Number(e.target.value) });
+                              showToast({ type: 'success', title: 'Guardado', message: `Tolerancia ${meta.label} actualizada.` });
+                            } catch (err: any) {
+                              showToast({ type: 'error', title: 'Error', message: err.message });
+                            }
+                          }}
+                          className="w-20 h-9 text-center text-sm font-bold border border-border rounded-xl mx-auto block focus:outline-none focus:border-brand focus:ring-[3px] focus:ring-brand/10 transition-all"
+                        />
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          <p className="text-xs text-tx-4">
+            Los cambios se aplican a las próximas OTs generadas por medidor. Las OTs ya creadas conservan sus fechas originales.
+          </p>
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import PlansView from './components/PlansView';
 import PmSchedulerPanel from './components/PmSchedulerPanel';
-import PmCalendarView from './components/PmCalendarView';
-import { Calendar, FileText, Cpu } from 'lucide-react';
+import PmKanbanView from './components/PmKanbanView';
+import { FileText, Cpu, LayoutGrid } from 'lucide-react';
 import { cn } from '../../shared/components';
 import { useStore } from '../../store';
 
 const TABS = [
   { id: 'plans', label: 'Planes PM', shortLabel: 'Planes', icon: <FileText size={16} /> },
   { id: 'scheduler', label: 'Motor', shortLabel: 'Motor', icon: <Cpu size={16} /> },
-  { id: 'calendar', label: 'Calendario', shortLabel: 'Cal', icon: <Calendar size={16} /> },
+  { id: 'kanban', label: 'Agenda Kanban', shortLabel: 'Agenda', icon: <LayoutGrid size={16} /> },
 ];
+
+// Extend TabId so that 'kanban' is included. Since TABS is not a const array with "as const", 
+// typeof TABS[number]['id'] will be 'string'. But let's just make it a string type for safety.
 
 type TabId = typeof TABS[number]['id'];
 
@@ -20,7 +23,7 @@ interface PmEngineViewProps {
 
 export default function PmEngineView({ mode = 'plans' }: PmEngineViewProps) {
   const { fetchPmData } = useStore() as any;
-  const [activeTab, setActiveTab] = useState<TabId>(mode === 'plans' ? 'plans' : 'calendar');
+  const [activeTab, setActiveTab] = useState<string>(mode === 'plans' ? 'plans' : 'kanban');
 
   useEffect(() => { 
     fetchPmData(); 
@@ -59,7 +62,7 @@ export default function PmEngineView({ mode = 'plans' }: PmEngineViewProps) {
       <div className="flex-1 overflow-hidden">
         {activeTab === 'plans' && <PlansView />}
         {activeTab === 'scheduler' && <PmSchedulerPanel />}
-        {activeTab === 'calendar' && <PmCalendarView />}
+        {activeTab === 'kanban' && <PmKanbanView />}
       </div>
     </div>
   );

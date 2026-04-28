@@ -1,6 +1,6 @@
 import { StateCreator } from 'zustand';
 import { StoreState } from '../../../store';
-import { PmPlan, AssetPlan, MeasurementPoint, MeterReading, PmTask, MeasurementConfig } from '../types';
+import { PmPlan, AssetPlan, MeasurementPoint, MeterReading, PmTask, MeasurementConfig, MeterTolerance } from '../types';
 import { WorkOrder } from '../../workorders/types';
 import { runScheduler, calcNextDueDate, SupersededAction } from './pmEngine';
 import { generateId } from '../../../shared/utils/utils';
@@ -17,6 +17,9 @@ export interface PmSlice {
   /** Global projection horizon in months. Default 12, max 24. */
   projectionMonths: number;
   setProjectionMonths: (months: number) => void;
+  /** Number of future cycles shown for meter-only plans. Default 8, range [4, 24]. */
+  meterProjectionCycles: number;
+  setMeterProjectionCycles: (cycles: number) => void;
 
   fetchPmData: () => Promise<void>;
   savePlan: (plan: PmPlan, tasks: PmTask[]) => Promise<void>;
@@ -37,6 +40,10 @@ export interface PmSlice {
 
   addMeterReading: (reading: Omit<MeterReading, 'id' | 'readingAt'>) => Promise<void>;
 
+  meterTolerances: MeterTolerance[];
+  fetchMeterTolerances: () => Promise<void>;
+  saveMeterTolerance: (tolerance: MeterTolerance) => Promise<void>;
+
   runPmScheduler: (horizonDays: number) => Promise<{ generatedCount: number; skippedCount: number }>;
   recalcNextDue: (assetPlanId: string, completedAt: string, meterValue?: number, completedCycleIndex?: number) => Promise<void>;
 }
@@ -48,22 +55,29 @@ export const createPmSlice: StateCreator<StoreState, [], [], PmSlice> = (set, ge
   measurementConfigs: [],
   measurementPoints: [],
   meterReadings: [],
+  meterTolerances: [],
   pmLoading: false,
   projectionMonths: 12,
   setProjectionMonths: (months: number) => {
     const clamped = Math.min(24, Math.max(1, months));
     set({ projectionMonths: clamped });
   },
+  meterProjectionCycles: 8,
+  setMeterProjectionCycles: (cycles: number) => {
+    const clamped = Math.min(24, Math.max(4, cycles));
+    set({ meterProjectionCycles: clamped });
+  },
 
   fetchPmData: async () => {
     set({ pmLoading: true });
-    const [plansRes, tasksRes, assetPlansRes, configsRes, pointsRes, readingsRes] = await Promise.all([
+    const [plansRes, tasksRes, assetPlansRes, configsRes, pointsRes, readingsRes, tolerancesRes] = await Promise.all([
       supabase.from('pm_plans').select('*').order('name'),
       supabase.from('pm_tasks').select('*').order('sort_order'),
       supabase.from('asset_plans').select('*'),
       supabase.from('measurement_configs').select('*').order('name'),
       supabase.from('measurement_points').select('*'),
       supabase.from('meter_readings').select('*').order('created_at', { ascending: false }),
+      supabase.from('pm_meter_tolerance').select('*'),
     ]);
 
     if (plansRes.error) {
@@ -141,7 +155,13 @@ export const createPmSlice: StateCreator<StoreState, [], [], PmSlice> = (set, ge
       recordedBy: mr.recorded_by,
     }));
 
-    set({ pmPlans, pmTasks, assetPlans, measurementConfigs, measurementPoints, meterReadings, pmLoading: false });
+    const meterTolerances: MeterTolerance[] = (tolerancesRes.data || []).map((t: any) => ({
+      criticality: t.criticality,
+      scheduledOffsetDays: t.scheduled_offset_days,
+      dueOffsetDays: t.due_offset_days,
+    }));
+
+    set({ pmPlans, pmTasks, assetPlans, measurementConfigs, measurementPoints, meterReadings, meterTolerances, pmLoading: false });
 
     // After fetching, check non-cumulative readings for alerts
     _checkNonCumulativeAlerts(measurementPoints, measurementConfigs, get);
@@ -204,6 +224,29 @@ export const createPmSlice: StateCreator<StoreState, [], [], PmSlice> = (set, ge
     const { error } = await supabase.from('measurement_configs').delete().eq('id', id);
     if (error) throw error;
     await get().fetchPmData();
+  },
+
+  fetchMeterTolerances: async () => {
+    const { data, error } = await supabase.from('pm_meter_tolerance').select('*');
+    if (error) return;
+    set({
+      meterTolerances: (data || []).map((t: any) => ({
+        criticality: t.criticality,
+        scheduledOffsetDays: t.scheduled_offset_days,
+        dueOffsetDays: t.due_offset_days,
+      })),
+    });
+  },
+
+  saveMeterTolerance: async (tolerance: MeterTolerance) => {
+    const { error } = await supabase.from('pm_meter_tolerance').upsert({
+      criticality: tolerance.criticality,
+      scheduled_offset_days: tolerance.scheduledOffsetDays,
+      due_offset_days: tolerance.dueOffsetDays,
+      updated_at: new Date().toISOString(),
+    });
+    if (error) throw error;
+    await get().fetchMeterTolerances();
   },
 
   saveAssetPlan: async (assetPlan) => {
@@ -400,6 +443,7 @@ export const createPmSlice: StateCreator<StoreState, [], [], PmSlice> = (set, ge
       measurementPoints: state.measurementPoints,
       pmTasks: state.pmTasks,
       workOrders: state.workOrders,
+      meterTolerances: state.meterTolerances,
     };
 
     const { generated, superseded } = runScheduler(dbData, horizonDays);

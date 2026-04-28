@@ -19,6 +19,7 @@ import {
   CheckCircle2,
   Info,
   LayoutDashboard,
+  LayoutGrid,
   Bell,
   Settings,
   TrendingUp,
@@ -193,9 +194,9 @@ const MODULE_GUIDES: Record<string, GuideStep[]> = {
       color: 'bg-brand' 
     },
     { 
-      title: 'Proyecciones en el Calendario', 
-      description: 'Los eventos azules en el calendario son simulaciones — muestran cuándo se generarían las próximas OTs si el sistema funciona normalmente. No son órdenes reales hasta que el scheduler las crea. El horizonte de proyección se configura en Configuración → Motor PM (máximo 24 meses).', 
-      icon: <CalendarClock size={20} />, 
+      title: 'Proyecciones en el Kanban', 
+      description: 'Las tarjetas violáceas (PLAN) en la Agenda Kanban son simulaciones. Muestran cuándo se generarían las próximas OTs. Para mantenimientos basados en medidor, el sistema proyecta una fecha en el calendario analizando el histórico de consumo (tendencia de uso diario).', 
+      icon: <LayoutGrid size={20} />, 
       color: 'bg-indigo-600' 
     },
   ],
@@ -214,7 +215,7 @@ const MODULE_GUIDES: Record<string, GuideStep[]> = {
     },
     { 
       title: 'Horizonte de Proyección', 
-      description: 'Controla cuántos meses hacia el futuro se calculan las proyecciones en el calendario y en la pestaña de Proyección de cada activo. Un horizonte de 3-6 meses es útil para operación diaria. 12-24 meses sirve para planificación de presupuesto y recursos. Valores mayores pueden hacer más lento el renderizado del calendario.', 
+      description: 'Controla cuántos meses hacia el futuro se calculan las proyecciones en el Kanban y en la pestaña de Proyección de cada activo. Un horizonte de 3-6 meses es útil para operación diaria. 12-24 meses sirve para planificación de presupuesto y recursos.', 
       icon: <CalendarClock size={20} />, 
       color: 'bg-brand' 
     },

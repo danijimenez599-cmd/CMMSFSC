@@ -25,7 +25,7 @@ import { Badge, Button, cn, Modal, Select, FormField } from '../../../shared/com
 import { formatDate, generateId } from '../../../shared/utils/utils';
 import { calcNextDueDate, computePlanStatus } from '../../pm/store/pmEngine';
 import { calculateProjections } from '../../pm/utils/projections';
-import { format, isValid } from 'date-fns';
+import { format, formatDistanceToNow, isValid, isFuture } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 const safeLocale = es || undefined;
@@ -33,6 +33,23 @@ const safeLocale = es || undefined;
 // --- COMPONENTE: TARJETA DE PROYECCIÓN PREMIUM ---
 const ProjectionCard = ({ proj }: { proj: any }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+
+  const hasDate    = proj.date instanceof Date && isValid(proj.date);
+  const hasMeter   = proj.meterValue != null;
+  const cycleLabel = `C${proj.cycleIndex}`;
+  const activeMultipliers: number[] = proj.activeMultipliers?.length
+    ? proj.activeMultipliers
+    : [proj.maxMultiplier ?? 1];
+
+  const absoluteValue = hasDate
+    ? format(proj.date, "dd MMM yyyy", { locale: safeLocale }).toUpperCase()
+    : hasMeter
+      ? `${Number(proj.meterValue).toLocaleString()} ${proj.meterUnit ?? 'unidades'}`
+      : '—';
+
+  const relativeValue = hasDate && isFuture(proj.date)
+    ? formatDistanceToNow(proj.date, { locale: safeLocale, addSuffix: true })
+    : null;
 
   return (
     <div className="relative pl-10 pb-8 last:pb-0 group">
@@ -48,24 +65,27 @@ const ProjectionCard = ({ proj }: { proj: any }) => {
         "flex flex-col rounded-[24px] border transition-all duration-300 overflow-hidden",
         proj.isMajor ? "bg-white border-brand/20 shadow-xl shadow-brand/5" : "bg-white border-slate-100 shadow-sm"
       )}>
-        <button onClick={() => setIsExpanded(!isExpanded)} className="flex items-center justify-between p-5 text-left w-full group/btn">
-          <div className="space-y-1">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
-              {proj.date instanceof Date && isValid(proj.date)
-                ? format(proj.date, 'EEEE, dd MMMM', { locale: safeLocale })
-                : proj.meterValue != null
-                  ? `A las ${Number(proj.meterValue).toLocaleString()} unidades`
-                  : 'Pendiente'}
-            </p>
-            <div className="flex items-center gap-3">
-              <h4 className="text-sm font-black text-slate-900 tracking-tight uppercase">{proj.label}</h4>
-              <Badge variant={proj.isMajor ? 'brand' : 'neutral'} className="text-[8px] px-2 py-0.5 font-black uppercase">
-                {proj.isMajor ? 'MAYOR' : 'RUTINA'}
-              </Badge>
+        <button onClick={() => setIsExpanded(!isExpanded)} className="flex items-center justify-between p-5 text-left w-full">
+          <div className="space-y-2 flex-1 min-w-0">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="text-[9px] font-black text-slate-400 bg-slate-100 px-2 py-0.5 rounded-lg tracking-widest uppercase">{cycleLabel}</span>
+              {activeMultipliers.map((m) => (
+                <span key={m} className={cn(
+                  "text-[9px] font-black px-2 py-0.5 rounded-lg tracking-widest uppercase",
+                  m > 1 ? "bg-brand/10 text-brand" : "bg-slate-100 text-slate-500"
+                )}>X{m}</span>
+              ))}
+              {proj.isMajor && (
+                <Badge variant="brand" className="text-[8px] px-2 py-0.5 font-black uppercase bg-brand text-white border-none">MAYOR</Badge>
+              )}
             </div>
+            <p className="text-sm font-black text-slate-900 tracking-tight font-mono">{absoluteValue}</p>
+            {relativeValue && (
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{relativeValue}</p>
+            )}
           </div>
-          <div className={cn("w-10 h-10 rounded-2xl flex items-center justify-center transition-all", isExpanded ? "bg-slate-900 text-white rotate-180" : "bg-slate-50 text-slate-400")}>
-            <ChevronDown size={18} />
+          <div className={cn("w-9 h-9 rounded-2xl flex items-center justify-center transition-all shrink-0 ml-3", isExpanded ? "bg-slate-900 text-white rotate-180" : "bg-slate-50 text-slate-400")}>
+            <ChevronDown size={16} />
           </div>
         </button>
 
@@ -96,7 +116,7 @@ export default function AssetSidePanel() {
     selectedAssetId, setModule = () => {}, selectWo = () => {}, workOrders = [], pmPlans = [],
     assetPlans = [], measurementPoints = [], measurementConfigs = [], pmTasks = [],
     saveAssetPlan = () => {}, unlinkAssetPlan, showToast = () => {},
-    projectionMonths
+    projectionMonths, meterProjectionCycles = 8,
   } = store;
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [selectedPlanId, setSelectedPlanId] = useState('');
@@ -274,7 +294,7 @@ export default function AssetSidePanel() {
                   const basePlan = pmPlans.find((p: any) => p.id === ap.pmPlanId);
                   if (!basePlan) return null;
                   const planWithTasks = { ...basePlan, tasks: (Array.isArray(pmTasks) ? pmTasks : []).filter((t: any) => t.pmPlanId === basePlan.id) };
-                  const projections = calculateProjections(ap, planWithTasks, projectionMonths || 12);
+                  const projections = calculateProjections(ap, planWithTasks, projectionMonths || 12, meterProjectionCycles);
                   return (
                     <div key={ap.id} className="pt-4">
                       <div className="flex items-center justify-between mb-8 px-2"><h5 className="text-[11px] font-black text-slate-900 uppercase tracking-widest border-l-4 border-brand pl-3">{basePlan.name}</h5><Badge variant="neutral" className="text-[9px] font-black">{(projections || []).length} HITOS</Badge></div>
