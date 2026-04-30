@@ -137,42 +137,16 @@ export const createInventorySlice: StateCreator<InventorySlice, [], []> = (set, 
   adjustStock: async (itemId, adjust) => {
     const item = get().inventoryItems.find(i => i.id === itemId);
     if (!item) return;
-
-    const balanceBefore = item.stockCurrent;
-    let newBalance: number;
-
-    switch (adjust.type) {
-      case 'in':
-        newBalance = balanceBefore + adjust.quantity; break;
-      case 'out':
-        newBalance = Math.max(0, balanceBefore - adjust.quantity); break;
-      case 'return':
-        newBalance = balanceBefore + adjust.quantity; break;
-      case 'adjustment':
-        newBalance = adjust.quantity; break;
-      default:
-        newBalance = balanceBefore;
-    }
-
-    // Update stock
-    const { error: stockError } = await supabase
-      .from('inventory_items')
-      .update({ stock_current: newBalance, updated_at: new Date().toISOString() })
-      .eq('id', itemId);
-    if (stockError) throw stockError;
-
-    // Log movement
-    await supabase.from('stock_movements').insert({
-      id: generateId(),
-      inventory_item_id: itemId,
-      type: adjust.type,
-      quantity: adjust.quantity,
-      balance_before: balanceBefore,
-      balance_after: newBalance,
-      work_order_id: adjust.workOrderId || null,
-      reason: adjust.reason || null,
-      performed_by: null,
+    const { error } = await supabase.rpc('fn_adjust_stock_tx', {
+      p_item_id: itemId,
+      p_type: adjust.type,
+      p_quantity: adjust.quantity,
+      p_work_order_id: adjust.workOrderId || null,
+      p_reason: adjust.reason || null,
+      p_performed_by: null,
+      p_movement_id: generateId(),
     });
+    if (error) throw error;
 
     await get().fetchInventory();
   },

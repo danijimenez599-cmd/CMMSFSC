@@ -2,14 +2,14 @@ import { useState } from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { CalendarClock, Filter } from 'lucide-react';
-import { useKpiData, Period } from './hooks/useKpiData';
+import { useKpiContext } from './KpiContext';
+import { useKpiTargets } from './config/kpiTargets';
 import { SectionHeader, StatePill } from './components/ChartComponents';
 import { cn } from '../../shared/utils/utils';
 
-interface Props { period: Period; custom?: { from: string; to: string }; filterPlant?: string; filterArea?: string; }
-
-export default function PmCompliance({ period, custom, filterPlant, filterArea }: Props) {
-  const { pmComplianceByPlan, overview } = useKpiData(period, custom, filterPlant, filterArea);
+export default function PmCompliance() {
+  const { pmComplianceByPlan, overview } = useKpiContext();
+  const [targets] = useKpiTargets();
   const [stateFilter, setStateFilter] = useState<'all' | 'ok' | 'soon' | 'overdue'>('all');
 
   const filtered = pmComplianceByPlan.filter((p: any) =>
@@ -33,7 +33,7 @@ export default function PmCompliance({ period, custom, filterPlant, filterArea }
             <circle cx="50" cy="50" r="40" fill="none" stroke="#1e293b" strokeWidth="12" />
             <circle
               cx="50" cy="50" r="40" fill="none"
-              stroke={overview.pmCompliance >= 80 ? '#10b981' : overview.pmCompliance >= 60 ? '#f59e0b' : '#ef4444'}
+              stroke={overview.pmCompliance >= targets.pmCompliance ? '#10b981' : overview.pmCompliance >= targets.pmCompliance * 0.75 ? '#f59e0b' : '#ef4444'}
               strokeWidth="12" strokeLinecap="round"
               strokeDasharray={`${2 * Math.PI * 40}`}
               strokeDashoffset={`${2 * Math.PI * 40 * (1 - overview.pmCompliance / 100)}`}
@@ -42,7 +42,7 @@ export default function PmCompliance({ period, custom, filterPlant, filterArea }
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             <span className="text-4xl font-black text-white">{overview.pmCompliance}<span className="text-xl">%</span></span>
-            <span className="text-[9px] font-bold text-white/50 uppercase tracking-widest mt-0.5">Cumplimiento</span>
+            <span className="text-[9px] font-bold text-white/50 uppercase tracking-widest mt-0.5">Meta {targets.pmCompliance}%</span>
           </div>
         </div>
 

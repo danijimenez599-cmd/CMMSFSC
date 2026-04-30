@@ -1,13 +1,10 @@
 import { Package, AlertTriangle } from 'lucide-react';
-import { useKpiData, Period } from './hooks/useKpiData';
-import { SectionHeader, KpiCard, HorizontalBar } from './components/ChartComponents';
+import { useKpiContext } from './KpiContext';
+import { SectionHeader, KpiCard } from './components/ChartComponents';
 
-interface Props { period: Period; custom?: { from: string; to: string }; filterPlant?: string; filterArea?: string; }
-
-export default function InventoryKpis({ period, custom, filterPlant, filterArea }: Props) {
-  const { inventoryKpis } = useKpiData(period, custom, filterPlant, filterArea);
+export default function InventoryKpis() {
+  const { inventoryKpis } = useKpiContext();
   const { total, belowMin, totalValue, belowMinItems } = inventoryKpis;
-  const maxStock = Math.max(...belowMinItems.map((i: any) => i.stockMin), 1);
 
   return (
     <div className="space-y-8">

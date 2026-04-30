@@ -308,9 +308,6 @@ export default function WoDetailPanel() {
             ) : (
               <div className="bg-slate-100 rounded-lg px-4 py-2 flex items-center justify-between">
                 <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Orden Cerrada</span>
-                {(currentUser?.role === 'admin' || currentUser?.role === 'supervisor') && (
-                  <button onClick={() => handleStatusChange('open')} className="text-[10px] font-bold text-brand hover:underline">Re-abrir Orden</button>
-                )}
               </div>
             )}
           </div>

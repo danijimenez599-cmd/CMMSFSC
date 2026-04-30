@@ -22,7 +22,23 @@ Existe el trigger de PostgreSQL `trg_prevent_closed_wo_updates` que bloquea fís
 ### REGLA 4: Modo Auditoría es Estrictamente de Solo Lectura
 Cuando se activa el Modo Auditoría (desde el árbol de activos), los paneles que se renderizan (`AuditListPanel`, `AuditDetailPanel`) NO DEBEN exponer botones de guardado, cambio de estado, o comentarios. Son ventanas al pasado.
 
+### REGLA 5: Operaciones Multi-Tabla van por RPC Transaccional
+Cuando una accion toca mas de una tabla, NO la implementes como una cadena de llamadas Supabase desde el cliente. Usa una funcion SQL/RPC versionada en `schema.sql` y una migracion idempotente.
+
+Casos actuales obligatorios:
+- Consumo de repuestos en OT: `fn_add_part_usage_tx`.
+- Devolucion de consumo en OT: `fn_remove_part_usage_tx`.
+- Ajuste manual de stock: `fn_adjust_stock_tx`.
+- Cierre de OT PM con avance de `asset_plans`: `fn_complete_pm_wo_tx`.
+
+**Razon:** si falla una llamada intermedia desde el cliente, quedan datos inconsistentes (stock sin asiento, OT cerrada sin ciclo avanzado, etc.).
+
+### REGLA 6: Migraciones Idempotentes Junto al Schema
+Toda columna, tabla o RPC nueva debe existir en `schema.sql` y tambien en un archivo `migration_*.sql` seguro para re-ejecutar (`IF NOT EXISTS`, `CREATE OR REPLACE FUNCTION`, `ON CONFLICT`, etc.).
+
 ## 2. ARQUITECTURA GENERAL Y STATE MANAGEMENT
+
+Nota para agentes: las invariantes transaccionales viven en PostgreSQL mediante RPCs SQL; el frontend solo orquesta la llamada y refresca Zustand.
 
 - **Zustand:** Todo el state global se maneja en `src/store/index.ts`, combinando varios slices (uiSlice, authSlice, assetSlice, woSlice, inventorySlice, pmSlice, alertSlice).
 - **No hay React Query ni SWR:** Sincronizamos manualmente con Supabase en las funciones asíncronas de Zustand.

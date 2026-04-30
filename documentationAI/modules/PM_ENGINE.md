@@ -239,6 +239,12 @@ supersessions before inserting.
 
 ## 9. recalcNextDue FLOW
 
+Implementation status:
+- `recalcNextDue` still exists in `src/modules/pm/store/slice.ts` as a store method/helper.
+- For normal PM closure, `src/modules/workorders/store/slice.ts::completeWo` computes the next thresholds before closure and persists them through the RPC `fn_complete_pm_wo_tx`.
+- Do NOT reintroduce the old pattern: close `work_orders` first, then call `recalcNextDue` in a `try/catch`. That can leave a completed WO with a stale `asset_plans` row.
+- The atomic closure RPC lives in `schema.sql` and `migration_complete_pm_wo_tx.sql`.
+
 Called after a WO is closed. Updates AssetPlan thresholds and triggers the next WO.
 
 Signature: `recalcNextDue(assetPlanId, completedAt, meterValue?, completedCycleIndex?)`
@@ -271,11 +277,15 @@ Steps:
   7. Calendar auto-trigger: if next_due_date was updated, run scheduler with
      `horizonDays = intervalDays + leadDays`. Only if no open WO already exists.
 
-IMPORTANT — call order in completeWo:
-  `fetchWorkOrders()` must be called BEFORE `recalcNextDue`. The hasOpenWo guard in
-  steps 6 and 7 reads `get().workOrders` from state. If the WO that was just completed
-  is still in state as 'open', hasOpenWo returns true and the auto-trigger is blocked.
-  Refreshing first ensures the completed WO is seen as terminal.
+CURRENT IMPLEMENTATION NOTE (supersedes the legacy note below):
+  `completeWo` should call `fn_complete_pm_wo_tx` for PM closures. The RPC closes the
+  WO and updates `asset_plans` in one transaction. After that, refresh
+  `fetchWorkOrders()` and `fetchPmData()`, then run any scheduler catch-up.
+
+IMPORTANT — legacy warning:
+  Older code paths required `fetchWorkOrders()` before `recalcNextDue` because the
+  open-WO guard read stale state. Current PM closure avoids that partial-write risk by
+  using `fn_complete_pm_wo_tx` first, then refreshing state before scheduler catch-up.
 
 ---
 
@@ -303,6 +313,8 @@ Both triggers only fire if no open WO already exists for the same AssetPlan.
 | src/modules/pm/types.ts                     | PmPlan, AssetPlan, MeasurementPoint types    |
 | src/modules/workorders/types.ts             | WorkOrder, CompletePayload types             |
 | schema.sql                                  | DB schema including asset_plans, work_orders |
+| migration_complete_pm_wo_tx.sql            | Idempotent RPC migration for atomic PM closure |
+| migration_completed_meter_value.sql        | Adds `work_orders.completed_meter_value` |
 
 Key exported functions from pmEngine.ts:
   - `runScheduler(input, horizonDays)` → SchedulerResult

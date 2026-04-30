@@ -20,6 +20,18 @@ El módulo de inventario gestiona los repuestos (Stock), costos unitarios, nivel
    - Tipos de movimiento: `in` (compra/ingreso), `out` (salida/consumo), `return` (devolución), `adjustment` (conteo físico/corrección).
    - El consumo de piezas dentro de una OT (`addPartUsage` en `workorders/slice.ts`) invoca internamente a `adjustStock` con tipo `out`.
 
+3. **RPCs Obligatorias para Stock**
+   - `adjustStock` debe llamar a `fn_adjust_stock_tx`; no debe actualizar `inventory_items` y luego insertar `stock_movements` desde el cliente.
+   - `fn_adjust_stock_tx` bloquea sobreconsumo: si `type='out'` y no hay stock suficiente, lanza error. No uses `Math.max(0, stock - qty)` porque oculta faltantes.
+   - `addPartUsage` en Work Orders debe usar `fn_add_part_usage_tx`.
+   - `removePartUsage` en Work Orders debe usar `fn_remove_part_usage_tx`.
+   - `fn_add_part_usage_tx` y `fn_remove_part_usage_tx` modifican `part_usages`, `inventory_items.stock_current` y `stock_movements` en una sola transaccion.
+
+4. **Migracion de Contratos de Inventario**
+   - Las RPCs viven en `schema.sql`.
+   - La migracion idempotente asociada es `migration_inventory_transactions.sql`.
+   - Si cambias la firma de una RPC, actualiza `schema.sql`, la migracion y los sitios que llaman `supabase.rpc(...)`.
+
 ### Componentes Principales
 - `InventoryTable.tsx`: Tabla principal con buscador y KPIs visuales (advertencia si el stock actual < stock min).
 - `InventoryItemForm.tsx`: Modal para crear/editar ítems del catálogo.

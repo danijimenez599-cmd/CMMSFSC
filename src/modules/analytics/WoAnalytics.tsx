@@ -1,31 +1,16 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Wrench, Users, AlertTriangle, Clock } from 'lucide-react';
-import { useKpiData, Period } from './hooks/useKpiData';
+import { Wrench, Users, AlertTriangle, Clock, Hourglass, CalendarCheck } from 'lucide-react';
+import { useKpiContext } from './KpiContext';
 import {
-  SectionHeader, StackedBarChart, DonutChart,
-  HorizontalBar, ChartTooltip,
+  SectionHeader, StackedBarChart, HorizontalBar, KpiCard,
 } from './components/ChartComponents';
-import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer, Cell,
-} from 'recharts';
+import { WO_TYPE_COLORS, WO_TYPE_LABELS } from './constants';
 
-interface Props { period: Period; custom?: { from: string; to: string }; filterPlant?: string; filterArea?: string; }
-
-const WO_TYPE_COLORS: Record<string, string> = {
-  preventive: '#3b82f6', corrective: '#f59e0b',
-  predictive: '#a855f7', inspection: '#10b981',
-};
-const WO_TYPE_LABELS: Record<string, string> = {
-  preventive: 'Preventiva', corrective: 'Correctiva',
-  predictive: 'Predictiva', inspection: 'Inspección',
-};
-
-export default function WoAnalytics({ period, custom, filterPlant, filterArea }: Props) {
-  const kpi = useKpiData(period, custom, filterPlant, filterArea);
-  const { woByWeek, topAssetsByWo, techPerformance, overdueWos, periodWos } = kpi;
+export default function WoAnalytics() {
+  const kpi = useKpiContext();
+  const { woByWeek, topAssetsByWo, techPerformance, overdueWos, periodWos, overview, backlog } = kpi;
 
   const [drillType, setDrillType] = useState<string | null>(null);
 
@@ -39,6 +24,44 @@ export default function WoAnalytics({ period, custom, filterPlant, filterArea }:
   return (
     <div className="space-y-10">
 
+      {/* Backlog summary */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <KpiCard
+          label="Backlog total"
+          value={backlog.count}
+          sub={`${backlog.totalHours}h estimadas`}
+          icon={<Hourglass size={20} />}
+          color="bg-slate-700"
+          accent="text-slate-900"
+        />
+        <KpiCard
+          label="OTs Vencidas"
+          value={backlog.overdueCount}
+          sub="fuera de SLA"
+          icon={<AlertTriangle size={20} />}
+          color={backlog.overdueCount > 0 ? 'bg-red-500' : 'bg-emerald-500'}
+          accent={backlog.overdueCount > 0 ? 'text-red-600' : 'text-emerald-600'}
+        />
+        <KpiCard
+          label="Edad promedio"
+          value={`${backlog.avgAge}d`}
+          sub={`más antigua: ${backlog.oldest}d`}
+          icon={<Clock size={20} />}
+          color="bg-amber-500"
+          accent="text-amber-600"
+        />
+        <KpiCard
+          label="Schedule Compliance"
+          value={`${overview.scheduleCompliance}%`}
+          sub="ejecutadas en fecha planeada"
+          icon={<CalendarCheck size={20} />}
+          color={overview.scheduleCompliance >= 80 ? 'bg-emerald-500' : 'bg-amber-500'}
+          accent={overview.scheduleCompliance >= 80 ? 'text-emerald-600' : 'text-amber-600'}
+          trend={overview.trends.scheduleCompliance}
+          trendDirection="higher"
+        />
+      </div>
+
       {/* Stacked Bars by week */}
       <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm">
         <SectionHeader
@@ -51,10 +74,10 @@ export default function WoAnalytics({ period, custom, filterPlant, filterArea }:
             data={woByWeek}
             xKey="label"
             bars={[
-              { key: 'preventive', name: 'Preventiva', color: '#3b82f6' },
-              { key: 'corrective',  name: 'Correctiva',  color: '#f59e0b' },
-              { key: 'predictive', name: 'Predictiva',  color: '#a855f7' },
-              { key: 'inspection', name: 'Inspección',  color: '#10b981' },
+              { key: 'preventive', name: 'Preventiva', color: WO_TYPE_COLORS.preventive },
+              { key: 'corrective', name: 'Correctiva', color: WO_TYPE_COLORS.corrective },
+              { key: 'predictive', name: 'Predictiva', color: WO_TYPE_COLORS.predictive },
+              { key: 'inspection', name: 'Inspección', color: WO_TYPE_COLORS.inspection },
             ]}
             onBarClick={(d) => {
               if (d?.activePayload?.[0]) {
@@ -65,7 +88,6 @@ export default function WoAnalytics({ period, custom, filterPlant, filterArea }:
           />
         ) : <EmptyState />}
 
-        {/* Drill-down list */}
         {drillType && drillWos.length > 0 && (
           <div className="mt-4 border-t border-slate-100 pt-4">
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">
@@ -92,7 +114,6 @@ export default function WoAnalytics({ period, custom, filterPlant, filterArea }:
 
       {/* Top Assets + Technicians */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Top assets */}
         <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm">
           <SectionHeader icon={<AlertTriangle size={16} />} title="Activos con más OTs" subtitle="Pareto de carga de trabajo" />
           {topAssetsByWo.length > 0 ? (
@@ -104,14 +125,13 @@ export default function WoAnalytics({ period, custom, filterPlant, filterArea }:
                   value={a.count}
                   max={maxAsset}
                   color="#3b82f6"
-                  sub={a.cost > 0 ? `$${a.cost.toLocaleString()}` : undefined}
+                  sub={a.cost > 0 ? `$${Math.round(a.cost).toLocaleString()}` : undefined}
                 />
               ))}
             </div>
           ) : <EmptyState />}
         </div>
 
-        {/* Technician performance */}
         <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm">
           <SectionHeader icon={<Users size={16} />} title="Rendimiento por Técnico" subtitle="Asignadas vs completadas" />
           {techPerformance.length > 0 ? (
@@ -183,6 +203,11 @@ export default function WoAnalytics({ period, custom, filterPlant, filterArea }:
                 })}
               </tbody>
             </table>
+            {overdueWos.length > 15 && (
+              <p className="text-[10px] font-bold text-slate-400 text-center mt-3">
+                Mostrando 15 de {overdueWos.length} OTs vencidas
+              </p>
+            )}
           </div>
         ) : (
           <div className="py-10 text-center">

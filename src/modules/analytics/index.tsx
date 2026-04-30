@@ -2,12 +2,14 @@ import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   BarChart3, FileBarChart2, LayoutDashboard, Wrench,
-  CalendarClock, DollarSign, Package, Filter, ChevronDown,
+  CalendarClock, DollarSign, Package, Filter, Target as TargetIcon,
 } from 'lucide-react';
 import { useStore } from '../../store';
 import { cn } from '../../shared/utils/utils';
 import { Period } from './hooks/useKpiData';
 import { PeriodSelector } from './components/ChartComponents';
+import { KpiProvider } from './KpiContext';
+import { TargetsModal } from './components/TargetsModal';
 import KpiOverview from './KpiOverview';
 import WoAnalytics from './WoAnalytics';
 import PmCompliance from './PmCompliance';
@@ -37,6 +39,7 @@ export default function AnalyticsModule() {
   const [filterPlant, setFilterPlant] = useState('');
   const [filterArea,  setFilterArea]  = useState('');
   const [showFilters, setShowFilters] = useState(false);
+  const [showTargets, setShowTargets] = useState(false);
 
   const plants = useMemo(
     () => assets.filter((a: any) => a.assetType === 'plant'),
@@ -70,24 +73,32 @@ export default function AnalyticsModule() {
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            {/* Filter toggle */}
             {mainTab === 'kpis' && (
-              <button
-                onClick={() => setShowFilters(v => !v)}
-                className={cn(
-                  'flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border',
-                  showFilters || hasFilters
-                    ? 'bg-slate-900 text-white border-slate-900'
-                    : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
-                )}
-              >
-                <Filter size={12} />
-                <span className="hidden sm:inline">Filtrar</span>
-                {hasFilters && <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />}
-              </button>
+              <>
+                <button
+                  onClick={() => setShowTargets(true)}
+                  title="Configurar metas de KPI"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border bg-white text-slate-500 border-slate-200 hover:bg-slate-50"
+                >
+                  <TargetIcon size={12} />
+                  <span className="hidden sm:inline">Metas</span>
+                </button>
+                <button
+                  onClick={() => setShowFilters(v => !v)}
+                  className={cn(
+                    'flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border',
+                    showFilters || hasFilters
+                      ? 'bg-slate-900 text-white border-slate-900'
+                      : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
+                  )}
+                >
+                  <Filter size={12} />
+                  <span className="hidden sm:inline">Filtrar</span>
+                  {hasFilters && <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />}
+                </button>
+              </>
             )}
 
-            {/* Main tabs */}
             <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-xl">
               {[
                 { id: 'kpis'    as MainTab, label: 'KPIs',     icon: <BarChart3 size={12} /> },
@@ -109,7 +120,6 @@ export default function AnalyticsModule() {
           </div>
         </div>
 
-        {/* Row 2: KPI sub-nav (mobile: scrollable) */}
         {mainTab === 'kpis' && (
           <div className="flex items-center gap-1 overflow-x-auto no-scrollbar -mx-1 px-1">
             {KPI_VIEWS.map(v => (
@@ -129,7 +139,6 @@ export default function AnalyticsModule() {
           </div>
         )}
 
-        {/* Row 3: Filters panel (animated) */}
         <AnimatePresence>
           {mainTab === 'kpis' && showFilters && (
             <motion.div
@@ -139,7 +148,6 @@ export default function AnalyticsModule() {
               className="overflow-hidden"
             >
               <div className="pt-3 border-t border-slate-100 flex flex-col sm:flex-row gap-3 sm:items-center flex-wrap">
-                {/* Period */}
                 <PeriodSelector
                   value={period}
                   onChange={setPeriod}
@@ -147,7 +155,6 @@ export default function AnalyticsModule() {
                   onCustomChange={setCustom}
                 />
 
-                {/* Plant */}
                 {plants.length > 0 && (
                   <select
                     value={filterPlant}
@@ -159,7 +166,6 @@ export default function AnalyticsModule() {
                   </select>
                 )}
 
-                {/* Area */}
                 {plants.length > 0 && (
                   <select
                     value={filterArea}
@@ -175,7 +181,6 @@ export default function AnalyticsModule() {
                   </select>
                 )}
 
-                {/* Clear */}
                 {hasFilters && (
                   <button
                     onClick={() => { setFilterPlant(''); setFilterArea(''); }}
@@ -189,7 +194,6 @@ export default function AnalyticsModule() {
           )}
         </AnimatePresence>
 
-        {/* Period row when filters hidden */}
         {mainTab === 'kpis' && !showFilters && (
           <div className="flex items-center">
             <PeriodSelector
@@ -212,15 +216,21 @@ export default function AnalyticsModule() {
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.18, ease: 'easeOut' }}
           >
-            {mainTab === 'reports'                          && <ReportsHub />}
-            {mainTab === 'kpis' && kpiView === 'overview'   && <KpiOverview   period={period} custom={custom} filterPlant={filterPlant} filterArea={filterArea} onNavigate={(v) => setKpiView(v as KpiView)} />}
-            {mainTab === 'kpis' && kpiView === 'workorders'  && <WoAnalytics   period={period} custom={custom} filterPlant={filterPlant} filterArea={filterArea} />}
-            {mainTab === 'kpis' && kpiView === 'pm'          && <PmCompliance  period={period} custom={custom} filterPlant={filterPlant} filterArea={filterArea} />}
-            {mainTab === 'kpis' && kpiView === 'costs'       && <CostAnalysis  period={period} custom={custom} filterPlant={filterPlant} filterArea={filterArea} />}
-            {mainTab === 'kpis' && kpiView === 'inventory'   && <InventoryKpis period={period} custom={custom} filterPlant={filterPlant} filterArea={filterArea} />}
+            {mainTab === 'reports' && <ReportsHub />}
+            {mainTab === 'kpis' && (
+              <KpiProvider period={period} custom={custom} filterPlant={filterPlant} filterArea={filterArea}>
+                {kpiView === 'overview'   && <KpiOverview onNavigate={(v) => setKpiView(v as KpiView)} />}
+                {kpiView === 'workorders' && <WoAnalytics />}
+                {kpiView === 'pm'         && <PmCompliance />}
+                {kpiView === 'costs'      && <CostAnalysis />}
+                {kpiView === 'inventory'  && <InventoryKpis />}
+              </KpiProvider>
+            )}
           </motion.div>
         </AnimatePresence>
       </div>
+
+      <TargetsModal open={showTargets} onClose={() => setShowTargets(false)} />
     </div>
   );
 }

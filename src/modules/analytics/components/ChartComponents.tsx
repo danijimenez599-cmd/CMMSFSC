@@ -93,11 +93,24 @@ interface KpiCardProps {
   icon: React.ReactNode;
   color?: string;
   accent?: string;
-  trend?: number; // percentage vs previous period
+  /** % cambio vs período anterior. null = no hay base comparable. */
+  trend?: number | null;
+  /** 'higher' = más es mejor (default); 'lower' = menos es mejor (costos, MTTR, vencidas). */
+  trendDirection?: 'higher' | 'lower';
+  /** Etiqueta opcional al pie ("Meta: 80%") */
+  targetHint?: string;
+  /** Indicador de cumplimiento de meta. */
+  targetMet?: boolean | null;
   onClick?: () => void;
 }
 
-export function KpiCard({ label, value, sub, icon, color = 'bg-blue-500', accent = 'text-blue-600', trend, onClick }: KpiCardProps) {
+export function KpiCard({
+  label, value, sub, icon, color = 'bg-blue-500', accent = 'text-blue-600',
+  trend, trendDirection = 'higher', targetHint, targetMet, onClick,
+}: KpiCardProps) {
+  const showTrend = trend !== undefined && trend !== null;
+  const isGood = showTrend && (trendDirection === 'higher' ? (trend as number) >= 0 : (trend as number) <= 0);
+
   return (
     <motion.button
       whileHover={{ y: -3, scale: 1.01 }}
@@ -109,17 +122,25 @@ export function KpiCard({ label, value, sub, icon, color = 'bg-blue-500', accent
         <div className={cn('w-11 h-11 rounded-2xl flex items-center justify-center text-white shadow-sm', color)}>
           {icon}
         </div>
-        {trend !== undefined && (
+        {showTrend && (
           <span className={cn('text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest',
-            trend >= 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-500'
+            isGood ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-500'
           )}>
-            {trend >= 0 ? '+' : ''}{trend}%
+            {(trend as number) >= 0 ? '+' : ''}{trend}%
           </span>
         )}
       </div>
       <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">{label}</p>
       <p className={cn('text-4xl font-black tracking-tighter', accent)}>{value}</p>
       {sub && <p className="text-[10px] text-slate-400 font-bold mt-1">{sub}</p>}
+      {targetHint && (
+        <div className="flex items-center gap-1.5 mt-2">
+          <span className={cn('w-1.5 h-1.5 rounded-full',
+            targetMet === true ? 'bg-emerald-500' : targetMet === false ? 'bg-red-500' : 'bg-slate-300'
+          )} />
+          <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{targetHint}</span>
+        </div>
+      )}
     </motion.button>
   );
 }
