@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { useStore } from './store';
 import { AppModule } from './shared/types';
-import { Button, ToastRack, Avatar, cn, Badge, NotificationDot, AlertBanner } from './shared/components';
+import { Button, ToastRack, Avatar, cn, Badge, NotificationDot, AlertBanner, VersaIcon, VersaLogo } from './shared/components';
 import AssetRegistryView from './modules/assets';
 import WorkOrdersView from './modules/workorders';
 import InventoryView from './modules/inventory';
@@ -20,10 +20,10 @@ import HelpView from './modules/help/HelpView';
 const MODULES: { id: AppModule; label: string; icon: React.ReactNode; shortLabel: string }[] = [
   { id: 'dashboard',   label: 'Dashboard',        shortLabel: 'Inicio',    icon: <LayoutDashboard size={18} /> },
   { id: 'assets',      label: 'Activos',           shortLabel: 'Activos',   icon: <Factory size={18} /> },
-  { id: 'workorders',  label: 'Órdenes de Trabajo',shortLabel: 'OTs',       icon: <Wrench size={18} /> },
-  { id: 'inventory',   label: 'Inventario',         shortLabel: 'Stock',     icon: <Package size={18} /> },
+  { id: 'workorders',  label: 'Órdenes',           shortLabel: 'OTs',       icon: <Wrench size={18} /> },
+  { id: 'inventory',   label: 'Stock',             shortLabel: 'Stock',     icon: <Package size={18} /> },
   { id: 'pm',          label: 'Planes PM',          shortLabel: 'Planes',    icon: <FileText size={18} /> },
-  { id: 'scheduler',   label: 'Programador',        shortLabel: 'Agenda',    icon: <CalendarClock size={18} /> },
+  { id: 'scheduler',   label: 'Agenda',             shortLabel: 'Agenda',    icon: <CalendarClock size={18} /> },
   { id: 'analytics',   label: 'Analytics',          shortLabel: 'KPIs',      icon: <BarChart3 size={18} /> },
   { id: 'settings',    label: 'Configuración',      shortLabel: 'Config',    icon: <Settings size={18} /> },
   { id: 'help',        label: 'Ayuda / Trainer',    shortLabel: 'Ayuda',     icon: <HelpCircle size={18} /> },
@@ -75,9 +75,8 @@ export default function App() {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-slate-50">
         <div className="flex flex-col items-center gap-6">
-          <div className="w-16 h-16 rounded-[14px] bg-white shadow-floating border border-slate-100 flex items-center justify-center relative">
-            <span className="font-display font-bold text-brand text-2xl relative z-10">A</span>
-            <div className="absolute inset-0 bg-brand/5 rounded-[14px] animate-pulse" />
+          <div className="w-16 h-16 rounded-2xl bg-white shadow-xl shadow-brand/10 flex items-center justify-center relative overflow-hidden border border-slate-100">
+            <VersaIcon size={32} />
           </div>
           <div className="flex flex-col items-center gap-2">
             <div className="w-8 h-1 bg-slate-200 rounded-full overflow-hidden relative">
@@ -96,15 +95,11 @@ export default function App() {
 
   if (!currentUser) {
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-[#f9fafb] p-4 font-sans">
+      <div className="flex h-screen w-full items-center justify-center bg-bg-app p-4 font-sans">
         <div className="w-full max-w-sm px-4 sm:px-0">
           {/* Logo */}
-          <div className="text-center mb-10">
-            <div className="w-20 h-20 rounded-[24px] bg-white flex items-center justify-center mx-auto mb-6 shadow-floating border border-slate-100 relative overflow-hidden group">
-              <span className="font-display font-black text-brand text-4xl relative z-10 tracking-tighter">A</span>
-            </div>
-            <h1 className="font-display text-3xl font-bold text-slate-900 tracking-tight italic">APEX <span className="text-brand not-italic">CMMS</span></h1>
-            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.25em] mt-2 opacity-50">Industrial Grade Maintenance</p>
+          <div className="text-center mb-10 flex flex-col items-center">
+            <VersaLogo width={240} height={56} className="text-slate-900 mb-2" />
           </div>
 
           {/* Login card */}
@@ -198,7 +193,7 @@ export default function App() {
   const activeAlerts = (meterAlerts || []).filter((a: any) => !a.dismissed);
 
   return (
-    <div className="flex h-[100dvh] bg-[#f9fafb] overflow-hidden font-sans">
+    <div className="flex h-[100dvh] bg-bg-app overflow-hidden font-sans">
       {/* ── MOBILE BACKDROP ── */}
       <AnimatePresence>
         {isMobileMenuOpen && (
@@ -226,19 +221,19 @@ export default function App() {
       >
         {/* Brand Logo */}
         <div className={cn(
-          'h-16 flex items-center shrink-0 border-b border-slate-100',
+          'h-20 flex items-center shrink-0 border-b border-slate-100',
           isExpanded ? 'px-6 gap-3' : 'justify-center px-0'
         )}>
           <div className="w-10 h-10 flex items-center justify-center shrink-0">
-            <span className="font-display font-black text-brand text-3xl tracking-tighter">A</span>
+            <VersaIcon size={24} />
           </div>
           {isExpanded && (
             <motion.span 
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
-              className="font-display font-bold text-slate-900 text-lg tracking-tight italic"
+              className="font-display font-bold text-slate-900 text-lg tracking-tight"
             >
-              APEX <span className="text-brand not-italic text-sm align-top ml-0.5 opacity-60">CMMS</span>
+              Versa<span className="text-brand">Maint</span>
             </motion.span>
           )}
         </div>
@@ -397,7 +392,7 @@ export default function App() {
                   initial={{ opacity: 0, y: 10, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                  className="absolute top-full right-0 mt-3 w-80 bg-white border border-slate-200 rounded-[14px] shadow-floating z-50 overflow-hidden"
+                  className="absolute top-full right-0 mt-3 w-80 bg-white border border-slate-200 rounded-2xl shadow-floating z-50 overflow-hidden"
                 >
                   <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                     <p className="text-[10px] font-bold text-slate-900 uppercase tracking-widest">Centro de Notificaciones</p>
@@ -481,4 +476,3 @@ export default function App() {
     </div>
   );
 }
-

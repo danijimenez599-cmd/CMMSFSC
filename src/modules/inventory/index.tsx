@@ -51,7 +51,7 @@ export default function InventoryView() {
             onClick={() => setMobileView('list')}
             className="flex items-center gap-1 text-sm font-bold text-brand"
           >
-            <ChevronLeft size={18} /> Inventario
+            <ChevronLeft size={18} /> Stock
           </button>
         </div>
         <InventoryDetailPanel

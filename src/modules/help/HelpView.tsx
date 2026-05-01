@@ -283,7 +283,7 @@ export default function HelpView() {
             className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-full mb-6"
           >
             <Sparkles size={14} className="text-brand" />
-            <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Centro de Entrenamiento APEX</span>
+            <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Centro de Entrenamiento VersaMaint</span>
           </motion.div>
           
           <motion.h1 
@@ -303,7 +303,7 @@ export default function HelpView() {
             className="text-slate-300 text-lg max-w-2xl mx-auto leading-relaxed"
           >
             Bienvenido al módulo de ayuda. Aquí aprenderá a utilizar todas las capacidades 
-            de APEX CMMS para maximizar la confiabilidad de su planta.
+            de VersaMaint CMMS para maximizar la confiabilidad de su planta.
           </motion.p>
         </div>
       </div>

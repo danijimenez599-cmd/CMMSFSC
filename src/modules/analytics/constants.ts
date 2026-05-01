@@ -1,8 +1,8 @@
 export const WO_TYPE_COLORS: Record<string, string> = {
-  preventive: '#3b82f6',
-  corrective: '#f59e0b',
-  predictive: '#a855f7',
-  inspection: '#10b981',
+  preventive: '#2563EB',
+  corrective: '#D97706',
+  predictive: '#7C3AED',
+  inspection: '#00C8B8',
 };
 
 export const WO_TYPE_LABELS: Record<string, string> = {
@@ -13,12 +13,12 @@ export const WO_TYPE_LABELS: Record<string, string> = {
 };
 
 export const WO_STATUS_COLORS: Record<string, string> = {
-  open: '#94a3b8',
-  assigned: '#3b82f6',
-  in_progress: '#f59e0b',
-  on_hold: '#8b5cf6',
-  completed: '#10b981',
-  cancelled: '#ef4444',
+  open: '#2563EB',
+  assigned: '#4F46E5',
+  in_progress: '#D97706',
+  on_hold: '#64748B',
+  completed: '#15803D',
+  cancelled: '#64748B',
 };
 
 export const WO_STATUS_LABELS: Record<string, string> = {

@@ -1,5 +1,5 @@
 /**
- * APEX CMMS — PM Scheduling Engine v2
+ * VersaMaint — PM Scheduling Engine v2
  *
  * Architecture:
  *  1. Trigger evaluation   — calendar and meter dimensions are independent; hybrid fires on either.

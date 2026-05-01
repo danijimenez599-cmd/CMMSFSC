@@ -143,7 +143,7 @@ export default function DashboardView() {
 
         {/* KPI Row 2: Performance */}
         <motion.div variants={item} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white rounded-[14px] border border-slate-100 shadow-card p-4 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-card p-4 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div>
               <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">PM Compliance</p>
               <div className="flex items-baseline gap-1">
@@ -171,7 +171,7 @@ export default function DashboardView() {
             variant="info"
           />
           <StatCard
-            title="Valor Inventario"
+            title="Valor en Stock"
             value={`$${metrics.inventory_value.toLocaleString('es-SV', { maximumFractionDigits: 0 })}`}
             description="Capital en repuestos"
             icon={<DollarSign />}
@@ -181,7 +181,7 @@ export default function DashboardView() {
         {/* Charts & Analytical Section */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Trend Chart */}
-          <motion.div variants={item} className="lg:col-span-8 bg-white rounded-[14px] border border-slate-100 shadow-card p-6">
+          <motion.div variants={item} className="lg:col-span-8 bg-white rounded-2xl border border-slate-100 shadow-card p-6">
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h3 className="font-display font-bold text-slate-900 tracking-tight text-base flex items-center gap-2">
@@ -207,7 +207,7 @@ export default function DashboardView() {
           </motion.div>
 
           {/* Distribution Pie */}
-          <motion.div variants={item} className="lg:col-span-4 bg-white rounded-[14px] border border-slate-100 shadow-card p-6 flex flex-col">
+          <motion.div variants={item} className="lg:col-span-4 bg-white rounded-2xl border border-slate-100 shadow-card p-6 flex flex-col">
             <h3 className="font-display font-bold text-slate-900 tracking-tight text-base mb-1 flex items-center gap-2">
               <Layers size={18} className="text-brand" />
               Distribución por Tipo
@@ -255,7 +255,7 @@ export default function DashboardView() {
         {/* Operational Intelligence Row */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Critical WOs Table */}
-          <motion.div variants={item} className="lg:col-span-7 bg-white rounded-[14px] border border-slate-100 shadow-card overflow-hidden">
+          <motion.div variants={item} className="lg:col-span-7 bg-white rounded-2xl border border-slate-100 shadow-card overflow-hidden">
             <div className="px-6 py-5 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
               <h3 className="font-display font-bold text-slate-900 tracking-tight text-base flex items-center gap-2">
                 <AlertTriangle size={18} className="text-brand" />
@@ -269,7 +269,7 @@ export default function DashboardView() {
           </motion.div>
 
           {/* Top Assets Activity */}
-          <motion.div variants={item} className="lg:col-span-5 bg-white rounded-[14px] border border-slate-100 shadow-card p-6 flex flex-col">
+          <motion.div variants={item} className="lg:col-span-5 bg-white rounded-2xl border border-slate-100 shadow-card p-6 flex flex-col">
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h3 className="font-display font-bold text-slate-900 tracking-tight text-base flex items-center gap-2">

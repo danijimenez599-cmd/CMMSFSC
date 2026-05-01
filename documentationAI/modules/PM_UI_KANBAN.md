@@ -6,6 +6,16 @@ Este documento describe la lógica de visualización y el comportamiento de la i
 
 ## 1. KANBAN Y PROYECCIONES DE FECHAS (UI)
 
+### Paleta Operativa VersaMaint
+- **PREV / Preventiva:** `#2563EB`. OTs planificadas: preventivo, predictivo e inspeccion.
+- **CORREC / Correctiva:** `#D97706`. OTs reactivas o creadas manualmente por falla.
+- **PLAN / Proyeccion:** `#7C3AED`. Proyecciones futuras no materializadas como OT.
+- **Completada:** `#15803D`. Trabajo cerrado exitosamente.
+- **Vencida:** `#DC2626`. Sobrescribe cualquier tipo cuando `date < hoy`.
+- **En espera / cancelada:** `#64748B`. Estado operativo pausado o terminal no exitoso.
+
+Las variantes de fondo y borde viven como tokens CSS en `src/index.css`: `--color-work-*-bg`, `--color-work-*-border`, `--color-status-*-bg` y `--color-status-*-border`.
+
 La vista principal de gestión operativa de Mantenimientos Preventivos es la **Agenda Kanban**. Esta interfaz unifica las Órdenes de Trabajo (OTs) activas y las proyecciones futuras (simulaciones de lo que el PM Engine generará) en un solo flujo cronológico interactivo.
 
 ### Filosofía Visual

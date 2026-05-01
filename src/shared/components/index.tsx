@@ -7,6 +7,7 @@ import { ToastPayload } from '../types';
 
 export { cn } from '../utils/generateId';
 export * from './MobilePanelTransition';
+export * from './Branding';
 
 // ─── BUTTON ──────────────────────────────────────────────────────────────────
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -64,20 +65,25 @@ interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
 export const Badge = ({ variant = 'neutral', dot, className, children, ...props }: BadgeProps) => {
   const colorMap: Record<string, string> = {
     brand:       'bg-brand/10 text-brand border-brand/20',
-    ocre:        'bg-amber-100 text-amber-800',
-    ok:          'bg-green-100 text-green-800',
-    success:     'bg-green-100 text-green-800',
-    warn:        'bg-amber-100 text-amber-800',
-    warning:     'bg-amber-100 text-amber-800',
-    danger:      'bg-red-100 text-red-800',
-    err:         'bg-red-100 text-red-800',
-    info:        'bg-blue-100 text-blue-800',
+    ocre:        'bg-accent/10 text-accent border-accent/20',
+    ok:          'bg-work-completed-bg text-work-completed border-work-completed-border',
+    success:     'bg-work-completed-bg text-work-completed border-work-completed-border',
+    warn:        'bg-work-corrective-bg text-work-corrective border-work-corrective-border',
+    warning:     'bg-work-corrective-bg text-work-corrective border-work-corrective-border',
+    danger:      'bg-work-overdue-bg text-work-overdue border-work-overdue-border',
+    err:         'bg-work-overdue-bg text-work-overdue border-work-overdue-border',
+    info:        'bg-work-preventive-bg text-work-preventive border-work-preventive-border',
     neutral:     'bg-slate-100 text-slate-700',
-    open:        'bg-blue-100 text-blue-800',
-    assigned:    'bg-purple-100 text-purple-800',
-    in_progress: 'bg-amber-100 text-amber-800',
-    on_hold:     'bg-slate-100 text-slate-600',
-    completed:   'bg-green-100 text-green-800',
+    preventive:  'bg-work-preventive-bg text-work-preventive border-work-preventive-border',
+    corrective:  'bg-work-corrective-bg text-work-corrective border-work-corrective-border',
+    projection:  'bg-work-projection-bg text-work-projection border-work-projection-border',
+    overdue:     'bg-work-overdue-bg text-work-overdue border-work-overdue-border',
+    open:        'bg-status-open-bg text-status-open border-status-open-border',
+    assigned:    'bg-status-assigned-bg text-status-assigned border-status-assigned-border',
+    in_progress: 'bg-status-progress-bg text-status-progress border-status-progress-border',
+    on_hold:     'bg-status-hold-bg text-status-hold border-status-hold-border',
+    completed:   'bg-status-completed-bg text-status-completed border-status-completed-border',
+    cancelled:   'bg-status-cancelled-bg text-status-cancelled border-status-cancelled-border',
     default:     'bg-slate-100 text-slate-700',
   };
 
@@ -144,7 +150,7 @@ export const Modal = ({ isOpen, onClose, title, children, footer, size = 'md' }:
             transition={{ duration: 0.15, ease: "easeOut" }}
             className={cn(
               'bg-white w-full flex flex-col relative z-10',
-              'rounded-[14px] shadow-floating border border-slate-100',
+              'rounded-2xl shadow-floating border border-slate-100',
               'max-h-[90dvh]',
               sizeMap[size]
             )}
@@ -289,17 +295,17 @@ export const StatCard = ({
 }) => {
   const iconVariants: Record<string, string> = {
     default: 'text-slate-600 bg-slate-100',
-    danger:  'text-brand bg-brand/10',
-    warn:    'text-amber-600 bg-amber-50',
-    ok:      'text-green-600 bg-green-50',
-    info:    'text-blue-600 bg-blue-50',
+    danger:  'text-danger bg-danger/10',
+    warn:    'text-work-corrective bg-work-corrective-bg',
+    ok:      'text-work-completed bg-work-completed-bg',
+    info:    'text-work-preventive bg-work-preventive-bg',
   };
 
   return (
     <motion.div
       whileHover={onClick ? { y: -4 } : {}}
       className={cn(
-        'bg-white rounded-[14px] border border-slate-100 shadow-card p-4 sm:p-6 flex flex-col gap-3 sm:gap-4',
+        'bg-white rounded-2xl border border-slate-100 shadow-card p-4 sm:p-6 flex flex-col gap-3 sm:gap-4',
         onClick ? 'cursor-pointer' : ''
       )}
       onClick={onClick}
@@ -338,7 +344,7 @@ export const EmptyState = ({
   action?: ReactNode;
   icon?: ReactNode;
 }) => (
-  <div className="flex flex-col items-center justify-center p-12 text-center bg-white rounded-[14px] border border-dashed border-slate-200">
+  <div className="flex flex-col items-center justify-center p-12 text-center bg-white rounded-2xl border border-dashed border-slate-200">
     {icon && <div className="text-slate-300 mb-4">{React.cloneElement(icon as React.ReactElement, { size: 40 })}</div>}
     <h3 className="text-sm font-bold text-slate-900 uppercase tracking-tight">{title}</h3>
     {description && <p className="mt-1 text-xs text-slate-500 max-w-[240px] leading-relaxed">{description}</p>}
@@ -391,10 +397,10 @@ export const ToastRack = ({ toast, onDismiss }: { toast: ToastPayload | null; on
   if (!toast) return null;
 
   const config: Record<string, { icon: ReactNode; accent: string; bg: string }> = {
-    success: { icon: <CheckCircle2 size={18} />, accent: 'bg-green-500', bg: 'text-green-600' },
+    success: { icon: <CheckCircle2 size={18} />, accent: 'bg-work-completed', bg: 'text-work-completed' },
     error:   { icon: <AlertTriangle size={18} />, accent: 'bg-brand', bg: 'text-brand' },
-    warning: { icon: <AlertTriangle size={18} />, accent: 'bg-amber-500', bg: 'text-amber-600' },
-    info:    { icon: <Info size={18} />, accent: 'bg-blue-500', bg: 'text-blue-600' },
+    warning: { icon: <AlertTriangle size={18} />, accent: 'bg-work-corrective', bg: 'text-work-corrective' },
+    info:    { icon: <Info size={18} />, accent: 'bg-work-preventive', bg: 'text-work-preventive' },
   };
 
   const c = config[toast.type] || config.info;
@@ -407,7 +413,7 @@ export const ToastRack = ({ toast, onDismiss }: { toast: ToastPayload | null; on
             initial={{ opacity: 0, y: 20, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.9 }}
-            className="bg-white border border-slate-100 shadow-floating rounded-[14px] overflow-hidden flex"
+            className="bg-white border border-slate-100 shadow-floating rounded-xl overflow-hidden flex"
           >
             <div className={cn('w-1 shrink-0', c.accent)} />
             <div className="flex items-start gap-3 p-4 flex-1">
@@ -451,7 +457,8 @@ export const Avatar = ({
   const hash = safeName.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
   const colors = [
     'bg-brand', 'bg-slate-700', 'bg-slate-900',
-    'bg-brand-dark', 'bg-slate-800', 'bg-slate-600'
+    'bg-brand-dark', 'bg-slate-800', 'bg-slate-600',
+    'bg-ocre'
   ];
   const color = colors[hash % colors.length];
 
@@ -514,10 +521,10 @@ export const AlertBanner = ({
   action?: ReactNode;
 }) => {
   const cfg: Record<string, { icon: ReactNode; bg: string; border: string; text: string }> = {
-    info:   { icon: <Info size={16} />, bg: 'bg-blue-50', border: 'border-blue-100', text: 'text-blue-800' },
-    warn:   { icon: <AlertTriangle size={16} />, bg: 'bg-amber-50', border: 'border-amber-100', text: 'text-amber-800' },
-    danger: { icon: <AlertTriangle size={16} />, bg: 'bg-red-50', border: 'border-red-100', text: 'text-red-800' },
-    ok:     { icon: <CheckCircle2 size={16} />, bg: 'bg-green-50', border: 'border-green-100', text: 'text-green-800' },
+    info:   { icon: <Info size={16} />, bg: 'bg-work-preventive-bg', border: 'border-work-preventive-border', text: 'text-work-preventive' },
+    warn:   { icon: <AlertTriangle size={16} />, bg: 'bg-work-corrective-bg', border: 'border-work-corrective-border', text: 'text-work-corrective' },
+    danger: { icon: <AlertTriangle size={16} />, bg: 'bg-work-overdue-bg', border: 'border-work-overdue-border', text: 'text-work-overdue' },
+    ok:     { icon: <CheckCircle2 size={16} />, bg: 'bg-work-completed-bg', border: 'border-work-completed-border', text: 'text-work-completed' },
   };
   const c = cfg[type];
 

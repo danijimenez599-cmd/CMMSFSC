@@ -183,7 +183,7 @@ export default function WoListPanel({ onSelect, onNewWo, customWorkOrders, title
                   'px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all',
                   statusFilter === key
                     ? key === 'overdue'
-                      ? 'bg-red-600 text-white shadow-sm'
+                      ? 'bg-work-overdue text-white shadow-sm'
                       : 'bg-white text-slate-900 shadow-sm'
                     : 'text-slate-400 hover:text-slate-600'
                 )}
@@ -303,7 +303,7 @@ export default function WoListPanel({ onSelect, onNewWo, customWorkOrders, title
                   <span className="font-mono text-[9px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded uppercase tracking-wider">
                     #{wo.woNumber}
                   </span>
-                  <span className={cn("text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded", wo.woType === 'corrective' ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700')}>
+                  <span className={cn("text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded", wo.woType === 'corrective' ? 'bg-work-corrective-bg text-work-corrective' : 'bg-work-preventive-bg text-work-preventive')}>
                     {wo.woType === 'corrective' ? 'CORREC' : 'PREV'}
                   </span>
                   {wo.woType !== 'corrective' && wo.pmCycleIndex != null && (

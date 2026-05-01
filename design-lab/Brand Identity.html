@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VersaSol — Brand Identity</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <script type="text/babel" src="design-canvas.jsx"></script>
+  <script type="text/babel" src="tweaks-panel.jsx"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Space Grotesk', sans-serif; }
+  </style>
+</head>
+<body>
+<script type="text/babel">
+
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "theme": "light",
+  "palette": "azul",
+  "darkContrast": "lifted"
+}/*EDITMODE-END*/;
+
+// ─── PALETTES ──────────────────────────────────────────────────────────────
+// Each palette: primary, primaryL (light), accent (secondary), accentL, steel
+const PALETTES = {
+  azul: {
+    name: 'Azul Técnico',
+    primary:  '#1B6FF8',
+    primaryL: '#4B8EFA',
+    primaryXL:'#A0C2FD',
+    accent:   '#00C8B8',
+    accentL:  '#5DE8DC',
+    steel:    '#7A90AE',
+    steelL:   '#B0BFD0',
+    desc:     'Tecnología de alto rendimiento. Azul eléctrico + teal señal.',
+  },
+  ocre: {
+    name: 'Ocre & Acero',
+    primary:  '#B8820A',   // deep rich ochre
+    primaryL: '#D4A030',
+    primaryXL:'#EAC870',
+    accent:   '#6A8E9E',   // cool slate-blue contrast
+    accentL:  '#9ABCCA',
+    steel:    '#8A8272',
+    steelL:   '#B8B0A0',
+    desc:     'Manufactura de valor. Ocre dorado sobre navy — materiales nobles, ingeniería seria.',
+  },
+  forja: {
+    name: 'Rojo Forja',
+    primary:  '#9C2020',   // deep forged red
+    primaryL: '#C84040',
+    primaryXL:'#E08888',
+    accent:   '#B8820A',   // copper-ochre secondary
+    accentL:  '#D4A840',
+    steel:    '#8A7878',
+    steelL:   '#B8A8A8',
+    desc:     'Potencia e intensidad. El rojo de la forja — fuerza industrial sin concesiones.',
+  },
+  carmesi: {
+    name: 'Carmesí & Slate',
+    primary:  '#7A1C2E',   // deep wine-crimson
+    primaryL: '#A83248',
+    primaryXL:'#D08898',
+    accent:   '#8AABB0',   // steel blue-gray
+    accentL:  '#B4CDD0',
+    steel:    '#8A7C80',
+    steelL:   '#B8B0B4',
+    desc:     'Elegancia técnica. Carmesí profundo — marcas premium de ingeniería especializada.',
+  },
+  bronce: {
+    name: 'Bronce & Navy',
+    primary:  '#C07040',   // warm bronze
+    primaryL: '#D89060',
+    primaryXL:'#EAB890',
+    accent:   '#4A7A8E',   // deep teal-blue
+    accentL:  '#7AAABB',
+    steel:    '#8A8070',
+    steelL:   '#B8B0A0',
+    desc:     'Solidez artesanal. Bronce cálido + teal profundo — ingeniería con carácter.',
+  },
+};
+
+// ─── BASE TOKENS (stay constant) ──────────────────────────────────────────
+const BASE = {
+  navy:   '#0D1A2D',
+  navy2:  '#152033',
+  navy3:  '#1C2B42',
+  white:  '#F4F7FB',
+};
+
+// Dark theme — three contrast variants selectable via Tweak
+const DARK_VARIANTS = {
+  subtle: {
+    // original — todo en navy/azul, bajo contraste
+    canvasBg: '#0C0D11', cardBg: '#162032', cardBg2: '#1C2B42',
+    border:   'rgba(200,215,240,0.09)',
+    fg: '#E8F0FB', fgSub: '#8A9FBA', fgMuted: '#4A607A', label: '#4B8EFA',
+  },
+  lifted: {
+    // texto sub/muted mucho más claro — mejor contraste, mismo navy
+    canvasBg: '#0C0D11', cardBg: '#162032', cardBg2: '#1C2B42',
+    border:   'rgba(180,210,255,0.15)',
+    fg: '#F2F7FF', fgSub: '#B8CEEA', fgMuted: '#7A9ABE', label: '#7AB8FF',
+  },
+  warm: {
+    // fondo y texto con tinte cálido — texto crema contrasta el navy frío
+    canvasBg: '#0E0C10', cardBg: '#1A1D28', cardBg2: '#222636',
+    border:   'rgba(230,220,200,0.10)',
+    fg: '#F0EDE8', fgSub: '#C0B8AA', fgMuted: '#80787A', label: '#7AB8FF',
+  },
+};
+const DARK_LABELS = { subtle:'Sutil (original)', lifted:'Alto contraste', warm:'Tono cálido' };
+
+// Active dark theme derived from tweak
+const getDark = (v) => DARK_VARIANTS[v] || DARK_VARIANTS.lifted;
+
+// Light theme — warm ivory
+const LIGHT = {
+  canvasBg: '#EDE8E1',
+  cardBg:   '#F7F3EE',
+  cardBg2:  '#EDE8E1',
+  border:   'rgba(13,26,45,0.09)',
+  fg:       '#0D1A2D',
+  fgSub:    '#4A5568',
+  fgMuted:  '#94A3B8',
+};
+
+// ─── LOGO ──────────────────────────────────────────────────────────────────
+const LogoA = ({ dark = true, size = 1, pal }) => {
+  const fg  = dark ? BASE.white : BASE.navy;
+  const P   = pal || PALETTES.azul;
+  return (
+    <svg width={270*size} height={72*size} viewBox="0 0 270 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="0,8 14,8 36,56 22,56" fill={P.primary} />
+      <polygon points="22,8 36,8 58,56 44,56" fill={P.primary} opacity="0.45" />
+      <polygon points="36,8 50,8 28,56 14,56" fill={fg} opacity="0.07" />
+      <text x="66" y="38" fontFamily="Space Grotesk, sans-serif" fontWeight="700" fontSize="28" fill={fg} letterSpacing="-0.5">VersaSol</text>
+      <text x="67" y="58" fontFamily="Space Grotesk, sans-serif" fontWeight="300" fontSize="11" fill={P.steel} letterSpacing="4">VERSATILE SOLUTIONS</text>
+    </svg>
+  );
+};
+
+// ─── ICON SLASH V ─────────────────────────────────────────────────────────
+const IconSlash = ({ bg, size = 64, light = false, pal }) => {
+  const P   = pal || PALETTES.azul;
+  const background = bg || (light ? '#F7F3EE' : BASE.navy3);
+  const p = size * 0.18;
+  const inner = size - p * 2;
+  return (
+    <div style={{ width:size, height:size, flexShrink:0, borderRadius:size*0.18, background:background, display:'flex', alignItems:'center', justifyContent:'center', border:`1px solid ${light ? 'rgba(13,26,45,0.10)' : `${P.primary}55`}` }}>
+      <svg width={inner} height={inner} viewBox="0 0 40 48" fill="none">
+        <polygon points="0,2 11,2 28,46 17,46" fill={P.primary} />
+        <polygon points="17,2 28,2 45,46 34,46" fill={P.primary} opacity="0.45" />
+      </svg>
+    </div>
+  );
+};
+
+// ─── COLOR SWATCH ─────────────────────────────────────────────────────────
+const Swatch = ({ color, name, hex, token, th }) => (
+  <div style={{ display:'flex', flexDirection:'column', gap:7 }}>
+    <div style={{ width:72, height:72, borderRadius:10, background:color, border:`1px solid ${th.border}` }} />
+    <div style={{ fontSize:11, fontWeight:600, color:th.fg }}>{name}</div>
+    <div style={{ fontSize:9, fontFamily:'DM Mono, monospace', color:th.fgSub }}>{hex}</div>
+    <div style={{ fontSize:8, fontFamily:'DM Mono, monospace', color:th.fgMuted }}>{token}</div>
+  </div>
+);
+
+// ─── TOKEN ROW ────────────────────────────────────────────────────────────
+const TokenRow = ({ name, value, isColor, th }) => (
+  <div style={{ display:'flex', alignItems:'center', gap:10, padding:'7px 12px', background:'rgba(128,128,128,0.04)', borderRadius:6, border:`1px solid ${th.border}` }}>
+    {isColor && <div style={{ width:13, height:13, borderRadius:3, background:value, flexShrink:0, border:`1px solid ${th.border}` }} />}
+    <span style={{ fontFamily:'DM Mono, monospace', fontSize:10, color:th.fgSub }}>--{name}</span>
+    <span style={{ marginLeft:'auto', fontFamily:'DM Mono, monospace', fontSize:10, color:th.fgSub, opacity:0.7 }}>{value}</span>
+  </div>
+);
+
+// ─── BUSINESS CARD ────────────────────────────────────────────────────────
+const BusinessCard = ({ dark = true, pal }) => {
+  const P   = pal || PALETTES.azul;
+  const bg  = dark ? '#162032' : '#F7F3EE';
+  const fg  = dark ? BASE.white : BASE.navy;
+  const sub = dark ? P.steel : '#64748B';
+  return (
+    <div style={{ width:320, height:180, borderRadius:12, background:bg, padding:'22px 26px', display:'flex', flexDirection:'column', justifyContent:'space-between', border: dark ? `1px solid rgba(200,215,240,0.08)` : `1px solid rgba(13,26,45,0.09)`, position:'relative', overflow:'hidden', flexShrink:0 }}>
+      <svg style={{ position:'absolute', inset:0, opacity: dark ? 0.04 : 0.05 }} width="320" height="180">
+        {Array.from({length:18}, (_,c) => Array.from({length:10}, (_,r) =>
+          <circle key={`${c}-${r}`} cx={c*18+4} cy={r*18+4} r="0.9" fill={P.primary} />
+        ))}
+      </svg>
+      <div style={{ position:'absolute', top:0, right:0, width:52, height:52, background:P.primary, opacity:dark?0.18:0.10, clipPath:'polygon(100% 0,0 0,100% 100%)' }} />
+      <div style={{ position:'absolute', top:0, right:0, width:16, height:16, background:P.primary, opacity:0.75, clipPath:'polygon(100% 0,0 0,100% 100%)' }} />
+      <div style={{ position:'relative' }}>
+        <LogoA dark={dark} size={0.54} pal={P} />
+      </div>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-end', position:'relative' }}>
+        <div>
+          <div style={{ fontSize:12, fontWeight:600, color:fg }}>Ing. Nombre Apellido</div>
+          <div style={{ fontSize:9, color:P.primary, fontWeight:500, marginTop:2 }}>Director de Ingeniería</div>
+          <div style={{ fontSize:8, color:sub, marginTop:5, fontFamily:'DM Mono, monospace' }}>nombre@versasol.com</div>
+          <div style={{ fontSize:8, color:sub, fontFamily:'DM Mono, monospace' }}>+52 (55) 0000 · 0000</div>
+        </div>
+        <div style={{ fontSize:8, color:sub, textAlign:'right', fontFamily:'DM Mono, monospace', lineHeight:1.9 }}>
+          versasol.com<br/>CDMX, México
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ─── LETTERHEAD ───────────────────────────────────────────────────────────
+const Letterhead = ({ pal }) => {
+  const P = pal || PALETTES.azul;
+  return (
+    <div style={{ width:400, background:'#F8FAFD', borderRadius:10, overflow:'hidden', border:'1px solid #D4DDE8', boxShadow:'0 4px 20px rgba(0,0,0,0.08)' }}>
+      <div style={{ background:BASE.navy2, padding:'18px 24px', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+        <LogoA dark={true} size={0.52} pal={P} />
+        <div style={{ fontSize:9, fontFamily:'DM Mono, monospace', color:P.steel, textAlign:'right', lineHeight:1.9 }}>
+          versasol.com<br/>ingenieria@versasol.com<br/>+52 (55) 0000 0000
+        </div>
+      </div>
+      <div style={{ height:3, background:`linear-gradient(90deg, ${P.primary}, ${P.accent})` }} />
+      <div style={{ padding:'22px 24px 18px' }}>
+        <div style={{ fontSize:9, color:'#94A3B8', fontFamily:'DM Mono, monospace', marginBottom:14 }}>Ciudad de México, 30 de abril de 2026</div>
+        <div style={{ fontSize:11, color:'#475569', lineHeight:1.9 }}>
+          Estimado cliente,<br/><br/>
+          <span style={{ color:'#CBD5E1' }}>[ Contenido de la carta aquí ]</span>
+        </div>
+      </div>
+      <div style={{ borderTop:'1px solid #E2EAF4', padding:'10px 24px', display:'flex', justifyContent:'space-between' }}>
+        <div style={{ fontSize:8, fontFamily:'DM Mono, monospace', color:'#94A3B8', letterSpacing:1 }}>VERSATILE SOLUTIONS S.A. DE C.V.</div>
+        <div style={{ fontSize:8, fontFamily:'DM Mono, monospace', color:P.primary }}>VersaSol</div>
+      </div>
+    </div>
+  );
+};
+
+// ─── PALETTE PREVIEW STRIP ────────────────────────────────────────────────
+const PaletteStrip = ({ pal, th, active, onClick }) => {
+  const P = PALETTES[pal];
+  return (
+    <div onClick={onClick} style={{ cursor:'pointer', borderRadius:10, overflow:'hidden', border:`2px solid ${active ? P.primary : th.border}`, transition:'all 0.2s', boxShadow: active ? `0 0 0 2px ${P.primary}44` : 'none' }}>
+      <div style={{ display:'flex', height:36 }}>
+        {[DARK_VARIANTS.lifted.cardBg, P.primary, P.accent, P.primaryL, P.steel].map((c,i) => (
+          <div key={i} style={{ flex:1, background:c }} />
+        ))}
+      </div>
+      <div style={{ padding:'10px 14px', background:th.cardBg }}>
+        <div style={{ fontSize:11, fontWeight:600, color:th.fg }}>{P.name}</div>
+        <div style={{ fontSize:9, color:th.fgSub, marginTop:3, fontFamily:'DM Mono, monospace', lineHeight:1.5 }}>{P.desc}</div>
+      </div>
+    </div>
+  );
+};
+
+// ─── MAIN APP ─────────────────────────────────────────────────────────────
+const App = () => {
+  const [tweaks, setTweak] = useTweaks(TWEAK_DEFAULTS);
+  const isDark = tweaks.theme === 'dark';
+  const th     = isDark ? getDark(tweaks.darkContrast) : LIGHT;
+  const P      = PALETTES[tweaks.palette] || PALETTES.azul;
+
+  const lbl = {
+    fontFamily:'DM Mono, monospace', fontSize:9, fontWeight:500,
+    letterSpacing:4, color:P.primary, textTransform:'uppercase', marginBottom:20,
+  };
+  const card = (extra={}) => ({
+    background:th.cardBg, borderRadius:12,
+    border:`1px solid ${th.border}`, padding:32, ...extra,
+  });
+  const fill = { width:'100%', height:'100%' };
+  const dim  = { opacity:0.5 };
+
+  const dcStyle = {
+    '--dc-bg': th.canvasBg,
+    '--dc-grid': isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.06)',
+    '--dc-label': th.fgSub,
+    '--dc-title': th.fg,
+    '--dc-sub': th.fgSub,
+  };
+
+  return (
+    <>
+      <TweaksPanel>
+        <TweakSection label="Apariencia" />
+        <TweakRadio label="Tema" value={tweaks.theme} options={["dark","light"]} onChange={v => setTweak("theme", v)} />
+        <TweakSection label="Modo oscuro" />
+        <TweakSelect label="Contraste" value={tweaks.darkContrast}
+          options={Object.entries(DARK_LABELS).map(([k,v]) => ({ value:k, label:v }))}
+          onChange={v => setTweak('darkContrast', v)} />
+        <TweakSection label="Paleta" />
+        <TweakSelect label="Paleta de color" value={tweaks.palette}
+          options={Object.entries(PALETTES).map(([k,v]) => ({ value:k, label:v.name }))}
+          onChange={v => setTweak("palette", v)} />
+      </TweaksPanel>
+
+      <DesignCanvas title="VersaSol — Brand Identity System" style={dcStyle}>
+
+        {/* ── 01 LOGO ── */}
+        <DCSection id="logos" title="01 — Logo">
+
+          <DCArtboard id="logoA" label="VersaSol — Wordmark + Slash V" width={500} height={380}>
+            <div style={{ ...card(), ...fill, display:'flex', flexDirection:'column', justifyContent:'space-evenly', padding:32 }}>
+              <div>
+                <p style={lbl}>Versión oscura</p>
+                <div style={{ background:DARK_VARIANTS.lifted.cardBg, padding:'18px 32px', borderRadius:8, width:'100%', display:'flex', justifyContent:'center' }}>
+                  <LogoA dark={true} size={1.05} pal={P} />
+                </div>
+              </div>
+              <div>
+                <p style={lbl}>Versión clara</p>
+                <div style={{ background:LIGHT.cardBg, padding:'18px 32px', borderRadius:8, width:'100%', display:'flex', justifyContent:'center', border:`1px solid ${LIGHT.border}` }}>
+                  <LogoA dark={false} size={1.05} pal={P} />
+                </div>
+              </div>
+            </div>
+          </DCArtboard>
+
+        </DCSection>
+
+        {/* ── 02 ÍCONO ── */}
+        <DCSection id="icon" title="02 — Ícono Slash V">
+
+          <DCArtboard id="iconScales" label="Escalas y variantes" width={620} height={240}>
+            <div style={{ ...card(), ...fill, display:'flex', flexDirection:'column', justifyContent:'center', gap:24, padding:32 }}>
+              <p style={lbl}>Slash V · Escalas</p>
+              <div style={{ display:'flex', alignItems:'flex-end', gap:20 }}>
+                <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:10 }}>
+                  <IconSlash size={96} light={!isDark} pal={P} />
+                  <span style={{ fontSize:9, color:th.fgSub, fontFamily:'DM Mono, monospace' }}>96px</span>
+                </div>
+                <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:10 }}>
+                  <IconSlash bg={P.primary} size={72} pal={P} />
+                  <span style={{ fontSize:9, color:th.fgSub, fontFamily:'DM Mono, monospace' }}>Primary</span>
+                </div>
+                <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:10 }}>
+                  <IconSlash size={56} pal={P} />
+                  <span style={{ fontSize:9, color:th.fgSub, fontFamily:'DM Mono, monospace' }}>56px</span>
+                </div>
+                <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:10 }}>
+                  <IconSlash size={40} pal={P} />
+                  <span style={{ fontSize:9, color:th.fgSub, fontFamily:'DM Mono, monospace' }}>40px</span>
+                </div>
+                <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:10 }}>
+                  <IconSlash size={28} pal={P} />
+                  <span style={{ fontSize:9, color:th.fgSub, fontFamily:'DM Mono, monospace' }}>28px</span>
+                </div>
+                <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:10 }}>
+                  <IconSlash size={20} pal={P} />
+                  <span style={{ fontSize:9, color:th.fgSub, fontFamily:'DM Mono, monospace' }}>20px</span>
+                </div>
+              </div>
+            </div>
+          </DCArtboard>
+
+        </DCSection>
+
+        {/* ── 03 PALETAS ── */}
+        <DCSection id="palettes" title="03 — Paletas de Color">
+
+          <DCArtboard id="paletteSelector" label="Exploración de Paletas" width={780} height={520}>
+            <div style={{ ...card(), ...fill, padding:32 }}>
+              <p style={lbl}>Paletas — selecciona en Tweaks para previsualizar</p>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14 }}>
+                {Object.keys(PALETTES).map(k => (
+                  <PaletteStrip key={k} pal={k} th={th} active={tweaks.palette === k} onClick={() => setTweak('palette', k)} />
+                ))}
+              </div>
+            </div>
+          </DCArtboard>
+
+          <DCArtboard id="paletteSwatches" label="Tokens de la Paleta Activa" width={640} height={320}>
+            <div style={{ ...card(), ...fill, padding:32 }}>
+              <p style={lbl}>{P.name} · Tokens</p>
+              <div style={{ display:'flex', gap:18, flexWrap:'wrap', marginBottom:24 }}>
+                <Swatch color={P.primary}  name="Primary"   hex={P.primary}  token="--primary"    th={th} />
+                <Swatch color={P.primaryL} name="Primary L" hex={P.primaryL} token="--primary-l"  th={th} />
+                <Swatch color={P.primaryXL}name="Primary XL"hex={P.primaryXL}token="--primary-xl" th={th} />
+                <Swatch color={P.accent}   name="Accent"    hex={P.accent}   token="--accent"     th={th} />
+                <Swatch color={P.accentL}  name="Accent L"  hex={P.accentL}  token="--accent-l"   th={th} />
+                <Swatch color={P.steel}    name="Steel"     hex={P.steel}    token="--steel"      th={th} />
+              </div>
+              <div style={{ display:'flex', gap:0, height:32, borderRadius:8, overflow:'hidden' }}>
+                {[P.primary, P.primaryL, P.primaryXL, P.accent, P.accentL, P.steel, P.steelL].map((c,i) => (
+                  <div key={i} style={{ flex:1, background:c }} />
+                ))}
+              </div>
+              <div style={{ marginTop:12, fontSize:10, color:th.fgSub, fontFamily:'DM Mono, monospace', lineHeight:1.6 }}>
+                {P.desc}
+              </div>
+            </div>
+          </DCArtboard>
+
+          <DCArtboard id="gradients" label="Gradientes" width={580} height={180}>
+            <div style={{ ...card(), ...fill, padding:32 }}>
+              <p style={lbl}>Gradientes</p>
+              <div style={{ display:'flex', gap:12 }}>
+                {[
+                  `linear-gradient(135deg, ${DARK_VARIANTS.lifted.cardBg}, ${P.primary})`,
+                  `linear-gradient(135deg, ${P.primary}, ${P.accent})`,
+                  `linear-gradient(135deg, ${DARK_VARIANTS.lifted.cardBg}, ${P.primary} 55%, ${P.accent})`,
+                  `linear-gradient(135deg, ${P.primaryL}, ${P.primaryXL})`,
+                ].map((g,i) => (
+                  <div key={i} style={{ flex:1, height:52, borderRadius:8, background:g }} />
+                ))}
+              </div>
+            </div>
+          </DCArtboard>
+
+        </DCSection>
+
+        {/* ── 04 TOKENS ── */}
+        <DCSection id="tokens" title="04 — Design Tokens">
+          <DCArtboard id="tokenList" label="Variables CSS" width={680} height={360}>
+            <div style={{ ...card(), ...fill, padding:32 }}>
+              <p style={lbl}>Variables CSS · Paleta activa</p>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:5 }}>
+                {[
+                  ['bg-dark',     DARK_VARIANTS.lifted.canvasBg, true],
+                  ['card-dark',   DARK_VARIANTS.lifted.cardBg,   true],
+                  ['primary',     P.primary,      true],
+                  ['primary-l',   P.primaryL,     true],
+                  ['primary-xl',  P.primaryXL,    true],
+                  ['accent',      P.accent,       true],
+                  ['accent-l',    P.accentL,      true],
+                  ['steel',       P.steel,        true],
+                  ['font-heading',"'Space Grotesk'",false],
+                  ['font-mono',   "'DM Mono'",    false],
+                  ['radius-card', '12px',         false],
+                  ['radius-sm',   '6px',          false],
+                ].map(([n,v,c]) => <TokenRow key={n} name={n} value={v} isColor={c} th={th} />)}
+              </div>
+            </div>
+          </DCArtboard>
+        </DCSection>
+
+        {/* ── 05 FILOSOFÍA ── */}
+        <DCSection id="philosophy" title="05 — Filosofía de Diseño">
+
+          <DCArtboard id="pillars" label="Pilares de Marca" width={760} height={360}>
+            <div style={{ ...card(), ...fill, padding:32 }}>
+              <p style={lbl}>Pilares</p>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:14 }}>
+                {[
+                  { title:'Precisión',       sym:'◈', body:'Cada trazo refleja el rigor de la ingeniería. Solo la intención calculada.' },
+                  { title:'Versatilidad',    sym:'⬡', body:'Un sistema que escala desde un tornillo hasta un sistema SCADA completo.' },
+                  { title:'Confianza',       sym:'◆', body:'El navy profundo proyecta estabilidad. Construimos infraestructura duradera.' },
+                  { title:'Claridad',        sym:'▣', body:'La información es el activo. Tipografía precisa y tokens sistematizados.' },
+                  { title:'Innovación dual', sym:'◉', body:'Electromecánica + software. La intersección de lo físico y lo digital.' },
+                  { title:'Escala',          sym:'◐', body:'Desde tarjeta de presentación hasta señalética industrial y dashboards.' },
+                ].map(({ title, sym, body }) => (
+                  <div key={title} style={{ padding:16, background:'rgba(128,128,128,0.04)', borderRadius:8, border:`1px solid ${th.border}`, borderLeft:`3px solid ${P.primary}` }}>
+                    <div style={{ fontSize:16, marginBottom:8, color:P.primary }}>{sym}</div>
+                    <div style={{ fontSize:12, fontWeight:600, color:th.fg, marginBottom:6 }}>{title}</div>
+                    <div style={{ fontSize:10, color:th.fgSub, lineHeight:1.7, textWrap:'pretty' }}>{body}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </DCArtboard>
+
+          <DCArtboard id="voice" label="Voz de Marca" width={440} height={260}>
+            <div style={{ ...card(), ...fill, padding:32 }}>
+              <p style={lbl}>Voz y Tono</p>
+              <div style={{ display:'flex', flexDirection:'column', gap:18 }}>
+                {[
+                  { key:'Es',    color:P.accent,   items:['Directo y preciso','Técnico accesible','Confiado','Orientado a resultados'] },
+                  { key:'No es', color:P.primaryL,  items:['Corporativo genérico','Formal en exceso','Ambiguo','Dependiente de jerga'] },
+                ].map(({ key, color, items }) => (
+                  <div key={key}>
+                    <div style={{ fontSize:9, color, fontFamily:'DM Mono, monospace', letterSpacing:3, marginBottom:8 }}>{key.toUpperCase()}</div>
+                    <div style={{ display:'flex', flexWrap:'wrap', gap:6 }}>
+                      {items.map(i => (
+                        <span key={i} style={{ fontSize:10, color:th.fgSub, background:'rgba(128,128,128,0.05)', padding:'4px 10px', borderRadius:4, border:`1px solid ${th.border}` }}>{i}</span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </DCArtboard>
+
+        </DCSection>
+
+        {/* ── 06 APLICACIONES ── */}
+        <DCSection id="applications" title="06 — Aplicaciones">
+
+          <DCArtboard id="bizCards" label="Tarjetas de Presentación" width={740} height={270}>
+            <div style={{ ...card({ background: isDark ? '#0C0D11' : '#EDE8E1' }), ...fill, display:'flex', alignItems:'center', justifyContent:'center', gap:28 }}>
+              <BusinessCard dark={true}  pal={P} />
+              <BusinessCard dark={false} pal={P} />
+            </div>
+          </DCArtboard>
+
+          <DCArtboard id="letterhead" label="Membrete" width={500} height={320}>
+            <div style={{ ...card({ background: isDark ? '#0C0D11' : '#EDE8E1' }), ...fill, display:'flex', alignItems:'center', justifyContent:'center' }}>
+              <Letterhead pal={P} />
+            </div>
+          </DCArtboard>
+
+          <DCArtboard id="ui" label="Componentes UI" width={580} height={190}>
+            <div style={{ ...card(), ...fill, padding:32 }}>
+              <p style={lbl}>Botones & Etiquetas</p>
+              <div style={{ display:'flex', gap:10, flexWrap:'wrap', marginBottom:18 }}>
+                <button style={{ padding:'10px 22px', background:P.primary, color:'#fff', border:'none', borderRadius:6, fontFamily:'Space Grotesk', fontWeight:600, fontSize:13, cursor:'pointer' }}>Contactar ahora</button>
+                <button style={{ padding:'10px 22px', background:'transparent', color:th.fg, border:`1.5px solid ${P.primary}`, borderRadius:6, fontFamily:'Space Grotesk', fontWeight:500, fontSize:13, cursor:'pointer' }}>Ver proyectos</button>
+                <button style={{ padding:'10px 22px', background:P.accent, color:BASE.navy, border:'none', borderRadius:6, fontFamily:'Space Grotesk', fontWeight:700, fontSize:13, cursor:'pointer' }}>Cotizar</button>
+              </div>
+              <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
+                {['Electromecánica','Software Industrial','SCADA','Automatización','IoT'].map(tag => (
+                  <span key={tag} style={{ fontSize:9, fontFamily:'DM Mono, monospace', color:P.primaryL, padding:'3px 9px', borderRadius:4, border:`1px solid ${P.primary}44`, background:`${P.primary}0D` }}>{tag}</span>
+                ))}
+              </div>
+            </div>
+          </DCArtboard>
+
+        </DCSection>
+
+      </DesignCanvas>
+    </>
+  );
+};
+
+ReactDOM.createRoot(document.body).render(<App />);
+</script>
+</body>
+</html>

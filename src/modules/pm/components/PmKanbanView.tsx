@@ -59,14 +59,14 @@ function getEventStyle(e: any, today: Date): EventStyle {
   if (isProjection) {
     return {
       card: overdue
-        ? 'bg-red-50/40 border-dashed border-red-300/60'
-        : 'bg-violet-50/30 border-dashed border-violet-300/60',
+        ? 'bg-work-overdue-bg border-dashed border-work-overdue-border'
+        : 'bg-work-projection-bg border-dashed border-work-projection-border',
       stripe: overdue
-        ? 'bg-gradient-to-b from-red-400/60 via-red-300/40 to-transparent'
-        : 'bg-gradient-to-b from-violet-400/60 via-violet-300/40 to-transparent',
+        ? 'bg-gradient-to-b from-work-overdue via-work-overdue-border to-transparent'
+        : 'bg-gradient-to-b from-work-projection via-work-projection-border to-transparent',
       badge: overdue
-        ? 'bg-red-100 text-red-700 border border-red-200/60'
-        : 'bg-violet-100 text-violet-600 border border-violet-200/60',
+        ? 'bg-work-overdue-bg text-work-overdue border border-work-overdue-border'
+        : 'bg-work-projection-bg text-work-projection border border-work-projection-border',
       badgeLabel: 'PLAN',
       isOverdue: overdue,
       isGhost: true,
@@ -75,9 +75,9 @@ function getEventStyle(e: any, today: Date): EventStyle {
 
   if (isCompleted) {
     return {
-      card: 'bg-emerald-50/60 border-emerald-200/60',
-      stripe: 'bg-emerald-500',
-      badge: 'bg-emerald-100 text-emerald-700',
+      card: 'bg-work-completed-bg border-work-completed-border',
+      stripe: 'bg-work-completed',
+      badge: 'bg-work-completed-bg text-work-completed',
       badgeLabel: isCorrective ? 'CORREC' : 'PREV',
       isOverdue: false,
       isGhost: false,
@@ -86,9 +86,9 @@ function getEventStyle(e: any, today: Date): EventStyle {
 
   if (isCorrective) {
     return {
-      card: overdue ? 'bg-red-50/60 border-red-200/70' : 'bg-amber-50/70 border-amber-200/70',
-      stripe: overdue ? 'bg-red-500' : 'bg-amber-400',
-      badge: overdue ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700',
+      card: overdue ? 'bg-work-overdue-bg border-work-overdue-border' : 'bg-work-corrective-bg border-work-corrective-border',
+      stripe: overdue ? 'bg-work-overdue' : 'bg-work-corrective',
+      badge: overdue ? 'bg-work-overdue-bg text-work-overdue' : 'bg-work-corrective-bg text-work-corrective',
       badgeLabel: 'CORREC',
       isOverdue: overdue,
       isGhost: false,
@@ -97,10 +97,10 @@ function getEventStyle(e: any, today: Date): EventStyle {
 
   // preventive / predictive / inspection
   return {
-    card: overdue ? 'bg-red-50/60 border-red-200/60' : 'bg-blue-50/60 border-blue-200/60',
-    stripe: overdue ? 'bg-red-500' : 'bg-blue-500',
-    stripeExtra: isInProgress && !overdue ? 'bg-emerald-400' : undefined,
-    badge: overdue ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700',
+    card: overdue ? 'bg-work-overdue-bg border-work-overdue-border' : 'bg-work-preventive-bg border-work-preventive-border',
+    stripe: overdue ? 'bg-work-overdue' : 'bg-work-preventive',
+    stripeExtra: isInProgress && !overdue ? 'bg-work-completed' : undefined,
+    badge: overdue ? 'bg-work-overdue-bg text-work-overdue' : 'bg-work-preventive-bg text-work-preventive',
     badgeLabel: 'PREV',
     isOverdue: overdue,
     isGhost: false,
@@ -119,22 +119,22 @@ function ColumnBreakdown({ events, today }: { events: any[]; today: Date }) {
   return (
     <div className="flex items-center gap-1.5 flex-wrap mt-1.5">
       {corrective > 0 && (
-        <span className="text-[8px] font-black text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-md uppercase">
+        <span className="text-[8px] font-black text-work-corrective bg-work-corrective-bg px-1.5 py-0.5 rounded-md uppercase">
           {corrective} correc
         </span>
       )}
       {preventive > 0 && (
-        <span className="text-[8px] font-black text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded-md uppercase">
+        <span className="text-[8px] font-black text-work-preventive bg-work-preventive-bg px-1.5 py-0.5 rounded-md uppercase">
           {preventive} prev
         </span>
       )}
       {projections > 0 && (
-        <span className="text-[8px] font-black text-violet-600 bg-violet-50 px-1.5 py-0.5 rounded-md uppercase">
+        <span className="text-[8px] font-black text-work-projection bg-work-projection-bg px-1.5 py-0.5 rounded-md uppercase">
           {projections} plan
         </span>
       )}
       {overdue > 0 && (
-        <span className="text-[8px] font-black text-red-600 bg-red-50 px-1.5 py-0.5 rounded-md uppercase flex items-center gap-0.5">
+        <span className="text-[8px] font-black text-work-overdue bg-work-overdue-bg px-1.5 py-0.5 rounded-md uppercase flex items-center gap-0.5">
           <AlertTriangle size={7} /> {overdue} venc
         </span>
       )}
@@ -275,11 +275,11 @@ function Legend() {
   return (
     <div className="flex items-center gap-3 md:gap-4 overflow-x-auto no-scrollbar pb-1 md:pb-0 w-full md:w-auto shrink-0">
       {[
-        { color: 'bg-amber-400', label: 'Correctiva' },
-        { color: 'bg-blue-500', label: 'Preventiva' },
-        { color: 'bg-emerald-500', label: 'Completada' },
-        { color: 'bg-violet-400', label: 'Proyección' },
-        { color: 'bg-red-500', label: 'Vencida' },
+        { color: 'bg-work-corrective', label: 'Correctiva' },
+        { color: 'bg-work-preventive', label: 'Preventiva' },
+        { color: 'bg-work-completed', label: 'Completada' },
+        { color: 'bg-work-projection', label: 'Proyección' },
+        { color: 'bg-work-overdue', label: 'Vencida' },
       ].map(({ color, label }) => (
         <div key={label} className="flex items-center gap-1.5 shrink-0">
           <div className={cn('w-2.5 h-2.5 rounded-full', color)} />
@@ -508,41 +508,41 @@ export default function PmKanbanView() {
     {
       id: 'planned',
       title: 'Planificado',
-      icon: <Sparkles size={14} className="text-violet-500" />,
-      bg: 'bg-violet-50/50',
-      headerClass: 'text-violet-800',
+      icon: <Sparkles size={14} className="text-work-projection" />,
+      bg: 'bg-work-projection-bg',
+      headerClass: 'text-work-projection',
       events: displayedEvents.filter(e => e.type === 'projection'),
     },
     {
       id: 'open',
       title: 'Abierta',
-      icon: <Clock size={14} className="text-blue-500" />,
-      bg: 'bg-blue-50/50',
-      headerClass: 'text-blue-800',
+      icon: <Clock size={14} className="text-status-open" />,
+      bg: 'bg-status-open-bg',
+      headerClass: 'text-status-open',
       events: displayedEvents.filter(e => e.type === 'wo' && e.status === 'open'),
     },
     {
       id: 'assigned',
       title: 'Asignada',
-      icon: <Wrench size={14} className="text-indigo-500" />,
-      bg: 'bg-indigo-50/50',
-      headerClass: 'text-indigo-800',
+      icon: <Wrench size={14} className="text-status-assigned" />,
+      bg: 'bg-status-assigned-bg',
+      headerClass: 'text-status-assigned',
       events: displayedEvents.filter(e => e.type === 'wo' && ['assigned', 'on_hold'].includes(e.status)),
     },
     {
       id: 'in_progress',
       title: 'En Proceso',
-      icon: <Activity size={14} className="text-amber-500" />,
-      bg: 'bg-amber-50/50',
-      headerClass: 'text-amber-800',
+      icon: <Activity size={14} className="text-status-progress" />,
+      bg: 'bg-status-progress-bg',
+      headerClass: 'text-status-progress',
       events: displayedEvents.filter(e => e.type === 'wo' && e.status === 'in_progress'),
     },
     {
       id: 'completed',
       title: 'Completada',
-      icon: <CheckCircle2 size={14} className="text-emerald-500" />,
-      bg: 'bg-emerald-50/50',
-      headerClass: 'text-emerald-800',
+      icon: <CheckCircle2 size={14} className="text-status-completed" />,
+      bg: 'bg-status-completed-bg',
+      headerClass: 'text-status-completed',
       events: displayedEvents.filter(e => e.type === 'wo' && e.status === 'completed'),
     },
   ], [displayedEvents]);
@@ -574,7 +574,7 @@ export default function PmKanbanView() {
         )}
       >
         {style.isOverdue && (
-          <div className="absolute top-0 left-0 right-0 h-[3px] bg-red-500 z-10" />
+          <div className="absolute top-0 left-0 right-0 h-[3px] bg-work-overdue z-10" />
         )}
 
         <div className="flex shrink-0">
@@ -589,7 +589,7 @@ export default function PmKanbanView() {
             </span>
             <div className="flex items-center gap-1 shrink-0">
               {style.isOverdue && (
-                <span className="text-[8px] font-black bg-red-500 text-white px-1.5 py-0.5 rounded-md uppercase tracking-wide">
+                <span className="text-[8px] font-black bg-work-overdue text-white px-1.5 py-0.5 rounded-md uppercase tracking-wide">
                   VENCIDA
                 </span>
               )}
@@ -611,7 +611,7 @@ export default function PmKanbanView() {
           <h5 className={cn(
             'text-[11px] font-bold tracking-tight leading-snug line-clamp-2',
             style.isGhost
-              ? (style.isOverdue ? 'text-red-700 italic' : 'text-violet-700 italic')
+              ? (style.isOverdue ? 'text-work-overdue italic' : 'text-work-projection italic')
               : 'text-slate-900'
           )}>
             {event.title}

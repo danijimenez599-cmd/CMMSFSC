@@ -11,12 +11,12 @@ export const WO_STATUS_LABELS: Record<WoStatus, string> = {
 };
 
 export const WO_STATUS_BADGE: Record<WoStatus, string> = {
-  open:        'info',
-  assigned:    'warn',
-  in_progress: 'brand',
+  open:        'open',
+  assigned:    'assigned',
+  in_progress: 'in_progress',
   on_hold:     'neutral',
-  completed:   'ok',
-  cancelled:   'neutral',
+  completed:   'completed',
+  cancelled:   'cancelled',
 };
 
 export const WO_ACTION_LABELS: Record<WoStatus, string> = {
@@ -45,10 +45,10 @@ export const WO_TYPE_LABELS: Record<string, string> = {
 };
 
 export const WO_PRIORITY_CONFIG: Record<string, { label: string; color: string; textColor: string }> = {
-  critical: { label: 'Crítica',  color: '#7f1d1d', textColor: 'text-danger' },
-  high:     { label: 'Alta',     color: '#b45309', textColor: 'text-warn' },
-  medium:   { label: 'Media',    color: '#1d4ed8', textColor: 'text-info' },
-  low:      { label: 'Baja',     color: '#166534', textColor: 'text-ok' },
+  critical: { label: 'Crítica',  color: '#DC2626', textColor: 'text-work-overdue' },
+  high:     { label: 'Alta',     color: '#D97706', textColor: 'text-work-corrective' },
+  medium:   { label: 'Media',    color: '#2563EB', textColor: 'text-work-preventive' },
+  low:      { label: 'Baja',     color: '#15803D', textColor: 'text-work-completed' },
 };
 
 // Allowed transitions per role
